@@ -2,6 +2,7 @@ CREATE TABLE Account(
     TrainerID varchar(50) NOT NULL,
     Email varchar(100) NOT NULL,
     Password varchar(50) NOT NULL,
+    StripeID varchar(50) NOT NULL,
     PRIMARY KEY (TrainerID),
     UNIQUE(TrainerID, Email)
     );
@@ -27,7 +28,6 @@ CREATE TABLE Certification(
     
 CREATE TABLE Info(
 	TrainerID varchar(50) NOT NULL,
-    StripeID varchar(50) NOT NULL,
     Bio varchar(100),
     Img varchar(50),
     Height decimal(10,2),
@@ -39,30 +39,12 @@ CREATE TABLE Info(
     FOREIGN KEY (TrainerID) REFERENCES Account(TrainerID),
     UNIQUE(TrainerID, StripeID)
     );
-    
-CREATE TABLE BankAccount(
-    TrainerID varchar(50) NOT NULL,
-    AccountNum varchar(50) NOT NULL,
-    BankName varchar(50) NOT NULL,
-    PRIMARY KEY (TrainerID),
-    FOREIGN KEY (TrainerID) REFERENCES Account(TrainerID),
-    UNIQUE(TrainerID, AccountName)
-    );
-
-
-INSERT INTO `account` (`TrainerID`, `Email`, `Password`) VALUES ('Sathwik123', 'Sathwik123@gmail.com', 'password123');
-INSERT INTO `account` (`TrainerID`, `Email`, `Password`) VALUES ('Dylan444', 'dylan444@gmail.com', '44444444');
-INSERT INTO `account` (`TrainerID`, `Email`, `Password`) VALUES ('jiaqing123', 'jiaqing123@gmail.com', 'password123');
-INSERT INTO `account` (`TrainerID`, `Email`, `Password`) VALUES ('fernfernfern', 'fern@gmail.com', 'password123');
-INSERT INTO `account` (`TrainerID`, `Email`, `Password`) VALUES ('marco', 'marco@gmail.com', 'password123');
-INSERT INTO `account` (`TrainerID`, `Email`, `Password`) VALUES ('melody234', 'melody234@gmail.com', 'password123');
-
-INSERT INTO `bankaccount` (`TrainerID`, `AccountNum`, `BankName`) VALUES ('Sathwik123', '123-12312-3', 'DBS Bank');
-INSERT INTO `bankaccount` (`TrainerID`, `AccountNum`, `BankName`) VALUES ('marco', '098-12346-4', 'POSB Bank');
-INSERT INTO `bankaccount` (`TrainerID`, `AccountNum`, `BankName`) VALUES ('jiaqing123', '3-235623-6', 'OCBC Bank');
-INSERT INTO `bankaccount` (`TrainerID`, `AccountNum`, `BankName`) VALUES ('Dylan444', '1234-1237-3', 'Bank of China');
-INSERT INTO `bankaccount` (`TrainerID`, `AccountNum`, `BankName`) VALUES ('fernfernfern', '5666-1223462-3', 'UOB Bank');
-INSERT INTO `bankaccount` (`TrainerID`, `AccountNum`, `BankName`) VALUES ('melody234', '634-1236412-3', 'HSBC Bank');
+INSERT INTO `account` (`TrainerID`, `Email`, `Password`, `StripeID`) VALUES ('Sathwik123', 'Sathwik123@gmail.com', 'password123', '123412341234');
+INSERT INTO `account` (`TrainerID`, `Email`, `Password`, `StripeID`) VALUES ('Dylan444', 'dylan444@gmail.com', '44444444', '23423423412');
+INSERT INTO `account` (`TrainerID`, `Email`, `Password`, `StripeID`) VALUES ('jiaqing123', 'jiaqing123@gmail.com', 'password123', '78375235523',);
+INSERT INTO `account` (`TrainerID`, `Email`, `Password`, `StripeID`) VALUES ('fernfernfern', 'fern@gmail.com', 'password123', '78375235523');
+INSERT INTO `account` (`TrainerID`, `Email`, `Password`, `StripeID`) VALUES ('marco', 'marco@gmail.com', 'password123', '78375235523');
+INSERT INTO `account` (`TrainerID`, `Email`, `Password`, `StripeID`) VALUES ('melody234', 'melody234@gmail.com', 'password123', '78375235523');
 
 INSERT INTO `category` (`CatID`, `CatName`) VALUES ('PCI', 'Pre-Choreographed Instructor');
 INSERT INTO `category` (`CatID`, `CatName`) VALUES ('FI', 'Fitness Instructor');
@@ -77,9 +59,9 @@ INSERT INTO `certification` (`TrainerID`, `CertID`, `CertDetail`, `CatID`) VALUE
 INSERT INTO `certification` (`TrainerID`, `CertID`, `CertDetail`, `CatID`) VALUES ('marco', 'GEI1383572', 'Group Exercise Instructor Certification', 'GEI');
 INSERT INTO `certification` (`TrainerID`, `CertID`, `CertDetail`, `CatID`) VALUES ('fernfernfern', 'ES135825', 'MSc in Physiotheraphy', 'ES');
 
-INSERT INTO `info` (`TrainerID`, `StripeID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('Sathwik123', '123412341234', 'Sathwik is a trained personal trainer with 10 years of experience. He has been certified by... ', 'sathwik.jpg', '179.2', '70', '2000-02-09', '1', 'Male');
-INSERT INTO `info` (`TrainerID`, `StripeID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('marco', '23423423412', 'Marco is a trained personal trainer with 10 years of experience. He has been certified by... ', 'marco.jpg', '179.2', '70', '2000-02-09', '1', 'Male');
-INSERT INTO `info` (`TrainerID`, `StripeID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('Dylan444', '78375235523', 'Dylan is a trained personal trainer with 10 years of experience. He has been certified by... ', 'dylan444.jpg', '179.2', '70', '2000-02-09', '0', 'Male');
-INSERT INTO `info` (`TrainerID`, `StripeID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('jiaqing123', '78375235523', 'Jia Qing is a trained personal trainer with 10 years of experience. He has been certified by... ', 'jiaqing123.jpg', '179.2', '70', '2000-02-09', '0', 'Male');
-INSERT INTO `info` (`TrainerID`, `StripeID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('fernfernfern', '78375235523', 'Fern is a trained personal trainer with 10 years of experience. She has been certified by... ', 'fern.jpg', '179.2', '70', '2000-02-09', '1', 'Female');
-INSERT INTO `info` (`TrainerID`, `StripeID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('melody234', '78375235523', 'Melody is a trained personal trainer with 10 years of experience. She has been certified by... ', 'melody.jpg', '179.2', '70', '2000-02-09', '1', 'Female');
+INSERT INTO `info` (`TrainerID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('Sathwik123', 'Sathwik is a trained personal trainer with 10 years of experience. He has been certified by... ', 'sathwik.jpg', '179.2', '70', '2000-02-09', '1', 'Male');
+INSERT INTO `info` (`TrainerID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('marco', 'Marco is a trained personal trainer with 10 years of experience. He has been certified by... ', 'marco.jpg', '179.2', '70', '2000-02-09', '1', 'Male');
+INSERT INTO `info` (`TrainerID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('Dylan444', 'Dylan is a trained personal trainer with 10 years of experience. He has been certified by... ', 'dylan444.jpg', '179.2', '70', '2000-02-09', '0', 'Male');
+INSERT INTO `info` (`TrainerID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('jiaqing123', 'Jia Qing is a trained personal trainer with 10 years of experience. He has been certified by... ', 'jiaqing123.jpg', '179.2', '70', '2000-02-09', '0', 'Male');
+INSERT INTO `info` (`TrainerID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('fernfernfern', 'Fern is a trained personal trainer with 10 years of experience. She has been certified by... ', 'fern.jpg', '179.2', '70', '2000-02-09', '1', 'Female');
+INSERT INTO `info` (`TrainerID`, `Bio`, `Img`, `Height`, `Weight`, `DateOfBirth`, `Verified`, `Gender`) VALUES ('melody234', 'Melody is a trained personal trainer with 10 years of experience. She has been certified by... ', 'melody.jpg', '179.2', '70', '2000-02-09', '1', 'Female');

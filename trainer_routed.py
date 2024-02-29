@@ -5,155 +5,100 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Define your database connection parameters
 conn_params = {
-    'database': 'bookingdb',
-    'user': 'postgres',
-    'password': 'root',
-    'host': 'host.docker.internal',
+    'database': 'verceldb',
+    'user': 'default',
+    'password': 's2fbryFa6Yej',
+    'host': 'ep-old-darkness-a1f9hm2w-pooler.ap-southeast-1.aws.neon.tech',
     'port': '5432'
 }
 
-def fetch_all_packages():
+# Route to retrieve all trainers
+@app.route("/trainer")
+def get_all():
     try:
         conn = psycopg2.connect(**conn_params)
         cur = conn.cursor()
 
-        cur.execute('SELECT * FROM packageschema.package;')  # Adjust SQL query as needed
-        rows = cur.fetchall()
-
-        # Convert rows to JSON format
-        package_data = [{'packageid': row[0], 'name': row[1], 'detail': row[2], 'price': row[3], 'online': row[4], 'postid': row[5]} for row in rows]
+        cur.execute("SELECT * FROM Account")
+        trainers = cur.fetchall()
 
         cur.close()
         conn.close()
 
-        return package_data
+        return jsonify(trainers)
+
     except psycopg2.Error as e:
         print("Error fetching data from PostgreSQL:", e)
         return []
 
-def fetch_package_by_id(package_id):
+# Route to retrieve a specific trainer by ID
+@app.route("/trainer/<trainer_id>")
+def find_by_trainerid(trainer_id):
     try:
         conn = psycopg2.connect(**conn_params)
         cur = conn.cursor()
 
-        cur.execute('SELECT * FROM packageschema.package WHERE packageid = %s;', (package_id,))
-        row = cur.fetchone()
+        cur.execute(f"SELECT * FROM Account WHERE TrainerID = '{trainer_id}'")
+        trainer = cur.fetchone()
 
         cur.close()
         conn.close()
 
-        if row:
-            package_data = {'packageid': row[0], 'name': row[1], 'detail': row[2], 'price': row[3], 'online': row[4], 'postid': row[5]}
-            return package_data
+        if trainer:
+            return jsonify(trainer)
         else:
-            return {'error': 'Package not found'}
+            return jsonify({"message": "Trainer not found"})
+        
     except psycopg2.Error as e:
         print("Error fetching data from PostgreSQL:", e)
         return {'error': 'Failed to fetch data from database'}
-    
-def create_new_package(name, detail, price, online, postid):
+
+# Route to create a new trainer
+@app.route("/trainer", methods=['POST'])
+def create_trainer():
     try:
         conn = psycopg2.connect(**conn_params)
         cur = conn.cursor()
 
-        post_id = request.args.get('postid')
+        data = request.get_json()
+        trainer_id = data['trainerID']
+        email = data['email']
+        password = data['password']
+        stripe_id = data['stripeid']
 
-        # Use the extracted post ID in your SQL query
-        cur.execute('SELECT EXISTS(SELECT 1 FROM postschema.post WHERE postid = %s);', (post_id,))
-        post_exists = cur.fetchone()[0]
-
-        if not post_exists:
-            return {'error': 'Post ID does not exist'}
-        
-        cur.execute('INSERT INTO packageschema.package (name, detail, price, online, postid) VALUES (%s, %s, %s, %s, %s) RETURNING packageid;', 
-                    (name, detail, price, online, postid))
-        new_package_id = cur.fetchone()[0]  # Get the ID of the newly inserted package
-
+        # Insert the new trainer into the database
+        cur.execute(f"INSERT INTO Account (trainerID, email, password, stripeid) VALUES ('{trainer_id}', '{email}', '{password}', '{stripe_id}')")
         conn.commit()
+
         cur.close()
         conn.close()
 
-        return {'packageid': new_package_id, 'message': 'Package created successfully'}
+        return jsonify({"message": "Trainer created successfully"})
     except psycopg2.Error as e:
-        print("Error creating new package in PostgreSQL:", e)
-        return {'error': 'Failed to create new package in database'}
+        print("Error creating new trainer in PostgreSQL:", e)
+        return {'error': 'Failed to create new trainer in database'}
     
-def delete_package_by_id(package_id):
+@app.route('/trainer/<int:trainer_id>', methods=['DELETE'])
+def delete_package(trainer_id):
     try:
         conn = psycopg2.connect(**conn_params)
         cur = conn.cursor()
 
-        # Execute the DELETE query
-        cur.execute('DELETE FROM packageschema.package WHERE packageid = %s;', (package_id,))
-        
-        # Commit the transaction
+        data = request.get_json()
+        trainer_id = data['trainerID']
+
+        # Insert the new trainer into the database
+        cur.execute('DELETE FROM Account WHERE trainerid= %s;', (trainer_id,))
         conn.commit()
-        
+
         cur.close()
         conn.close()
 
-        return {'message': 'Package deleted successfully'}
+        return jsonify({"message": "Trainer deleted successfully"})
     except psycopg2.Error as e:
-        print("Error deleting package from PostgreSQL:", e)
-        return {'error': 'Failed to delete package from database'}
-    
-def update_package_by_id(package_id, updated_data):
-    try:
-        conn = psycopg2.connect(**conn_params)
-        cur = conn.cursor()
-
-        # Execute the UPDATE query with the updated data
-        cur.execute('UPDATE packageschema.package SET name = %s, detail = %s, price = %s, online = %s, postid = %s WHERE packageid = %s;', 
-                    (updated_data['name'], updated_data['detail'], updated_data['price'], updated_data['online'], updated_data['postid'], package_id))
-        
-        # Commit the transaction
-        conn.commit()
-        
-        cur.close()
-        conn.close()
-
-        return {'message': 'Package updated successfully'}
-    except psycopg2.Error as e:
-        print("Error updating package in PostgreSQL:", e)
-        return {'error': 'Failed to update package in database'}
-
-@app.route('/packages', methods=['GET'])
-def get_packages():
-    package_data = fetch_all_packages()
-    return jsonify(package_data)
-
-@app.route('/packages/<int:package_id>', methods=['GET'])
-def get_package_by_id(package_id):
-    package_data = fetch_package_by_id(package_id)
-    return jsonify(package_data)
-
-@app.route('/packages', methods=['POST'])
-def create_package():
-    data = request.json
-    name = data.get('name')
-    detail = data.get('detail')
-    price = data.get('price')
-    online = data.get('online')
-    postid = data.get('postid')
-    result = create_new_package(name, detail, price, online, postid)
-    return jsonify(result)
-
-@app.route('/packages/<int:package_id>', methods=['DELETE'])
-def delete_package(package_id):
-    # Call the delete_package_by_id function with the package ID
-    result = delete_package_by_id(package_id)
-    return jsonify(result)
-
-@app.route('/packages/<int:package_id>', methods=['PUT'])
-def update_package(package_id):
-    # Extract the updated data from the request body
-    updated_data = request.json
-    
-    # Call the update_package_by_id function with the package ID and updated data
-    result = update_package_by_id(package_id, updated_data)
-    return jsonify(result)
+        print("Error deleting trainer in PostgreSQL:", e)
+        return {'error': 'Failed to delete trainer in database'}
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', port =  5000, debug = True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

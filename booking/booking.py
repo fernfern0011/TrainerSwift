@@ -1,12 +1,12 @@
 from flask import Flask, jsonify, request
-from config import *
+from config import load_config
 from dbConnection import *
 app = Flask(__name__)  # special variable that will call __main__
 
 
 # Post #
 # [GET] getAllPost
-@app.route("/post", methods=['GET'])
+@app.route('/post', methods=['GET'])
 def read_all_post_query():
     con = get_db_connection(config)
     cur = con.cursor()
@@ -104,7 +104,7 @@ def update_post_query(postid):
 
         try:
             # Update a post
-            cur.execute(f"""UPDATE post SET title = %s, description = %s, category = %s, trainerid = %s WHERE postid = %s;""",
+            cur.execute(f"""UPDATE post SET title = %s, description = %s, category = %s WHERE trainerid = %s AND postid = %s;""",
                         (data['title'], data['description'], data['category'], data['trainerid'], postid, ))
 
             con.commit()
@@ -279,7 +279,7 @@ def update_package_by_id_query(packageid):
 
 # [DELETE] deletePackage
 @app.route('/package/<int:packageid>', methods=['DELETE'])
-def delete_package_by_id(packageid):
+def delete_package_by_id_query(packageid):
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -306,7 +306,7 @@ def delete_package_by_id(packageid):
 
 # Availability #
 # [GET] getAllAvailabilities
-@app.route("/availability", methods=['GET'])
+@app.route('/availability', methods=['GET'])
 def read_all_availability_query():
     con = get_db_connection(config)
     cur = con.cursor()
@@ -333,7 +333,7 @@ def read_all_availability_query():
     })
 
 # [GET] getOneAvailabilityByPackageid
-@app.route("/package/<int:packageid>/availability", methods=['GET'])
+@app.route('/package/<int:packageid>/availability', methods=['GET'])
 def read__availability_by_packageid_query(packageid):
     con = get_db_connection(config)
     cur = con.cursor()
@@ -360,7 +360,7 @@ def read__availability_by_packageid_query(packageid):
     })
 
 # [GET] createNewAvailability
-@app.route("/availability/create", methods=['POST'])
+@app.route('/availability/create', methods=['POST'])
 def create_availability_query():
     if request.method == 'POST':
         data = request.get_json()
@@ -408,7 +408,7 @@ def create_availability_query():
             })
 
 # [PUT] updateAvailabilityStatus
-@app.route("/availability/update_status", methods=['PUT'])
+@app.route('/availability/update_status', methods=['PUT'])
 def update_availability_status_query():
     if request.method == 'PUT':
         data = request.get_json()
@@ -461,7 +461,7 @@ def delete_availability_query(availabilityid):
 
 # Bookedby #
 # [GET] getAllBookedby
-@app.route("/bookedby", methods=['GET'])
+@app.route('/bookedby', methods=['GET'])
 def read_all_bookedby_query():
     con = get_db_connection(config)
     cur = con.cursor()
@@ -487,7 +487,7 @@ def read_all_bookedby_query():
     })
 
 # [GET] getOneBookedby
-@app.route("/bookedby/<int:bookedbyid>", methods=['GET'])
+@app.route('/bookedby/<int:bookedbyid>', methods=['GET'])
 def read_bookedby_by_id_query(bookedbyid):
     con = get_db_connection(config)
     cur = con.cursor()
@@ -514,7 +514,7 @@ def read_bookedby_by_id_query(bookedbyid):
     })
 
 # [POST] createNewBookedby
-@app.route("/bookedby/create", methods=['POST'])
+@app.route('/bookedby/create', methods=['POST'])
 def create_bookedby_query():
     if request.method == 'POST':
         data = request.get_json()
@@ -562,7 +562,7 @@ def create_bookedby_query():
 
 # [DELETE] deleteBookedby
 @app.route('/bookedby/<int:bookedbyid>', methods=['DELETE'])
-def delete_bookedby_query(bookedbyid):
+def delete_bookedby_by_id_query(bookedbyid):
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()

@@ -1,6 +1,6 @@
 # TrainerSwift
 
-Step to connect to Booking database
+Step to connect to Trainer database
 1. Create a file called __'database.ini'__ inside trainer folder
 2. Add following codes inside:
    ```

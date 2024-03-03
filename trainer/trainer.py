@@ -3,7 +3,6 @@ from config import load_config
 from dbConnection import *
 app = Flask(__name__)  # special variable that will call __main__
 
-
 # Trainer Account #
 # [GET] getAllTrainer
 @app.route('/trainer', methods=['GET'])
@@ -167,74 +166,235 @@ def delete_trainer_by_id_query(trainerid):
 
 
 # Category #
-# [GET] getAllCategory
+# [GET] getAllCategory # Done
 @app.route('/category', methods=['GET'])
 def read_all_category_query():
     con = get_db_connection(config)
     cur = con.cursor()
-    
-    # Write your code below #
         
-# [GET] getOneCategory
+    cur.execute(f'SELECT * FROM category ORDER BY CatID ASC')
+
+    catlist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    catlist_json = [{"catid": catlist[0], "catname": catlist[1]} for cat in catlist]
+
+    if len(catlist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "cat": [catlist for catlist in catlist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no category."
+    })
+    
+        
+# [GET] getOneCategory # Done
 @app.route('/category/<int:catid>', methods=['GET'])
 def read_category_by_id_query(catid):
     con = get_db_connection(config)
-    cur = con.cursor()    
+    cur = con.cursor()
+
+    cur.execute(f'SELECT * FROM category WHERE catid = %s;', (catid, ))
+
+    cat = cur.fetchall()
+    cur.close()
+    con.close()
+
+    if cat:
+        cat_json = {"catid": cat[0], "catname": cat[1]}
+        return jsonify({
+            "code": 200,
+            "data": {
+                "cert": cat_json
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no category."
+    })    
     
-    # Write your code below #
     
-# [POST] createNewCategory
+# [POST] createNewCategory # Done
 @app.route('/category/create', methods=['POST'])
 def create_new_category_query():
     if request.method == 'POST':
         data = request.get_json()
+        catname = data['catname']
+
+        con = get_db_connection(config)
+        cur = con.cursor()
         
-        # Write your code below #
+        # Check whether Post ID exists
+        cur.execute(
+            f'SELECT EXISTS(SELECT 1 FROM category WHERE catname = %s);', (catname, ))
+        catname_exists = cur.fetchone()[0]
+
+        if catname_exists:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to create. Category name already exists"
+            })
+        try:
+            # Insert the new category into the database
+            cur.execute(
+                f"INSERT INTO category (catid, catname) VALUES (nextval('category_id_seq'), %s) RETURNING catid;",
+                (catname, ))
+
+            return jsonify({
+                    "code": 201,
+                    "message": "Category created successfully."
+                })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to create new category."
+            })        
         
-# [DELETE] deleteCategory
+# [DELETE] deleteCategory # Done
 @app.route('/category/<int:catid>', methods=['DELETE'])
 def delete_category_by_id_query(catid):
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
         
-        # Write your code below #    
+        try:
+            # Delete a certificate
+            cur.execute(f'DELETE FROM category WHERE catid = %s;', (catid, ))
+            con.commit()
+            cur.close()
+            con.close()
 
-
+            return jsonify({
+                "code": 200,
+                "message": "Category deleted successfully."
+            })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to delete a category."
+            })
+            
 # Certification #
-# [GET] getAllCertification
+# [GET] getAllCertification # Done
 @app.route('/certification', methods=['GET'])
 def read_all_certification_query():
     con = get_db_connection(config)
     cur = con.cursor()
     
-    # Write your code below #
-    
-# [GET] getOneCertification
+    cur.execute(f'SELECT * FROM certification ORDER BY certid ASC')
+
+    certlist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    certlist_json = [{"certid": certlist[0], "trainerid": certlist[1], "certdetail": certlist[2], "catdetail": certlist[3]} for cert in certlist]
+
+    if len(certlist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "cert": [certlist for certlist in certlist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no certificate."
+    })
+        
+# [GET] getOneCertification # Done
 @app.route('/certification/<int:certid>', methods=['GET'])
 def read_certification_by_id_query(certid):
     con = get_db_connection(config)
     cur = con.cursor()    
     
-    # Write your code below #
+    cur.execute(f'SELECT * FROM certification WHERE certid = %s;', (certid, ))
+
+    cert = cur.fetchall()
+    cur.close()
+    con.close()
+
+    if cert:
+        cert_json = {"certid": cert[0], "trainerid": cert[1], "certdetail": cert[2], "catdetail": cert[3]}
+        return jsonify({
+            "code": 200,
+            "data": {
+                "cert": cert_json
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no certificate."
+    })
 
 # [POST] createNewCertification
-@app.route('/certifiaction/create', methods=['POST'])
+@app.route('/certification/create', methods=['POST'])
 def create_new_certification_query():
     if request.method == 'POST':
         data = request.get_json()
-        
-        # Write your code below #    
 
-# [DELETE] deleteCertification
+        certid = data['certid']
+        trainerid = data['trainerid']
+        certdetail = data['certdetail']
+        catid = data['catid']
+                
+        con = get_db_connection(config)
+        cur = con.cursor()
+        
+        # Check whether Post ID exists
+        cur.execute(
+            f'SELECT EXISTS(SELECT 1 FROM certificate WHERE certid = %s);', (certid, ))
+        cert_exists = cur.fetchone()[0]
+
+        if cert_exists:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to create. Certificate already exists"
+            })
+        try:
+            # Insert the new certificate into the database
+            cur.execute(
+                f"INSERT INTO certificate (certid, trainerid, certdetail, catid) VALUES (nextval('certificate_id_seq'), %s) RETURNING certid;",
+                (trainerid, certdetail, catid))
+
+            return jsonify({
+                    "code": 201,
+                    "message": "Certificate created successfully."
+                })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to create new certificate."
+            })      
+        
+# [DELETE] deleteCertification # Done
 @app.route('/certification/<int:certid>', methods=['DELETE'])
 def delete_certification_by_id_query(certid):
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
         
-        # Write your code below #             
+        try:
+            # Delete a certificate
+            cur.execute(
+                f'DELETE FROM certification WHERE certid = %s;', (certid, ))
+            con.commit()
+            cur.close()
+            con.close()
 
+            return jsonify({
+                "code": 200,
+                "message": "Certification deleted successfully."
+            })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to delete a certification."
+            })
 
 # Trainer Info #
 # [GET] getAllTrainerInfo

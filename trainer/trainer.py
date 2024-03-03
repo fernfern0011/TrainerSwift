@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
-from config import load_config
+from config import *
 from dbConnection import *
 app = Flask(__name__)  # special variable that will call __main__
+
 
 # Trainer Account #
 # [GET] getAllTrainer
@@ -106,6 +107,7 @@ def create_new_trainer_query():
                     "new_trainerid": confirmed_new_trainerid,
                     "message": "Trainer created successfully."
                 })
+                
         except:
             return jsonify({
                 "code": 400,
@@ -166,19 +168,19 @@ def delete_trainer_by_id_query(trainerid):
 
 
 # Category #
-# [GET] getAllCategory # Done
+# [GET] getAllCategory
 @app.route('/category', methods=['GET'])
 def read_all_category_query():
     con = get_db_connection(config)
     cur = con.cursor()
         
-    cur.execute(f'SELECT * FROM category ORDER BY CatID ASC')
+    cur.execute(f'SELECT * FROM category ORDER BY catid ASC')
 
     catlist = cur.fetchall()
     cur.close()
     con.close()
 
-    catlist_json = [{"catid": catlist[0], "catname": catlist[1]} for cat in catlist]
+    catlist_json = [{"catid": cat[0], "catcode": cat[1], "catname": cat[2], "created_timestamp": cat[3]} for cat in catlist]
 
     if len(catlist):
         return jsonify({
@@ -191,9 +193,8 @@ def read_all_category_query():
         "code": 400,
         "message": "There is no category."
     })
-    
-        
-# [GET] getOneCategory # Done
+     
+# [GET] getOneCategory
 @app.route('/category/<int:catid>', methods=['GET'])
 def read_category_by_id_query(catid):
     con = get_db_connection(config)
@@ -201,61 +202,73 @@ def read_category_by_id_query(catid):
 
     cur.execute(f'SELECT * FROM category WHERE catid = %s;', (catid, ))
 
-    cat = cur.fetchall()
+    cat = cur.fetchone()
     cur.close()
     con.close()
 
     if cat:
-        cat_json = {"catid": cat[0], "catname": cat[1]}
+        cat_json = {"catid": cat[0], "catcode": cat[1], "catname": cat[2], "created_timestamp": cat[3]}
+        
         return jsonify({
             "code": 200,
             "data": {
-                "cert": cat_json
+                "category": cat_json
             }
         })
+        
     return jsonify({
         "code": 400,
         "message": "There is no category."
     })    
     
-    
-# [POST] createNewCategory # Done
+# [POST] createNewCategory
 @app.route('/category/create', methods=['POST'])
 def create_new_category_query():
     if request.method == 'POST':
         data = request.get_json()
+        catcode = data['catcode']
         catname = data['catname']
 
         con = get_db_connection(config)
         cur = con.cursor()
         
-        # Check whether Post ID exists
+        # Check whether Category ID exists
         cur.execute(
-            f'SELECT EXISTS(SELECT 1 FROM category WHERE catname = %s);', (catname, ))
-        catname_exists = cur.fetchone()[0]
+            f'SELECT EXISTS(SELECT 1 FROM category WHERE catcode = %s AND catname = %s);', (catcode, catname, ))
+        cat_exists = cur.fetchone()[0]
 
-        if catname_exists:
+        if cat_exists:
             return jsonify({
                 "code": 400,
-                "message": "Failed to create. Category name already exists"
+                "message": "Failed to create. Category already exists"
             })
+            
         try:
             # Insert the new category into the database
             cur.execute(
-                f"INSERT INTO category (catid, catname) VALUES (nextval('category_id_seq'), %s) RETURNING catid;",
-                (catname, ))
+                f"INSERT INTO category (catid, catcode, catname) VALUES (nextval('category_id_seq'), %s, %s) RETURNING catid;",
+                (catcode, catname, ))
+            
+            # Get the ID of the newly inserted category
+            new_catid = cur.fetchone()[0]
+            
+            con.commit()
+            cur.close()
+            con.close()
 
             return jsonify({
                     "code": 201,
+                    "new_catid": new_catid,
                     "message": "Category created successfully."
                 })
+            
         except:
             return jsonify({
                 "code": 400,
                 "message": "Failed to create new category."
             })        
         
-# [DELETE] deleteCategory # Done
+# [DELETE] deleteCategory
 @app.route('/category/<int:catid>', methods=['DELETE'])
 def delete_category_by_id_query(catid):
     if request.method == 'DELETE':
@@ -263,8 +276,9 @@ def delete_category_by_id_query(catid):
         cur = con.cursor()
         
         try:
-            # Delete a certificate
+            # Delete a category
             cur.execute(f'DELETE FROM category WHERE catid = %s;', (catid, ))
+            
             con.commit()
             cur.close()
             con.close()
@@ -279,8 +293,9 @@ def delete_category_by_id_query(catid):
                 "message": "Failed to delete a category."
             })
             
+            
 # Certification #
-# [GET] getAllCertification # Done
+# [GET] getAllCertification
 @app.route('/certification', methods=['GET'])
 def read_all_certification_query():
     con = get_db_connection(config)
@@ -292,13 +307,13 @@ def read_all_certification_query():
     cur.close()
     con.close()
 
-    certlist_json = [{"certid": certlist[0], "trainerid": certlist[1], "certdetail": certlist[2], "catdetail": certlist[3]} for cert in certlist]
+    certlist_json = [{"certid": cert[0], "certcode": cert[1], "certname": cert[2], "trainerid": cert[3], "catid": cert[4], "created_timestamp": cert[5]} for cert in certlist]
 
     if len(certlist):
         return jsonify({
             "code": 200,
             "data": {
-                "cert": [certlist for certlist in certlist_json]
+                "certification": [certlist for certlist in certlist_json]
             }
         })
     return jsonify({
@@ -306,7 +321,7 @@ def read_all_certification_query():
         "message": "There is no certificate."
     })
         
-# [GET] getOneCertification # Done
+# [GET] getOneCertification
 @app.route('/certification/<int:certid>', methods=['GET'])
 def read_certification_by_id_query(certid):
     con = get_db_connection(config)
@@ -314,18 +329,20 @@ def read_certification_by_id_query(certid):
     
     cur.execute(f'SELECT * FROM certification WHERE certid = %s;', (certid, ))
 
-    cert = cur.fetchall()
+    cert = cur.fetchone()
     cur.close()
     con.close()
 
     if cert:
-        cert_json = {"certid": cert[0], "trainerid": cert[1], "certdetail": cert[2], "catdetail": cert[3]}
+        cert_json = {"certid": cert[0], "certcode": cert[1], "certname": cert[2], "trainerid": cert[3], "catid": cert[4], "created_timestamp": cert[5]}
+        
         return jsonify({
             "code": 200,
             "data": {
                 "cert": cert_json
             }
         })
+        
     return jsonify({
         "code": 400,
         "message": "There is no certificate."
@@ -336,18 +353,17 @@ def read_certification_by_id_query(certid):
 def create_new_certification_query():
     if request.method == 'POST':
         data = request.get_json()
-
-        certid = data['certid']
+        certcode = data['certcode']
+        certname = data['certname']
         trainerid = data['trainerid']
-        certdetail = data['certdetail']
         catid = data['catid']
                 
         con = get_db_connection(config)
         cur = con.cursor()
         
-        # Check whether Post ID exists
+        # Check whether Certification ID exists
         cur.execute(
-            f'SELECT EXISTS(SELECT 1 FROM certificate WHERE certid = %s);', (certid, ))
+            f'SELECT EXISTS(SELECT 1 FROM certification WHERE trainerid = %s AND catid = %s);', (trainerid, catid, ))
         cert_exists = cur.fetchone()[0]
 
         if cert_exists:
@@ -355,23 +371,33 @@ def create_new_certification_query():
                 "code": 400,
                 "message": "Failed to create. Certificate already exists"
             })
+            
         try:
             # Insert the new certificate into the database
             cur.execute(
-                f"INSERT INTO certificate (certid, trainerid, certdetail, catid) VALUES (nextval('certificate_id_seq'), %s) RETURNING certid;",
-                (trainerid, certdetail, catid))
+                f"INSERT INTO certification (certid, certcode, certname, trainerid, catid) VALUES (nextval('certification_id_seq'), %s, %s, %s, %s) RETURNING certid;",
+                (certcode, certname, trainerid, catid, ))
+            
+            # Get the ID of the newly inserted certification
+            new_certificationid = cur.fetchone()[0]
+            
+            con.commit()
+            cur.close()
+            con.close()
 
             return jsonify({
                     "code": 201,
+                    "new_certificationid": new_certificationid,
                     "message": "Certificate created successfully."
                 })
+            
         except:
             return jsonify({
                 "code": 400,
                 "message": "Failed to create new certificate."
             })      
         
-# [DELETE] deleteCertification # Done
+# [DELETE] deleteCertification
 @app.route('/certification/<int:certid>', methods=['DELETE'])
 def delete_certification_by_id_query(certid):
     if request.method == 'DELETE':
@@ -382,6 +408,7 @@ def delete_certification_by_id_query(certid):
             # Delete a certificate
             cur.execute(
                 f'DELETE FROM certification WHERE certid = %s;', (certid, ))
+            
             con.commit()
             cur.close()
             con.close()
@@ -395,6 +422,7 @@ def delete_certification_by_id_query(certid):
                 "code": 400,
                 "message": "Failed to delete a certification."
             })
+            
 
 # Trainer Info #
 # [GET] getAllTrainerInfo

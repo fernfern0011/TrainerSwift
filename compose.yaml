@@ -1,0 +1,30 @@
+version: "4.27.2"
+
+services:
+
+  trainer:
+    image: nangkhongkham/trainer:1.0
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      dbURL: postgresql+psycopg2://default:s2fbryFa6Yej@ep-old-darkness-a1f9hm2w-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+
+  booking:
+    image: nangkhongkham/booking:1.0
+    restart: always
+    ports:
+      - "5001:5000"
+    environment:
+      dbURL: postgresql+psycopg2://default:YjmL6GzAh7Wn@ep-rough-water-a1qqu7ye-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+
+  bookingaslot:
+    image: dylanchua/bookingaslot:1.0
+    ports:
+      - "5100:5100"
+    depends_on:
+      - trainer
+      - booking
+    environment:
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000

@@ -10,7 +10,7 @@ async def connect(message):
 
 #test 
 async def main():
-    await connect("Create Zoom Link")
-    await connect("hello")
+    await connect('["5", "Create Zoom Link"]')
+    await connect('["3", "hello"]')
 
 asyncio.run(main())

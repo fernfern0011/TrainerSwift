@@ -1,5 +1,7 @@
 import { Providers } from "./Providers"
 import Navbar from "../components/navbar"
+import Footer from "../components/footer"
+
 
 export default function RootLayout({children}) {
   return (
@@ -8,6 +10,7 @@ export default function RootLayout({children}) {
         <Providers>
           <Navbar/>
           {children}
+          <Footer/>
         </Providers>
       </body>
     </html>

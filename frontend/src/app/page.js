@@ -1,10 +1,20 @@
 'use client'
-import { Link } from '@chakra-ui/next-js'
+import { Box } from '@chakra-ui/react'
+import Hero from '../components/hero'
+import Qualities from '../components/qualities'
+import Contact from '../components/contact'
+import PackageCard from '../components/packageCard'
+import PostCard from '../components/postCard';
 
-export default function Page() {
+
+export default function Landing() {
   return (
-    <Link href='/about' color='blue.400' _hover={{ color: 'blue.500' }}>
-      About
-    </Link>
+    <Box>
+      <Hero />
+      <Qualities />
+      <Contact />
+      <PackageCard />
+      <PostCard />
+    </Box>
   )
 }

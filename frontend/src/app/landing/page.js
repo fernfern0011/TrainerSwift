@@ -3,7 +3,7 @@ import { Box } from '@chakra-ui/react'
 import Hero from '../../components/hero'
 import Qualities from '../../components/qualities'
 import Contact from '../../components/contact'
-// import PostCard from '../../components/postCard'
+import PackageCard from '../../components/packageCard'
 
 
 
@@ -13,7 +13,7 @@ const Landing = () => {
           <Hero/>
           <Qualities/>
           <Contact/>
-          {/* <PostCard/> */}
+          <PackageCard/>
       </Box>
     )
   }

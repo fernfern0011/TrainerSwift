@@ -4,6 +4,7 @@ import Hero from '../../components/hero'
 import Qualities from '../../components/qualities'
 import Contact from '../../components/contact'
 import PackageCard from '../../components/packageCard'
+import PostCard from './../../components/postCard';
 
 
 
@@ -14,6 +15,7 @@ const Landing = () => {
           <Qualities/>
           <Contact/>
           <PackageCard/>
+          <PostCard/>
       </Box>
     )
   }

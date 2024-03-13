@@ -1,57 +1,161 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify, request
+from config import *
+from dbConnection import *
+app = Flask(__name__)  # special variable that will call __main__
 
-app = Flask(__name__)
+# Trainee Account #
+# [GET] getAllTrainee
+@app.route('/trainee', methods=['GET'])
+def read_all_trainee_query():
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f'SELECT * FROM account ORDER BY traineeid ASC')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/trainee'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    traineelist = cur.fetchall()
+    cur.close()
+    con.close()
 
-db = SQLAlchemy(app)
+    traineelist_json = [{"traineeid": trainee[0], "username": trainee[1], "email": trainee[2],
+                         "password": trainee[3], "created_timestamp": trainee[4]} for trainee in traineelist]
 
-class Account(db.Model):
-    __tablename__ = 'Account'
-    TraineeID = db.Column(db.String(50), primary_key=True)
-    Username = db.Column(db.String(50), nullable=False)
-    Email = db.Column(db.String(100), nullable=False)
-    Password = db.Column(db.String(50), nullable=False)
-    Created_timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    if len(traineelist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "trainee": [trainee for trainee in traineelist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no trainee."
+    })
 
-    db.UniqueConstraint('TraineeID', 'Email')
+# [GET] getOneTrainee    
+@app.route("/trainee/<traineeid>")
+def read_trainee_by_id_query(traineeid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f'SELECT * FROM account WHERE traineeid = %s;', (traineeid, ))
 
-    def __init__(self,TraineeID,Username,Email,Password):
-        self.TraineeID = TraineeID
-        self.Username = Username
-        self.Email = Email
-        self.Password = Password
-    
-    def json(self):
-        return {"TraineeID": self.TraineeID, "Username": self.Username, "Email": self.Email, "Password": self.Password}
+    trainee = cur.fetchone()
+    cur.close()
+    con.close()
 
-@app.route("/Trainee")
-def get_all():
-    trainees = Account.query.all()
-    return jsonify([Trainee.json() for Trainee in trainees])
-
-@app.route("/trainee/<trainee_id>")
-def find_by_traineeid(trainee_id):
-    trainee = Account.query.get(trainee_id)
     if trainee:
-        return jsonify(trainee.json())
-    return jsonify({"message": "Trainee not found"})
+        trainee_json = {"traineeid": trainee[0], "username": trainee[1], "email": trainee[2],
+                        "password": trainee[3], "created_timestamp": trainee[4]}
 
-@app.route("/trainee/<trainee_id>", methods=['POST'])
-def create_trainee(trainee_id):
-    data = request.get_json()
+        return jsonify({
+            "code": 200,
+            "data": {
+                "trainee": trainee_json
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no trainee."
+    })
 
-    existing_trainee = Account.query.get(trainee_id)
-    if existing_trainee:
-        return jsonify({"message": "Cannot create Trainee with the same ID."})
+# [POST] createNewTrainee
+@app.route('/trainee/create', methods=['POST'])
+def create_new_trainee_query():
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data['username']
+        email = data['email']
+        password = data['password']
 
-    add_trainee = Account(TraineeID=trainee_id, Username=data['Username'], Email=data['Email'], Password=data['Password'])
-    db.session.add(add_trainee)
-    db.session.commit()
+        con = get_db_connection(config)
+        cur = con.cursor()
+        
+        # Check whether Trainee ID exists
+        cur.execute(
+            f'SELECT EXISTS(SELECT 1 FROM account WHERE email = %s);', (email, ))
+        email_exists = cur.fetchone()[0]
 
-    return jsonify(add_trainee.json())
+        if email_exists:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to create. Email already exists"
+            })
+            
+        try:
+            # Insert the new trainee into the database
+            cur.execute(
+                f"INSERT INTO account (traineeid, username, email, password) VALUES (nextval('account_id_seq'), %s, %s, %s) RETURNING traineeid;",
+                (username, email, password, ))
 
-if __name__ == "__main__":
-    app.run(port=5000,debug=True)
+            # Get the ID of the newly inserted trainee
+            new_traineeid = cur.fetchone()[0]
+            
+            con.commit()
+            cur.close()
+            con.close()
+            return jsonify({
+                "code": 201,
+                "new_traineeid": new_traineeid,
+                "message": "Trainee created successfully."
+            })
+                
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to create new trainee."
+            })
+
+# [PUT] updateTrainee
+@app.route('/trainee/<int:traineeid>', methods=['PUT'])
+def update_trainee_query(traineeid):
+    if request.method == 'PUT':
+        data = request.get_json()
+        con = get_db_connection(config)
+        cur = con.cursor()
+        
+        try:
+            # Update a post
+            cur.execute(f"""UPDATE account SET username = %s, email = %s, password = %s WHERE traineeid = %s;""",
+                        (data['username'], data['email'], data['password'], traineeid, ))
+
+            con.commit()
+            cur.close()
+            con.close()
+
+            return jsonify({
+                "code": 200,
+                "message": "Trainee updated successfully."
+            })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to update trainee."
+            })
+
+# [DELETE] deleteTrainee
+@app.route('/trainee/<int:traineeid>', methods=['DELETE'])
+def delete_trainee_by_id_query(traineeid):
+    if request.method == 'DELETE':
+        con = get_db_connection(config)
+        cur = con.cursor()
+
+        try:
+            # Delete a trainee
+            cur.execute(
+                f'DELETE FROM account WHERE traineeid = %s;', (traineeid, ))
+            con.commit()
+            cur.close()
+            con.close()
+
+            return jsonify({
+                "code": 200,
+                "message": "Trainee deleted successfully."
+            })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to delete a trainee."
+            })
+                            
+if __name__ == '__main__':
+    config = load_config()
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -472,7 +472,7 @@ def read_all_bookedby_query():
     con.close()
 
     bookedbylist_json = [{"bookedbyid": booked[0], "trainerid": booked[1],
-                          "clientid": booked[2], "availabilityid": booked[3]} for booked in bookedbylist]
+                          "traineeid": booked[2], "availabilityid": booked[3]} for booked in bookedbylist]
 
     if len(bookedbylist):
         return jsonify({
@@ -499,7 +499,7 @@ def read_bookedby_by_id_query(bookedbyid):
     con.close()
 
     if bookedbyinfo:
-        bookedby_json = {'bookedbyid': bookedbyinfo[0], 'trainerid': bookedbyinfo[1], 'clientid': bookedbyinfo[2],
+        bookedby_json = {'bookedbyid': bookedbyinfo[0], 'trainerid': bookedbyinfo[1], 'traineeid': bookedbyinfo[2],
                          'availability': bookedbyinfo[3]}
 
         return jsonify({
@@ -519,7 +519,7 @@ def create_bookedby_query():
     if request.method == 'POST':
         data = request.get_json()
         trainerid = data.get('trainerid')
-        clientid = data.get('clientid')
+        traineeid = data.get('traineeid')
         availabilityid = data.get('availabilityid')
 
         con = get_db_connection(config)
@@ -527,7 +527,7 @@ def create_bookedby_query():
 
         # check if the bookedby exists
         cur.execute(
-            f"SELECT EXISTS(SELECT 1 FROM bookedby WHERE clientid = %s AND availabilityid = %s);", (clientid, availabilityid, ))
+            f"SELECT EXISTS(SELECT 1 FROM bookedby WHERE traineeid = %s AND availabilityid = %s);", (traineeid, availabilityid, ))
         bookedby_exists = cur.fetchone()[0]
 
         if bookedby_exists:
@@ -538,9 +538,9 @@ def create_bookedby_query():
 
         try:
             # Create new bookedby
-            cur.execute(f"""INSERT INTO bookedby (bookedbyid, trainerid, clientid, availabilityid)
+            cur.execute(f"""INSERT INTO bookedby (bookedbyid, trainerid, traineeid, availabilityid)
                         VALUES (nextval('bookedby_id_seq'), %s, %s, %s) RETURNING bookedbyid;""", 
-                        (trainerid, clientid, availabilityid, ))
+                        (trainerid, traineeid, availabilityid, ))
             
             # Get the ID of the newly inserted package
             new_bookedbyid = cur.fetchone()[0]

@@ -169,7 +169,7 @@ import {
               </Stack>
               <Stack pt={6}>
                 <Text align={'center'}>
-                    Already a user? <a href="/pages/login" style={{ color: 'blue.400' }}>Login</a>
+                    Already a user? <a href="/login" style={{ color: 'blue.400' }}>Login</a>
                 </Text>
               </Stack>
             </Stack>

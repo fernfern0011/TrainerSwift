@@ -47,7 +47,9 @@ export default function Navbar() {
     
       <Box bg={useColorModeValue('red.900', 'red.900')} zIndex={'5'} px={4} top={'0'} position={'sticky'}>
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-          <Box color={'white'}>Trainer Swift</Box>
+          <Box color={'white'}>
+           Trainer Swift
+          </Box>
 
           <Flex alignItems={'center'}>
             <Stack direction={'row'} spacing={7}>
@@ -96,7 +98,8 @@ export default function Navbar() {
             bg={'white'}
             href={'/login'}
             _hover={{
-              bg: 'white',
+              bg: 'pink.300',
+              color: 'white'
             }}>
             Sign In
           </Button>
@@ -110,6 +113,7 @@ export default function Navbar() {
             href={'/register'}
             _hover={{
               bg: 'pink.300',
+              color: 'white'
             }}>
             Sign Up
           </Button>

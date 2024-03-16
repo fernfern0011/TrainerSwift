@@ -6,4 +6,5 @@ COPY ./diet.py .
 COPY ./dbConnection.py .
 COPY ./config.py .
 COPY ./database.ini .
+COPY ./invokes.py .
 CMD [ "python", "./diet.py"]

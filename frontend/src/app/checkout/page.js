@@ -6,6 +6,8 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
+const trainer_id = 'acct_1OnPQZFSwTDhdL4G';
+
 export default function Checkout() {
   const [productData, setProductData] = useState([]);
   const [newSession, setNewSession] = useState(null);
@@ -50,8 +52,19 @@ export default function Checkout() {
         quantity: 1,
       }));
 
+      const totalAmount = productData.reduce((total, item) => total + item.price.unit_amount, 0);
+      console.log(totalAmount)
+      const applicationFeeAmount = Math.round(totalAmount * 0.0002 * 100);
+      console.log(applicationFeeAmount)
+
       const session = await stripe.checkout.sessions.create({
         line_items: lineItems,
+        payment_intent_data: {
+          application_fee_amount: applicationFeeAmount,
+          transfer_data: {
+            destination: trainer_id,
+          },
+        },
         mode: 'payment',
         success_url: `${window.location.origin}/?success=true`,
         cancel_url: `${window.location.origin}/?canceled=true`,

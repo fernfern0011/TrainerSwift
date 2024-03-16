@@ -9,7 +9,7 @@ app_id="70f0b79f"
 app_key="2ad7ba4942b277d6e7b316a5d45c39cc"
 nutrition_type="logging"
 
-@app.route('/diet/all/<string:sort>')
+@app.route('/diet/all/<string:sort>') # Provide 'calories' or 'date_time' for sort
 def get_all_meal(sort):
     print(sort)
     data = request.get_json()
@@ -38,7 +38,7 @@ def get_all_meal(sort):
         "message": "There is no meal."
     })
 
-@app.route('/diet/<string:month>/<string:sort>')
+@app.route('/diet/<string:month>/<string:sort>') # Provide 'January', 'February', etc. for month; 'calories' or 'date_time' for sort
 def get_all_meal_by_month(month, sort):
     data = request.get_json()
     clientid = data["clientid"]

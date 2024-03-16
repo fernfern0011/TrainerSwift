@@ -1,8 +1,11 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from config import *
 from dbConnection import *
 from invokes import invoke_http
+
 app = Flask(__name__)
+CORS(app)
 
 calories_URL="https://api.edamam.com/api/nutrition-data"
 app_id="70f0b79f"

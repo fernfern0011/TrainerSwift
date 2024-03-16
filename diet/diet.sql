@@ -1,14 +1,15 @@
 DROP TABLE IF EXISTS meal;
 
 CREATE TABLE IF NOT EXISTS meal(
-    clientid integer NOT NULL PRIMARY KEY
-    mealid serial NOT NULL,
-    foodname text NOT NULL,
-    quantity integer NOT NULL,
-    calories decimal NOT NULL,
-    carbs decimal NOT NULL,
-    protein decimal NOT NULL,
-    fat decimal NOT NULL
+    clientid INTEGER NOT NULL,
+    mealid SERIAL NOT NULL PRIMARY KEY,
+    foodname TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    calories DECIMAL NOT NULL,
+    carbs DECIMAL NOT NULL,
+    protein DECIMAL NOT NULL,
+    fat DECIMAL NOT NULL,
+    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 INSERT INTO meal (clientid, foodname, quantity, calories, carbs, protein, fat) VALUES (1, 'Chicken', 1, 30, 15, 20, 5);

@@ -9,14 +9,43 @@ app_id="70f0b79f"
 app_key="2ad7ba4942b277d6e7b316a5d45c39cc"
 nutrition_type="logging"
 
-@app.route('/diet')
-def get_all_meal():
+@app.route('/diet/all/<string:sort>')
+def get_all_meal(sort):
+    print(sort)
     data = request.get_json()
     clientid = data["clientid"]
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f'SELECT * FROM Meal WHERE clientid={clientid} ORDER BY calories DESC')
+    cur.execute(f"SELECT * FROM meal WHERE clientid={clientid} ORDER BY {sort} DESC")
+
+    meallist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    meallist_json = [{"clientid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7], "date_time": meal[8]} for meal in meallist]
+
+    if len(meallist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "meal": [meal for meal in meallist_json]
+            }
+        })
+    
+    return jsonify({
+        "code": 400,
+        "message": "There is no meal."
+    })
+
+@app.route('/diet/<string:month>/<string:sort>')
+def get_all_meal_by_month(month, sort):
+    data = request.get_json()
+    clientid = data["clientid"]
+
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f"SELECT * FROM meal WHERE clientid={clientid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY {sort} DESC")
 
     meallist = cur.fetchall()
     cur.close()
@@ -29,6 +58,32 @@ def get_all_meal():
             "code": 200,
             "data": {
                 "meal": [meal for meal in meallist_json]
+            }
+        })
+    
+    return jsonify({
+        "code": 400,
+        "message": "There is no meal."
+    })
+
+@app.route('/diet/get_monthly_average')
+def get_monthly_average():
+    data = request.get_json()
+    clientid = data["clientid"]
+
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f"SELECT AVG(calories) FROM meal WHERE clientid={clientid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP)")
+
+    average_value = cur.fetchone()
+    cur.close()
+    con.close()
+
+    if average_value != (None, ):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "average_value": average_value
             }
         })
     

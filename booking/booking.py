@@ -318,13 +318,41 @@ def read_all_availability_query():
     con.close()
 
     availabilitylist_json = [{"availabilityid": avail[0], "day": avail[1], "time": avail[2],
-                              "status": avail[3], "packageid": avail[4]} for avail in availabilitylist]
+                              "status": avail[3], "packageid": avail[4], "created_timestamp": avail[5]} for avail in availabilitylist]
 
     if len(availabilitylist):
         return jsonify({
             "code": 200,
             "data": {
                 "availabily": [avail for avail in availabilitylist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no availability."
+    })
+
+# [GET] getOneAvailability
+@app.route('/availability/<int:availabilityid>', 
+           methods=['GET'])
+def read__availability_by_id_query(availabilityid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f'SELECT * FROM availability WHERE availabilityid = %s;', (availabilityid, ))
+
+    availabilityinfo = cur.fetchone()
+    cur.close()
+    con.close()
+    
+    if availabilityinfo:
+        availability_json = {"availabilityid": availabilityinfo[0], "day": availabilityinfo[1], "time": availabilityinfo[2],
+                              "status": availabilityinfo[3], "packageid": availabilityinfo[4], "created_timestamp": availabilityinfo[5]}
+    
+        return jsonify({
+            "code": 200,
+            "data": {
+                "availability": availability_json
             }
         })
     return jsonify({

@@ -73,7 +73,7 @@ def get_monthly_average():
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT AVG(calories) FROM meal WHERE clientid={clientid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP)")
+    cur.execute(f"SELECT AVG(calories), AVG(carbs), AVG(protein), AVG(fat) FROM meal WHERE clientid={clientid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP)")
 
     average_value = cur.fetchone()
     cur.close()
@@ -83,7 +83,10 @@ def get_monthly_average():
         return jsonify({
             "code": 200,
             "data": {
-                "average_value": average_value
+                "average_calories": average_value[0],
+                "average_carbs": average_value[1],
+                "average_protein": average_value[2],
+                "average_fat": average_value[3]
             }
         })
     

@@ -1,23 +1,47 @@
-version: "4.27.2"
+version: "4.28.0"
+
+volumes:
+  pgdata: 
+
+networks:
+  trainerSwift-net:
+    driver: bridge
+    name: trainerSwift-net
 
 services:
+  trainee:
+      image: nangkhongkham/trainee:1.0
+      restart: always
+      environment:
+        dbURL: postgresql+psycopg2://default:l6RzivXEm0Ur@ep-falling-cake-a1k7bq9a-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+      networks:
+        - trainerSwift-net
 
   trainer:
     image: nangkhongkham/trainer:1.0
     restart: always
-    ports:
-      - "5000:5000"
     environment:
       dbURL: postgresql+psycopg2://default:s2fbryFa6Yej@ep-old-darkness-a1f9hm2w-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+    networks:
+      - trainerSwift-net
 
   booking:
     image: nangkhongkham/booking:1.0
     restart: always
-    ports:
-      - "5001:5000"
     environment:
       dbURL: postgresql+psycopg2://default:YjmL6GzAh7Wn@ep-rough-water-a1qqu7ye-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+    networks:
+      - trainerSwift-net
 
+  rabbitmq:
+      image: rabbitmq:3-management
+      restart: always
+      ports:
+        - "15672:15672"
+        - "5672:5672"
+      networks:
+        - trainerSwift-net
+      
   bookingaslot:
     image: dylanchua/bookingaslot:1.0
     ports:
@@ -25,6 +49,12 @@ services:
     depends_on:
       - trainer
       - booking
+      - rabbitmq
     environment:
+      traineeURL: http://trainee:5000
       trainerURL: http://trainer:5000
       bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketURL: http://websocket:5000
+    networks:
+        - trainerSwift-net

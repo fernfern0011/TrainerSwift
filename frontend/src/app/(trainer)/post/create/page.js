@@ -5,17 +5,31 @@ import { ChevronLeftIcon } from "@chakra-ui/icons"
 import {
     FormControl,
     FormLabel,
-    FormErrorMessage,
-    FormHelperText,
     Button, Heading, IconButton, Input, Stack, Textarea, Image as ChakraImage, Box, Text
 } from '@chakra-ui/react'
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useDropzone } from "react-dropzone"
 
-export default function createNewPost() {
+export default function CreateNewPost() {
     const router = useRouter()
     const [file, setFile] = useState({})
+    const [error, setError] = useState('')
     const [isUploading, setIsUploading] = useState(false)
+
+    const [formData, setFormData] = useState({
+        title: '',
+        content: ''
+    })
+
+    const handleChange = (e) => {
+        e.preventDefault();
+
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        })
+    }
 
     const setFileState = (data) => setFile((prev) => ({ ...prev, ...data }))
 
@@ -24,32 +38,39 @@ export default function createNewPost() {
         const preview = URL.createObjectURL(fileObject)
 
         setFileState({ fileObject, preview })
-
-        const image = new Image()
-        image.src = preview
-        image.onload = () => setFileState({ width: image.width, height: image.height })
-
-        const fileReader = new FileReader()
-        fileReader.onabort = () => console.log('file reading was aborted')
-        fileReader.onerror = () => console.log('file reading was failed')
-        fileReader.readAsDataURL(fileObject)
-        fileReader.onload = () => setFileState({ base64: fileReader.result })
     }
 
     // Yet to implement
     const handleSubmit = async () => {
         setIsUploading(true)
+        if (formData.title != "" && formData.content != "") {
 
-        try {
-            const { base64, height, width } = file
-            const url = '/'
+            try {
 
-            const { data } = await axios.post(url, { src: base64, height, width })
-            console.log(data);
-            setIsUploading(false)
-        } catch (error) {
-            console.log(error.response.data.message);
-            setIsUploading(false)
+                // To call createNewPost api
+
+                // Upload Image to S3
+                const uploadImage = new FormData();
+                uploadImage.append("file", file.fileObject)
+                const response = await fetch('/api/s3-upload', {
+                    method: 'POST',
+                    body: uploadImage
+                })
+
+                const data = await response.json();
+                console.log(data.fileName);
+
+
+                setIsUploading(false)
+                setFile({})
+                setFormData({ title: "", content: "" })
+            } catch (error) {
+                console.log(error);
+                setIsUploading(false)
+            }
+
+        } else {
+            setError('All required fields must not be empty')
         }
     }
 
@@ -73,24 +94,29 @@ export default function createNewPost() {
                 />
                 <Heading ml={'30px'}>Create New Post</Heading>
             </Stack>
+
             <Stack direction={'row'} width={'100%'} p={'30px 90px'} gap={'10%'}>
                 <Stack width={'50%'}>
                     <FormControl width={'100%'} justifyContent={'flex-start'}>
                         <FormLabel fontSize={'24px'}>Post Title <Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Input type='text' placeholder="Type a cool name..." mb={'20px'} />
+                        <Input type='text' placeholder="Type a cool name..." mb={'20px'} name='title' value={formData.title} onChange={handleChange} required />
                         <FormLabel fontSize={'24px'}>Content <Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Textarea type='text' placeholder="Type the description..." />
+                        <Textarea type='text' placeholder="Type the description..." name='content' value={formData.content} onChange={handleChange} required />
                     </FormControl>
                     <Button
                         colorScheme={'red'}
                         variant={'solid'}
                         mt={'50px'}
                         width={'fit-content'}
+                        isLoading={isUploading ? true : false}
                         isDisabled={file.preview ? false : true}
-                        // onClick={() => router.push('/post/create')}
-                        onClick={() => alert('clicked')}>
+                        loadingText='Submitting'
+                        onClick={() => handleSubmit()}>
                         Submit
                     </Button>
+                    {error ?
+                        <Text color={"red"} mb={'10px'}>{error}</Text>
+                        : ""}
                 </Stack>
 
                 <Stack width={'50%'} flexDirection={'column'} justifyContent={'space-between'} >
@@ -132,6 +158,5 @@ export default function createNewPost() {
                 </Stack>
             </Stack>
         </Stack>
-
     )
 }

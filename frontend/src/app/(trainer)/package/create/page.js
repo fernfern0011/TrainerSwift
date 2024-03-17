@@ -23,7 +23,7 @@ import {
 } from '@chakra-ui/react'
 import React, { useState, useEffect } from "react"
 
-export default function createNewPost() {
+export default function CreateNewPackage() {
     const router = useRouter()
     const [isModeSelected, setIsModeSelected] = useState('')
     const [timeValue, setTimeValue] = useState('')

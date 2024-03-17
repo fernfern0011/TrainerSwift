@@ -43,11 +43,11 @@ export default function CreateNewPost() {
     // Yet to implement
     const handleSubmit = async () => {
         setIsUploading(true)
+        setError("")
+
         if (formData.title != "" && formData.content != "") {
 
             try {
-
-                // To call createNewPost api
 
                 // Upload Image to S3
                 const uploadImage = new FormData();
@@ -58,18 +58,39 @@ export default function CreateNewPost() {
                 })
 
                 const data = await response.json();
-                console.log(data.fileName);
 
+                // If image successfully uploaded
+                if (data.success == true) {
+                    // To call createNewPost api
+                    const createNewPost = await fetch('http://localhost:3000/api/post', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            title: formData.title,
+                            description: formData.content,
+                            category: "Test",
+                            trainerid: "10"
+                        })
+                    })
 
-                setIsUploading(false)
-                setFile({})
-                setFormData({ title: "", content: "" })
+                    // if post successfully created
+                    const result = await createNewPost.json();
+                    if (result.code == 201) {
+                        setIsUploading(false)
+                        setFile({})
+                        setFormData({ title: "", content: "" })
+                    }
+
+                } else {
+                    console.log(error);
+                    setIsUploading(false)
+                }
             } catch (error) {
                 console.log(error);
                 setIsUploading(false)
             }
-
         } else {
+            setIsUploading(false)
             setError('All required fields must not be empty')
         }
     }

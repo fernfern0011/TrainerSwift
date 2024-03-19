@@ -12,7 +12,7 @@ export async function GET() {
 export async function POST(req) {
     const { name, detail, price, mode, address, postid } = await req.json()
 
-    if (!name || !detail || !price || !mode || !address || !postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
+    if (!name || !detail || !price || !mode || !postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
     const res = await fetch(`${DATA_SOURCE_URL}/package/create`, {
         method: 'POST',

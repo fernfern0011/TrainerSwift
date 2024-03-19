@@ -82,7 +82,6 @@ export default function CreateNewPost() {
                     }
 
                 } else {
-                    console.log(error);
                     setIsUploading(false)
                 }
             } catch (error) {

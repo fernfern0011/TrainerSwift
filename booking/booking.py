@@ -73,7 +73,7 @@ def create_new_post_query():
 
         try:
             # Create new post
-            cur.execute("INSERT INTO post (postid, title, description, category, trainerid) VALUES (nextval('post_id_seq'), %s, %s, %s, %s) RETURNING postid;", 
+            cur.execute("INSERT INTO post (postid, title, description, category, trainerid) VALUES (nextval('post_id_seq'), %s, %s, %s, %s) RETURNING postid;",
                         (title, description, category, trainerid, ))
 
             # Get the ID of the newly inserted post
@@ -120,7 +120,7 @@ def update_post_query(postid):
                 "code": 400,
                 "message": "Failed to update post."
             })
-    
+
 # [DELETE] deletePost
 @app.route('/post/<int:postid>', methods=['DELETE'])
 def delete_post_query(postid):
@@ -188,7 +188,7 @@ def read_package_by_id_query(packageid):
 
     if packageinfo:
         package_json = {'packageid': packageinfo[0], 'name': packageinfo[1], 'detail': packageinfo[2],
-                        'price': packageinfo[3], 'mode': packageinfo[4], 'postid': packageinfo[5]}
+                        'price': packageinfo[3], 'mode': packageinfo[4], 'address': packageinfo[5], 'postid': packageinfo[6], 'created_timestamp': packageinfo[7]}
 
         return jsonify({
             "code": 200,
@@ -210,6 +210,7 @@ def create_new_package_query():
         detail = data.get('detail')
         price = data.get('price')
         mode = data.get('mode')
+        address = data.get('address')
         postid = data.get('postid')
 
         con = get_db_connection(config)
@@ -228,8 +229,8 @@ def create_new_package_query():
 
         try:
             # Create new package
-            cur.execute("INSERT INTO package (packageid, name, detail, price, mode, postid) VALUES (nextval('package_id_seq'), %s, %s, %s, %s, %s) RETURNING packageid;", 
-                        (name, detail, price, mode, postid, ))
+            cur.execute("INSERT INTO package (packageid, name, detail, price, mode, address, postid) VALUES (nextval('package_id_seq'), %s, %s, %s, %s, %s, %s) RETURNING packageid;",
+                        (name, detail, price, mode, address, postid, ))
 
             # Get the ID of the newly inserted package
             new_packageid = cur.fetchone()[0]
@@ -260,8 +261,8 @@ def update_package_by_id_query(packageid):
 
         try:
             # Update a package
-            cur.execute(f"""UPDATE package SET name = %s, detail = %s, price = %s, mode = %s WHERE postid = %s AND packageid = %s;""",
-                        (data['name'], data['detail'], data['price'], data['mode'], data['postid'], packageid, ))
+            cur.execute(f"""UPDATE package SET name = %s, detail = %s, price = %s, mode = %s, address = %s WHERE postid = %s AND packageid = %s;""",
+                        (data['name'], data['detail'], data['price'], data['mode'], data['address'], data['postid'], packageid, ))
 
             con.commit()
             cur.close()
@@ -288,7 +289,7 @@ def delete_package_by_id_query(packageid):
             # Delete a package
             cur.execute(
                 f'DELETE FROM package WHERE packageid = %s;', (packageid, ))
-            
+
             con.commit()
             cur.close()
             con.close()
@@ -333,8 +334,7 @@ def read_all_availability_query():
     })
 
 # [GET] getOneAvailability
-@app.route('/availability/<int:availabilityid>', 
-           methods=['GET'])
+@app.route('/availability/<int:availabilityid>', methods=['GET'])
 def read__availability_by_id_query(availabilityid):
     con = get_db_connection(config)
     cur = con.cursor()
@@ -344,11 +344,11 @@ def read__availability_by_id_query(availabilityid):
     availabilityinfo = cur.fetchone()
     cur.close()
     con.close()
-    
+
     if availabilityinfo:
         availability_json = {"availabilityid": availabilityinfo[0], "day": availabilityinfo[1], "time": availabilityinfo[2],
-                              "status": availabilityinfo[3], "packageid": availabilityinfo[4], "created_timestamp": availabilityinfo[5]}
-    
+                             "status": availabilityinfo[3], "packageid": availabilityinfo[4], "created_timestamp": availabilityinfo[5]}
+
         return jsonify({
             "code": 200,
             "data": {
@@ -371,10 +371,10 @@ def read__availability_by_packageid_query(packageid):
     availabilityinfo = cur.fetchall()
     cur.close()
     con.close()
-    
+
     availabilityinfo_for_package_json = [{"availabilityid": availinfo[0], "day": availinfo[1], "time": availinfo[2],
-                              "status": availinfo[3], "packageid": availinfo[4]} for availinfo in availabilityinfo]
-    
+                                          "status": availinfo[3], "packageid": availinfo[4]} for availinfo in availabilityinfo]
+
     if len(availabilityinfo):
         return jsonify({
             "code": 200,
@@ -414,12 +414,12 @@ def create_availability_query():
         try:
             # Create new availability
             cur.execute(f"""INSERT INTO availability (availabilityid, day, time, status, packageid)
-                        VALUES (nextval('availability_id_seq'), %s, %s, %s, %s) RETURNING availabilityid;""", 
+                        VALUES (nextval('availability_id_seq'), %s, %s, %s, %s) RETURNING availabilityid;""",
                         (day, time, status, packageid, ))
-            
+
             # Get the ID of the newly inserted availability
             new_availabilityid = cur.fetchone()[0]
-            
+
             con.commit()
             cur.close()
             con.close()
@@ -445,8 +445,9 @@ def update_availability_status_query():
 
         try:
             # Update an availability status
-            cur.execute(f"""UPDATE availability SET status = %s WHERE availabilityid = %s;""", (data['status'], data['availabilityid'], ))
-            
+            cur.execute(f"""UPDATE availability SET status = %s WHERE availabilityid = %s;""",
+                        (data['status'], data['availabilityid'], ))
+
             con.commit()
             cur.close()
             con.close()
@@ -471,7 +472,7 @@ def delete_availability_query(availabilityid):
             # Delete an availability
             cur.execute(
                 f'DELETE FROM availability WHERE availabilityid = %s;', (availabilityid, ))
-            
+
             con.commit()
             cur.close()
             con.close()
@@ -567,12 +568,12 @@ def create_bookedby_query():
         try:
             # Create new bookedby
             cur.execute(f"""INSERT INTO bookedby (bookedbyid, trainerid, traineeid, availabilityid)
-                        VALUES (nextval('bookedby_id_seq'), %s, %s, %s) RETURNING bookedbyid;""", 
+                        VALUES (nextval('bookedby_id_seq'), %s, %s, %s) RETURNING bookedbyid;""",
                         (trainerid, traineeid, availabilityid, ))
-            
+
             # Get the ID of the newly inserted package
             new_bookedbyid = cur.fetchone()[0]
-            
+
             con.commit()
             cur.close()
             con.close()

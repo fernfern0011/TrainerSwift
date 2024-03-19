@@ -501,7 +501,7 @@ def read_all_bookedby_query():
     con.close()
 
     bookedbylist_json = [{"bookedbyid": booked[0], "trainerid": booked[1],
-                          "traineeid": booked[2], "availabilityid": booked[3]} for booked in bookedbylist]
+                          "traineeid": booked[2], "availabilityid": booked[3], "ispremium": booked[4], "created_timestamp": booked[5] } for booked in bookedbylist]
 
     if len(bookedbylist):
         return jsonify({
@@ -529,7 +529,7 @@ def read_bookedby_by_id_query(bookedbyid):
 
     if bookedbyinfo:
         bookedby_json = {'bookedbyid': bookedbyinfo[0], 'trainerid': bookedbyinfo[1], 'traineeid': bookedbyinfo[2],
-                         'availability': bookedbyinfo[3]}
+                         'availability': bookedbyinfo[3], 'ispremium': bookedbyinfo[4], "created_timestamp": bookedbyinfo[5]}
 
         return jsonify({
             "code": 200,
@@ -550,6 +550,7 @@ def create_bookedby_query():
         trainerid = data.get('trainerid')
         traineeid = data.get('traineeid')
         availabilityid = data.get('availabilityid')
+        ispremium = data.get('ispremium')
 
         con = get_db_connection(config)
         cur = con.cursor()
@@ -567,9 +568,9 @@ def create_bookedby_query():
 
         try:
             # Create new bookedby
-            cur.execute(f"""INSERT INTO bookedby (bookedbyid, trainerid, traineeid, availabilityid)
-                        VALUES (nextval('bookedby_id_seq'), %s, %s, %s) RETURNING bookedbyid;""",
-                        (trainerid, traineeid, availabilityid, ))
+            cur.execute(f"""INSERT INTO bookedby (bookedbyid, trainerid, traineeid, availabilityid, ispremium)
+                        VALUES (nextval('bookedby_id_seq'), %s, %s, %s, %s) RETURNING bookedbyid;""",
+                        (trainerid, traineeid, availabilityid, ispremium,))
 
             # Get the ID of the newly inserted package
             new_bookedbyid = cur.fetchone()[0]

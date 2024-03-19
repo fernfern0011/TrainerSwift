@@ -40,7 +40,7 @@ export default function CreateNewPost() {
         setFileState({ fileObject, preview })
     }
 
-    // Yet to implement
+    // Trigger s3 api and createNewPost api
     const handleSubmit = async () => {
         setIsUploading(true)
         setError("")
@@ -82,7 +82,6 @@ export default function CreateNewPost() {
                     }
 
                 } else {
-                    console.log(error);
                     setIsUploading(false)
                 }
             } catch (error) {

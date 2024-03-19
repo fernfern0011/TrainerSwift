@@ -19,30 +19,127 @@ import {
     SliderTrack,
     SliderFilledTrack,
     SliderThumb,
+    useToast,
     Button, Heading, IconButton, Input, Stack, Text, HStack
 } from '@chakra-ui/react'
 import React, { useState, useEffect } from "react"
 
+function convertTimeIntoInt(starttime, endtime) {
+    const intStartTime = parseInt(starttime.replace(":", ""))
+    const intEndTime = parseInt(endtime.replace(":", ""))
+
+    return [intStartTime, intEndTime]
+}
+
 export default function CreateNewPackage() {
     const router = useRouter()
     const [isModeSelected, setIsModeSelected] = useState('')
-    const [timeValue, setTimeValue] = useState('')
     const [timeList, setTimeList] = useState([])
     const [filterTimeList, setFilterTimeList] = useState([])
-    const [priceValue, setPriceValue] = useState(0)
     const [error, setError] = useState('')
+    const [isUploading, setIsUploading] = useState(false)
+    // const [isSuccess, setIsSuccess] = useState(false)
+    const toast = useToast()
+
+    const [formData, setFormData] = useState({
+        name: '',
+        detail: '',
+        day: '',
+        mode: '',
+        address: '',
+        price: 0
+    })
+
+    const [timeValue, setTimeValue] = useState({
+        starttime: '',
+        endtime: ''
+    })
+
+    const handleTimeslot = (e) => {
+        setError('')
+
+        const { name, value } = e.target;
+        setTimeValue({
+            ...timeValue,
+            [name]: value
+        })
+    }
+
+    const handleChange = (e) => {
+        setError('')
+
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        })
+
+        if (name == "mode") {
+            setIsModeSelected(value)
+        }
+    }
 
     const handleSubmitTimeslot = () => {
-        if (timeValue != '') {
-            if (!timeList.includes(timeValue) && timeList.length < 10) {
-                const newTimeslot = timeList.concat(timeValue);
-                setTimeList(newTimeslot);
-                setError('')
-            } else if (timeList.length >= 10) {
-                console.log(timeList);
-                setError('Timeslot can\'t exceed 10 slots.')
-            } else {
-                setError('Timeslot already exists.')
+        console.log(timeValue, error);
+
+        if (timeValue.starttime != '' && timeValue.endtime != '') {
+            var selectedTime;
+            var isInvalid = false;
+            console.log("not error", error);
+
+            // Check if the time list has any value
+            if (timeList.length > 0) {
+                console.log("yes more than 1");
+
+                timeList.forEach(time => {
+                    // Convert time into int
+                    const checkStartTime = time.split(" - ")[0]
+                    const checkEndTime = time.split(" - ")[1]
+                    const intTimeArray = convertTimeIntoInt(checkStartTime, checkEndTime)
+                    console.log(intTimeArray);
+
+                    // Check whether the start time overlaps
+                    const checkNewStartTime = parseInt(timeValue.starttime.replace(":", ""))
+                    const checkNewEndTime = parseInt(timeValue.endtime.replace(":", ""))
+                    console.log(checkNewStartTime, checkNewEndTime);
+
+                    if (checkNewStartTime >= intTimeArray[0] && checkNewStartTime <= intTimeArray[1]
+                        || checkNewEndTime >= intTimeArray[0] && checkNewEndTime <= intTimeArray[1]) {
+                        console.log("in between");
+                        isInvalid = true
+                        setError('Timeslot should not overlap.')
+                    } else if (checkNewStartTime > checkNewEndTime) {
+                        console.log("invalid");
+                        isInvalid = true
+                        setError('Invalid timeslot.')
+                    }
+                    else {
+                        console.log('no');
+                        selectedTime = timeValue.starttime + ' - ' + timeValue.endtime
+                    }
+                })
+            } else if (timeList.length == 0) {
+                const intTimeArray = convertTimeIntoInt(timeValue.starttime, timeValue.endtime)
+
+                // If starttime is less than endtime
+                if (intTimeArray[0] < intTimeArray[1]) {
+                    selectedTime = timeValue.starttime + ' - ' + timeValue.endtime
+                } else {
+                    isInvalid = true
+                    setError('Invalid timeslot.')
+                }
+            }
+
+            // Check whether there is error for starttime overlapping
+            if (!isInvalid) {
+                console.log("enter");
+                if (!timeList.includes(selectedTime) && timeList.length < 10) {
+                    const newTimeslot = timeList.concat(selectedTime);
+                    setTimeList(newTimeslot);
+                    setError('')
+                } else if (timeList.length >= 10) {
+                    setError('Timeslot can\'t exceed 10 slots.')
+                }
             }
         }
         else {
@@ -70,9 +167,80 @@ export default function CreateNewPackage() {
         setFilterTimeList(timeList)
     }, [timeList]);
 
-    const handlePriceChange = (value) => {
-        console.log(value);
-        setPriceValue(value)
+    // Trigger createNewPackage api and craeteNewAvailability api
+    const handleSubmit = async () => {
+        setIsUploading(true)
+        setError("")
+        console.log(formData);
+
+        if (formData.name != '' && formData.day != '' && formData.price != 0 && timeList.length != 0) {
+
+            const bodyData = {
+                name: formData.name,
+                detail: formData.detail,
+                price: formData.price,
+                mode: formData.mode,
+                address: formData.address != '' ? formData.address : '',
+                postid: 1
+            }
+
+            const createNewPackage = await fetch('http://localhost:3000/api/package', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData)
+            })
+
+            const CreateNewPackageResult = await createNewPackage.json();
+
+            switch (CreateNewPackageResult.code) {
+                case 201:
+                    const craeteNewAvailability = await fetch('http://localhost:3000/api/availability', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            day: formData.day,
+                            time: filterTimeList,
+                            status: 'Open',
+                            packageid: 1
+                        })
+                    })
+
+                    const craeteNewAvailabilityResult = await craeteNewAvailability.json();
+                    console.log(craeteNewAvailabilityResult);
+
+                    if (craeteNewAvailabilityResult[0].code == 201) {
+                        // clear the value
+                        setIsUploading(false)
+                        setFormData({
+                            name: '',
+                            detail: '',
+                            day: '',
+                            mode: '',
+                            address: '',
+                            price: 0
+                        })
+                        setTimeList([])
+                        setTimeValue({
+                            starttime: '',
+                            endtime: ''
+                        })
+
+                        // whenever package is successfully created
+                        toast({
+                            title: 'Package is created.',
+                            status: 'success',
+                            duration: 5000,
+                            isClosable: true,
+                        })
+                    }
+                    break;
+                case 400:
+                    setError('Missing required data.')
+                    setIsUploading(false)
+                default:
+                    break;
+            }
+        }
     }
 
     return (
@@ -93,26 +261,31 @@ export default function CreateNewPackage() {
                 <FormControl width={'100%'} justifyContent={'flex-start'}>
                     <FormControl>
                         <FormLabel fontSize={'24px'}>Package Name<Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Input type='text' placeholder="Type a cool name..." mb={'20px'} />
+                        <Input type='text' name='name' value={formData.name} placeholder="Type a cool name..." mb={'20px'} onChange={(e) => handleChange(e)} />
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel fontSize={'24px'}>Package Detail<Text as='sup' color={'red'}>*</Text> </FormLabel>
+                        <Input type='text' name='detail' value={formData.detail} placeholder="Type a brief detail..." mb={'20px'} onChange={(e) => handleChange(e)} />
                     </FormControl>
 
                     <Flex mb={'20px'} >
                         <FormControl mr='5%'>
                             <FormLabel fontSize={'24px'}>Day <Text as='sup' color={'red'}>*</Text> </FormLabel>
-                            <Select placeholder='Select day'>
-                                <option value='mon'>Monday</option>
-                                <option value='tues'>Tuesday</option>
-                                <option value='wed'>Wednesday</option>
-                                <option value='thurs'>Thursday</option>
-                                <option value='fri'>Friday</option>
-                                <option value='sat'>Saturday</option>
-                                <option value='sun'>Sunday</option>
+                            <Select placeholder='Select day' name='day' value={formData.day} onChange={(e) => handleChange(e)}>
+                                <option value='Monday'>Monday</option>
+                                <option value='Tuesday'>Tuesday</option>
+                                <option value='Wednesday'>Wednesday</option>
+                                <option value='Thursday'>Thursday</option>
+                                <option value='Friday'>Friday</option>
+                                <option value='Saturday'>Saturday</option>
+                                <option value='Sunday'>Sunday</option>
                             </Select>
                         </FormControl>
 
                         <FormControl>
                             <FormLabel fontSize={'24px'}>Mode <Text as='sup' color={'red'}>*</Text> </FormLabel>
-                            <Select placeholder='Select mode' onChange={(e) => setIsModeSelected(e.target.value)}>
+                            <Select placeholder='Select mode' name='mode' value={formData.mode} onChange={(e) => handleChange(e)}>
                                 <option value='offline'>Offline</option>
                                 <option value='online'>Online</option>
                             </Select>
@@ -122,19 +295,31 @@ export default function CreateNewPackage() {
                     {/* If Offline mode is selected, address field is shown */}
                     <FormControl hidden={isModeSelected == 'offline' ? false : true}>
                         <FormLabel fontSize={'24px'}>Address<Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Input type='text' placeholder="Type your address..." mb={'20px'} />
+                        <Input type='text' name='address' value={formData.address} placeholder="Type your address..." mb={'20px'} onChange={(e) => handleChange(e)} />
                     </FormControl>
 
                     <FormControl>
-                        <FormLabel fontSize={'24px'}>Timeslot<Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Input id='time' type='time' width={'50%'} mb={'20px'} mr={'20px'} onChange={(e) => setTimeValue(e.target.value)} />
-                        <Button
-                            colorScheme='teal'
-                            variant={'solid'}
-                            onClick={() => handleSubmitTimeslot()}
-                        >
-                            Add
-                        </Button>
+                        <FormLabel fontSize={'24px'}>Timeslot<Text as='sup' color={'red'}>*</Text></FormLabel>
+                        <Stack direction='row' align={'center'}>
+                            <Stack direction='row' width={'50%'}>
+                                <Stack direction='column' width={'100%'}>
+                                    <Text mb='8px' width={'100%'}>Start time:</Text>
+                                    <Input name='starttime' type='time' width={'100%'} mb={'20px'} mr={'20px'} value={timeValue.starttime} onChange={(e) => handleTimeslot(e)} />
+                                </Stack>
+                                <Stack direction='column' width={'100%'}>
+                                    <Text mb='8px' width={'100%'}>End time:</Text>
+                                    <Input name='endtime' type='time' width={'100%'} mb={'20px'} mr={'20px'} value={timeValue.endtime} onChange={(e) => handleTimeslot(e)} />
+                                </Stack>
+                            </Stack>
+                            <Button
+                                colorScheme='teal'
+                                variant={'solid'}
+                                mt={'20px'}
+                                onClick={() => handleSubmitTimeslot()}
+                            >
+                                Add
+                            </Button>
+                        </Stack>
                     </FormControl>
 
                     <FormControl mb={'20px'} >
@@ -159,7 +344,9 @@ export default function CreateNewPackage() {
                     <FormControl>
                         <FormLabel fontSize={'24px'}>Price (SGD) <Text as='sup' color={'red'}>*</Text> </FormLabel>
                         <Flex>
-                            <NumberInput maxW='100px' mr='2rem' value={priceValue} onChange={handlePriceChange}>
+                            <NumberInput maxW='100px' mr='2rem' name='price' value={formData.price}
+                                onChange={(value) => handleChange({ target: { name: 'price', value } })}
+                                max={1000}>
                                 <NumberInputField />
                                 <NumberInputStepper>
                                     <NumberIncrementStepper />
@@ -169,13 +356,14 @@ export default function CreateNewPackage() {
                             <Slider
                                 flex='1'
                                 focusThumbOnChange={false}
-                                value={priceValue}
-                                onChange={handlePriceChange}
+                                value={formData.price}
+                                max={1000}
+                                onChange={(value) => handleChange({ target: { name: 'price', value } })}
                             >
                                 <SliderTrack>
                                     <SliderFilledTrack />
                                 </SliderTrack>
-                                <SliderThumb fontSize='sm' boxSize='32px' children={priceValue} />
+                                <SliderThumb fontSize='sm' boxSize='32px' children={formData.price} />
                             </Slider>
                         </Flex>
                     </FormControl>
@@ -186,9 +374,10 @@ export default function CreateNewPackage() {
                     variant={'solid'}
                     mt={'50px'}
                     width={'fit-content'}
-                    // isDisabled={file.preview ? false : true}
-                    // onClick={() => router.push('/post/create')}
-                    onClick={() => alert('clicked')}>
+                    isLoading={isUploading ? true : false}
+                    isDisabled={(formData.name != '' && formData.detail != '' && formData.day != '' && formData.mode != '' && formData.price != 0 && timeList.length != 0) ? false : true}
+                    loadingText='Submitting'
+                    onClick={() => handleSubmit()}>
                     Submit
                 </Button>
             </Stack >

@@ -14,6 +14,26 @@ export default function Checkout() {
 
   const createCheckoutSession = async () => {
     try {
+
+      // const jsonData = {
+      //   "traineeID": "1",
+      //   "trainerID": "2",
+      //   "packageID": "3",
+      //   "availabilityID": 9
+      // }
+
+      // const microserviceResponse = await fetch('http://localhost:8000/bookingaslotapi/payment', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(jsonData)
+      // });
+
+      // if (!microserviceResponse.ok) {
+      //   throw new Error('Error triggering microservice');
+      // }
+
       const response = await fetch('http://localhost:5000/api/cart/get-all-cartitems');
 
       if (!response.ok) {

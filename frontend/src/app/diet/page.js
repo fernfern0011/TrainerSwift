@@ -1,0 +1,137 @@
+"use client"
+import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
+import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { React, useState } from 'react';
+
+export default function DietPage() {
+    // Sample data
+    const data = [
+        { food: 'Apple', quantity: '1', carbohydrates: '20g', protein: '1g', fats: '0.5g', calories: '95' },
+        { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
+        { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
+
+        // Add more sample data as needed
+    ];
+
+    const smallData = [
+        { nutrients: 'Kcal', current: '20g', target: '1g', diff: '-300'},
+        { nutrients: 'Carbs', current: '27g', target: '1.3g', diff: '+300'},
+        { nutrients: 'Protein', current: '27g', target: '1.3g', diff: '+300'},
+        { nutrients: 'Fats', current: '27g', target: '1.3g', diff: '-300'},
+        // Add more sample data as needed
+    ];
+
+    // Function to generate an array of dates for the past 7 days
+    const generatePastWeekDates = () => {
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            dates.push(date.toISOString().split('T')[0]); // Format date as YYYY-MM-DD
+        }
+        return dates;
+    };
+
+    const dates = generatePastWeekDates();
+    const [selectedDate, setSelectedDate] = useState(null);
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
+    };
+
+    return (
+        <Box>
+            <Flex alignItems="center" mt={5}>
+                <Box bg="gray.200" pl={20} ml={5} height="325px" width="700px">
+                    <Heading mt={20} mb={10} size='3xl'>My Diet</Heading>
+                    <Stack direction="row" spacing={4}>
+                        <Menu>
+                            <MenuButton as={Button} rightIcon={<ChevronDownIcon />} colorScheme="teal" variant="solid">
+                                {selectedDate ? selectedDate : 'Date'}
+                            </MenuButton>
+                            <MenuList>
+                                {dates.map((date, index) => (
+                                    <MenuItem key={index} onClick={() => handleDateSelect(date)}>{date}</MenuItem>
+                                ))}
+                            </MenuList>
+                        </Menu>
+                        <Button rightIcon={<AddIcon />} colorScheme="teal" variant="outline" as={'a'} href={'/add-meal'}>
+                            Add Meal
+                        </Button>
+                    </Stack>
+                </Box>
+                <Box bg="gray.200" p={4} ml="auto" mr={12} borderRadius="md">
+                <Flex alignItems="center">
+                    <Heading size="md" ml={5}>This Month</Heading>
+                    <Spacer />
+                    <Button colorScheme="teal" variant="outline" mr={4}>
+                        Bulk
+                    </Button>
+                    <Button colorScheme="teal" variant="outline">
+                        Cut
+                    </Button>
+                </Flex>
+                    <TableContainer>
+                        <Table variant='simple'>
+                            <Thead>
+                                <Tr>
+                                    <Th>Nutrients</Th>
+                                    <Th isNumeric>Current</Th>
+                                    <Th isNumeric>Target</Th>
+                                    <Th></Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {smallData.map((item, index) => (
+                                    <Tr key={index}>
+                                        <Td>{item.nutrients}</Td>
+                                        <Td isNumeric>{item.current}</Td>
+                                        <Td isNumeric>{item.target}</Td>
+                                        <Td>{item.diff}</Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                            <Tfoot>
+                            </Tfoot>
+                        </Table>
+                    </TableContainer>
+                </Box>
+            </Flex>
+
+            <TableContainer mt={10} mb={5}>
+                <Table variant='simple'>
+                    <Thead>
+                        <Tr>
+                            <Th>Food</Th>
+                            <Th isNumeric>Quantity</Th>
+                            <Th isNumeric>Carbohydrates</Th>
+                            <Th isNumeric>Protein</Th>
+                            <Th isNumeric>Fats</Th>
+                            <Th isNumeric>Calories</Th>
+                            <Th></Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {data.map((item, index) => (
+                            <Tr key={index}>
+                                <Td>{item.food}</Td>
+                                <Td isNumeric>{item.quantity}</Td>
+                                <Td isNumeric>{item.carbohydrates}</Td>
+                                <Td isNumeric>{item.protein}</Td>
+                                <Td isNumeric>{item.fats}</Td>
+                                <Td isNumeric>{item.calories}</Td>
+                                <Td>
+                                    <Center>
+                                        <EditIcon boxSize={5} mr={2} />
+                                        <DeleteIcon boxSize={5} />
+                                    </Center>
+                                </Td>
+                            </Tr>
+                        ))}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+        </Box>
+    );
+}

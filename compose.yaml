@@ -117,7 +117,7 @@ services:
       networks:
         - trainerSwift-net
       
-  bookingaslot:
+  bookingaslot1:
     image: dylanchua/bookingaslot:1.0
     depends_on:
       - trainer
@@ -130,4 +130,50 @@ services:
       notificationURL: http://notification:5000
       websocketURL: http://websocket:5000
     networks:
-        - trainerSwift-net
+      - trainerSwift-net
+
+  bookingaslot2:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainer
+      - booking
+      - rabbitmq
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketURL: http://websocket:5000
+    networks:
+      - trainerSwift-net
+
+  bookingaslot3:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainer
+      - booking
+      - rabbitmq
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketURL: http://websocket:5000
+    networks:
+      - trainerSwift-net
+
+  bookingaslot4:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainer
+      - booking
+      - rabbitmq
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketURL: http://websocket:5000
+    networks:
+      - trainerSwift-net
+

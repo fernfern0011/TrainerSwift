@@ -3,7 +3,7 @@ import { Box, Flex } from '@chakra-ui/react'
 import BookingCard from '../../../components/bookingCard'
 import SearchBar from '../../../components/searchBar'
 
-export default function MyBookingPage() {
+export default function MyClientPage() {
 
     const sampleData = Array.from({ length: 12 }, (_, index) => ({
         id: index + 1, // Assuming you have an 'id' field in your PostCard component

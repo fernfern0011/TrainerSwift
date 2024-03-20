@@ -8,7 +8,7 @@ import { SearchIcon } from '@chakra-ui/icons';
 
 function SearchBar() {
   return (
-    <Box maxWidth="400px">
+    <Box maxWidth="400px" width='80%'>
         <InputGroup size='md'>
             <Input
                 pr='4.5rem'

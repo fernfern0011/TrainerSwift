@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import pymongo
 
+
 #intialise mongodb
 mongodb_client = pymongo.MongoClient("mongodb://localhost:27017")
 db = mongodb_client["websocket_chat"]

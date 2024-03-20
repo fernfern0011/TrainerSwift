@@ -1,7 +1,7 @@
 'use client'
 import { Box, Flex } from '@chakra-ui/react'
-import BookingCard from '../../components/bookingCard'
-import SearchBar from '../../components/searchBar'
+import BookingCard from '../../../components/bookingCard'
+import SearchBar from '../../../components/searchBar'
 
 export default function Landing() {
     return (

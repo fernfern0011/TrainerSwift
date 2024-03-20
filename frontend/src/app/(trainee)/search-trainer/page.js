@@ -1,6 +1,6 @@
 import { SimpleGrid, Box, Flex } from '@chakra-ui/react';
-import SearchBar from './../../components/searchBar';
-import PostCard from '../../components/postCard';
+import SearchBar from './../../../components/searchBar';
+import PostCard from '../../../components/postCard';
 
 export default function SearchTrainer() {
   // Generate sample data for 15 components

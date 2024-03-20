@@ -1,10 +1,10 @@
-import { SimpleGrid, Box } from '@chakra-ui/react';
-import SearchBar from '../../../components/searchBar';
-import PostCard from '../../../components/postCard';
+import { SimpleGrid, Box, Flex } from '@chakra-ui/react';
+import SearchBar from './../../components/searchBar';
+import PostCard from '../../components/postCard';
 
 export default function SearchTrainer() {
   // Generate sample data for 15 components
-  const sampleData = Array.from({ length: 15 }, (_, index) => ({
+  const sampleData = Array.from({ length: 12 }, (_, index) => ({
     id: index + 1, // Assuming you have an 'id' field in your PostCard component
     // Add other fields as needed
     title: `Post ${index + 1}`,
@@ -14,7 +14,9 @@ export default function SearchTrainer() {
 
   return (
     <Box p={20}>
-      <SearchBar />
+      <Flex justifyContent='center' paddingBottom='5px'>
+        <SearchBar />
+      </Flex>
       <SimpleGrid columns={2} spacing={4} mt={4}>
         {sampleData.map((data) => (
           <Box key={data.id} width="200%" height="100%">

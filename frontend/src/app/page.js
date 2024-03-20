@@ -6,7 +6,6 @@ import Contact from '../components/contact'
 import PackageCard from '../components/packageCard'
 import PostCard from '../components/postCard';
 
-
 export default function Landing() {
   return (
     <Box>

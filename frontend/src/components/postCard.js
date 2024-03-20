@@ -4,11 +4,12 @@ import { ArrowForwardIcon } from '@chakra-ui/icons';
 
 export default function PostCard() {
   return (
-    <Box width="50%">
+    <Box>
       <Card
         direction={{ base: 'column', sm: 'row' }}
         overflow='hidden'
         variant='outline'
+        width="50%"
       >
         <Image
           objectFit='cover'

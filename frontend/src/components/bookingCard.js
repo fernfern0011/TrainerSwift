@@ -1,6 +1,6 @@
 "use client"
 import { Card, Flex, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box } from '@chakra-ui/react';
-import { ChatIcon } from '@chakra-ui/icons';
+import { ChatIcon, CalendarIcon } from '@chakra-ui/icons';
 
 export default function BookingCard(data) {
     return (
@@ -22,9 +22,13 @@ export default function BookingCard(data) {
                                     Location: Community Center
                                 </Text>
                                 <Flex alignItems='flex-end' paddingTop='5%'>
-                                    <Button variant='solid' colorScheme='red'>
+                                    <Button variant='solid' colorScheme='red' mr="2%">
                                         Chat
                                         <ChatIcon ml='5px' />
+                                    </Button>
+                                    <Button variant='solid' colorScheme='red'>
+                                        Macro
+                                        <CalendarIcon ml='5px' />
                                     </Button>
                                 </Flex>
                             </CardBody>

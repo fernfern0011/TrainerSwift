@@ -1,7 +1,8 @@
 "use client"
 import { Card, Flex, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box } from '@chakra-ui/react';
+import { ChatIcon } from '@chakra-ui/icons';
 
-export default function BookingCard() {
+export default function BookingCard(data) {
     return (
         <Flex justifyContent="center">
             <Box width="80%" margin="1%">
@@ -13,15 +14,23 @@ export default function BookingCard() {
                     <Flex justifyContent='space-between' width='100%'>
                         <Stack>
                             <CardBody>
-                                <Heading size='md'>Cruel Summer Yoga Session</Heading>
+                                <Heading size='md'>{data.title}</Heading>
                                 <Text py='2'>
-                                    By: John Doe
+                                    {data.content}
                                 </Text>
                                 <Text>
                                     Location: Community Center
                                 </Text>
+                                <Flex alignItems='flex-end' paddingTop='5%'>
+                                    <Button variant='solid' colorScheme='red'>
+                                        Chat
+                                        <ChatIcon ml='5px' />
+                                    </Button>
+                                </Flex>
                             </CardBody>
                         </Stack>
+
+                        
 
                         <Flex>
                             <Flex alignItems='flex-end'>

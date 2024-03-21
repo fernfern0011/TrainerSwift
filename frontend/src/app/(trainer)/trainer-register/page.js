@@ -76,7 +76,7 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/user/register', {
+      const response = await fetch('http://localhost:5000/api/stripe/stripe-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +86,8 @@ export default function Register() {
 
       if (response.ok) {
         // Handle success, e.g., redirect or show a success message
-        console.log('Account created successfully');
+        const { url } = await response.json();
+        window.location.href = url;
       } else {
         // Handle errors, e.g., show error messages to the user
         console.error('Failed to create account');

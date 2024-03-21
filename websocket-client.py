@@ -30,11 +30,11 @@ def websocketchat():
         nonlocal data
         if (data["connection"] == True):
             print(data)
-            await connect([data["traineeID"]+","+ "connection created"])
-            await connect([data["trainerID"]+","+  "connection created"])
+            await connect(["trainer",data["traineeID"]+","+ "connection created"])
+            await connect(["trainee",data["trainerID"]+","+  "connection created"])
         else:
-            await connect([data["traineeID"]+","+  "test message"])
-            await connect([data["trainerID"]+","+  "test message"])
+            await connect(["trainer",data["traineeID"]+","+  "test message"])
+            await connect(["trainee",data["trainerID"]+","+  "test message"])
 
     asyncio.run(main())
     return jsonify({"response": "success"})

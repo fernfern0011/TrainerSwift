@@ -1,0 +1,27 @@
+version: '3'
+services:
+  websocket-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: websocket-server
+    ports:
+      - "8765:8765"
+    networks:
+      - websocket-net
+  
+  websocket-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: websocket-client
+    ports:
+      - "5000:5000"
+    depends_on:
+      - websocket-server
+    networks:
+      - websocket-net
+
+networks:
+  websocket-net:
+    driver: bridge

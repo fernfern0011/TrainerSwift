@@ -161,7 +161,7 @@ def read_all_packages_query():
     con.close()
 
     packagelist_json = [{'packageid': package[0], 'name': package[1], 'detail': package[2],
-                         'price': package[3], 'mode': package[4], 'postid': package[5]} for package in packagelist]
+                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'created_timestamp': package[7]} for package in packagelist]
 
     if len(packagelist):
         return jsonify({

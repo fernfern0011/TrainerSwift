@@ -17,7 +17,7 @@ def read_all_post_query():
     con.close()
 
     postlist_json = [{"postid": post[0], "title": post[1], "description": post[2],
-                      "category": post[3], "trainerid": post[4], "created_timestamp": post[5]} for post in postlist]
+                      "category": post[3], "trainerid": post[4], "image": post[5], "created_timestamp": post[6]} for post in postlist]
 
     if len(postlist):
         return jsonify({
@@ -45,7 +45,7 @@ def read_post_by_id_query(postid):
 
     if postinfo:
         post_json = {'postid': postinfo[0], 'title': postinfo[1], 'description': postinfo[2],
-                     'category': postinfo[3], 'trainerid': postinfo[4]}
+                     'category': postinfo[3], 'trainerid': postinfo[4], 'image': postinfo[5], 'created_timestamp': postinfo[6]}
 
         return jsonify({
             "code": 200,
@@ -67,14 +67,15 @@ def create_new_post_query():
         description = data.get('description')
         category = data.get('category')
         trainerid = data.get('trainerid')
+        image = data.get('image')
 
         con = get_db_connection(config)
         cur = con.cursor()
 
         try:
             # Create new post
-            cur.execute("INSERT INTO post (postid, title, description, category, trainerid) VALUES (nextval('post_id_seq'), %s, %s, %s, %s) RETURNING postid;",
-                        (title, description, category, trainerid, ))
+            cur.execute("INSERT INTO post (postid, title, description, category, trainerid, image) VALUES (nextval('post_id_seq'), %s, %s, %s, %s, %s) RETURNING postid;",
+                        (title, description, category, trainerid, image, ))
 
             # Get the ID of the newly inserted post
             new_postid = cur.fetchone()[0]
@@ -104,8 +105,8 @@ def update_post_query(postid):
 
         try:
             # Update a post
-            cur.execute(f"""UPDATE post SET title = %s, description = %s, category = %s WHERE trainerid = %s AND postid = %s;""",
-                        (data['title'], data['description'], data['category'], data['trainerid'], postid, ))
+            cur.execute(f"""UPDATE post SET title = %s, description = %s, category = %s, image = %s WHERE trainerid = %s AND postid = %s;""",
+                        (data['title'], data['description'], data['category'], data['trainerid'], data['image'], postid, ))
 
             con.commit()
             cur.close()

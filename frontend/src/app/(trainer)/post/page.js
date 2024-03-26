@@ -1,41 +1,60 @@
 "use client"
+
+import React, { useState, useEffect } from 'react'
 import { AddIcon } from '@chakra-ui/icons'
-import { SimpleGrid, Box, Flex, Button, Stack } from '@chakra-ui/react';
+import { SimpleGrid, Box, Flex, Button, Stack, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation'
 import SearchBar from '../../../components/searchBar';
-import PostCard from '../../../components/postCard';
+import TrainerPostCard from '../../../components/trainerPostCard';
 
 export default function Post() {
-  const router = useRouter()
-  // Generate sample data for 15 components
-  const sampleData = Array.from({ length: 12 }, (_, index) => ({
-    id: index + 1, // Assuming you have an 'id' field in your PostCard component
-    // Add other fields as needed
-    title: `Post ${index + 1}`,
-    content: `Content of post ${index + 1}`,
-    // Add other fields as needed
-  }));
+    const router = useRouter()
+    const [data, setData] = useState([])
+    const [error, setError] = useState('')
 
-  return (
-    <Box p={20}>
-      <Flex justifyContent='center' paddingBottom='5px' gap='3'>
-        <SearchBar mr={10} />
-        <Button
-                rightIcon={<AddIcon />}
-                colorScheme={'blue'}
-                variant={'solid'}
-                borderRadius={'50px'}
-                onClick={() => router.push('/post/create')}>
-                Create Post
-        </Button>
-      </Flex>
-      <SimpleGrid columns={2} spacing={4} mt={4}>
-        {sampleData.map((data) => (
-          <Box key={data.id} width="200%" height="100%">
-            <PostCard {...data} />
-          </Box>
-        ))}
-      </SimpleGrid>
-    </Box>
-  );
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await fetch('http://localhost:3000/api/post', {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            })
+
+            // if post successfully fetched
+            const result = await response.json()
+            if (result.code == 200) {
+                setData(result.data.post)
+            } else {
+                setError('Failed to fetch post.')
+            }
+        }
+
+        fetchData().catch((e) => {
+            // handle the error as needed
+            console.error('An error occurred while fetching the data: ', e)
+        })
+    }, [])
+
+    return (
+        <Box p={20}>
+            <Flex justifyContent='center' paddingBottom='5px' gap='3'>
+                <SearchBar mr={10} />
+                <Button
+                    rightIcon={<AddIcon />}
+                    colorScheme={'blue'}
+                    variant={'solid'}
+                    borderRadius={'50px'}
+                    onClick={() => router.push('/post/create')}>
+                    Create Post
+                </Button>
+            </Flex>
+            {error ? <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
+                <SimpleGrid columns={2} spacing={4} mt={4}>
+                    {data.map((data) => (
+                        <Box key={data.postid} width="200%" height="100%">
+                            <TrainerPostCard {...data} />
+                        </Box>
+                    ))}
+                </SimpleGrid>}
+        </Box>
+    );
 }

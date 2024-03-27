@@ -95,8 +95,6 @@ services:
   calculator:
     image: marcokuok/calculator:1.0
     restart: always
-    environment:
-      dbURL: postgresql+psycopg2://default:s2fbryFa6Yej@ep-old-darkness-a1f9hm2w-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
     networks:
       - trainerSwift-net
       

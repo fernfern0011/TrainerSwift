@@ -7,9 +7,9 @@ import os, sys
 app = Flask(__name__)
 CORS(app)
 
-dietURL = environ.get('dietURL', 'http://127.0.0.1:5004')
-traineeURL = environ.get('traineeURL', 'http://127.0.0.1:5003')
-calcURL = environ.get('calcURL', 'http://127.0.0.1:5001')
+dietURL = environ.get('dietURL')
+traineeURL = environ.get('traineeURL')
+calcURL = environ.get('calcURL')
 
 @app.route('/check_my_diet', methods=["POST"])
 def check_my_diet():
@@ -108,7 +108,5 @@ def processDiet(diet):
         }
     }
 
-    
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

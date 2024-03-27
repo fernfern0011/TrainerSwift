@@ -1,5 +1,6 @@
-'use client'
+"use client"
 
+import { useState, useEffect } from 'react';
 import {
   Box,
   chakra,
@@ -14,13 +15,31 @@ import {
   SimpleGrid,
   StackDivider,
   useColorModeValue,
-  VisuallyHidden,
   List,
   ListItem,
-} from '@chakra-ui/react'
-import { MdLocalShipping } from 'react-icons/md'
+} from '@chakra-ui/react';
 
 export default function Simple() {
+  const [trainerInfo, setTrainerInfo] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/trainer/2');
+        if (!response.ok) {
+          throw new Error('Failed to fetch trainer information');
+        }
+        const data = await response.json();
+        setTrainerInfo(data.data.trainerinfo);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <Container maxW={'7xl'}>
       <SimpleGrid
@@ -31,9 +50,7 @@ export default function Simple() {
           <Image
             rounded={'md'}
             alt={'product image'}
-            src={
-              'https://images.unsplash.com/photo-1596516109370-29001ec8ec36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyODE1MDl8MHwxfGFsbHx8fHx8fHx8fDE2Mzg5MzY2MzE&ixlib=rb-1.2.1&q=80&w=1080'
-            }
+            src={trainerInfo ? trainerInfo.image : ''}
             fit={'cover'}
             align={'center'}
             w={'100%'}
@@ -46,13 +63,13 @@ export default function Simple() {
               lineHeight={1.1}
               fontWeight={600}
               fontSize={{ base: '2xl', sm: '4xl', lg: '5xl' }}>
-              [Trainer Name]
+              {trainerInfo ? trainerInfo.name : ''}
             </Heading>
             <Text
               color={useColorModeValue('gray.900', 'gray.400')}
               fontWeight={300}
               fontSize={'2xl'}>
-              [EMAIL]
+              {trainerInfo ? trainerInfo.email : ''}
             </Text>
           </Box>
 
@@ -67,37 +84,12 @@ export default function Simple() {
                 color={useColorModeValue('gray.500', 'gray.400')}
                 fontSize={'2xl'}
                 fontWeight={'300'}>
-                [AGE:]
-                [HEIGHT:]
-                [WEIGHT:]
+                {trainerInfo ? `Age: ${new Date().getFullYear() - new Date(trainerInfo.dob).getFullYear()}, Height: ${trainerInfo.height}, Weight: ${trainerInfo.weight}` : ''}
               </Text>
               <Text fontSize={'lg'}>
-                Hi! I am John Doe! Your fitness trainer who will help you achieve your fitness goals. I love to play sports and video games (who doesnt?)
+                {trainerInfo ? trainerInfo.bio : ''}
               </Text>
             </VStack>
-            <Box>
-              <Text
-                fontSize={{ base: '16px', lg: '18px' }}
-                color={useColorModeValue('yellow.500', 'yellow.300')}
-                fontWeight={'500'}
-                textTransform={'uppercase'}
-                mb={'4'}>
-                Expertise
-              </Text>
-
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-                <List spacing={2}>
-                  <ListItem>Calisthenics</ListItem>
-                  <ListItem>Bodybuilding</ListItem>{' '}
-                  <ListItem>Zumba</ListItem>
-                </List>
-                <List spacing={2}>
-                  <ListItem>Test</ListItem>
-                  <ListItem>Test</ListItem>
-                  <ListItem>Test</ListItem>
-                </List>
-              </SimpleGrid>
-            </Box>
           </Stack>
 
           <Button
@@ -118,5 +110,5 @@ export default function Simple() {
         </Stack>
       </SimpleGrid>
     </Container>
-  )
+  );
 }

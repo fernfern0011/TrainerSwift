@@ -1,0 +1,114 @@
+version: "4.28.0"
+
+volumes:
+  pgdata: 
+
+networks:
+  trainerSwift-net:
+    driver: bridge
+    name: trainerSwift-net
+
+services:
+  #######################################
+  # Postgres: The database used by Kong
+  #######################################
+  kong-database:
+    image: postgres:15 # tested 20231101; Ref: https://docs.konghq.com/gateway/latest/support/third-party/
+    platform: linux/amd64  # <- required for Mac M1 chip. Otherwise, can remove
+    restart: always
+    networks:
+      - trainerSwift-net
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  #######################################
+  # Kong database migration
+  #######################################
+  kong-migration:
+    image: kong/kong-gateway:3.2.2.5 # tested 20231101
+    platform: linux/amd64  # <- required for Mac M1 chip. Otherwise, can remove
+    command: "kong migrations bootstrap"
+    restart: on-failure
+    networks:
+      - trainerSwift-net
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+    depends_on:
+      - kong-database
+
+  #######################################
+  # Kong: The API Gateway
+  #######################################
+  kong:
+    image: kong/kong-gateway:3.2.2.5 # tested 20231101
+    platform: linux/amd64  # <- required for Mac M1 chip. Otherwise, can remove
+    restart: always
+    networks:
+      - trainerSwift-net
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+    depends_on:
+      - kong-migration
+    ports: # https://docs.konghq.com/gateway/latest/production/networking/default-ports/
+      - "8000:8000" # Takes incoming HTTP traffic from Consumers, and forwards it to upstream Services.
+      - "8443:8443" # Takes incoming HTTPS traffic from Consumers, and forwards it to upstream Services.
+      - "8001:8001" # Admin API. Listens for calls from the command line over HTTP.
+      - "8444:8444" # Admin API. Listens for calls from the command line over HTTPS.
+      - "8002:8002" # Kong Manager (GUI). Listens for HTTP traffic.
+      - "8445:8445" # Kong Manager (GUI). Listens for HTTPS traffic.
+      - "8003:8003" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
+      - "8446:8446" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
+      - "8004:8004" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.
+      - "8447:8447" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.
+
+  diet:
+      image: marcokuok/diet:1.0
+      restart: always
+      environment:
+        dbURL: postgresql+psycopg2://default:l6RzivXEm0Ur@ep-falling-cake-a1k7bq9a-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+      networks:
+        - trainerSwift-net
+
+  calculator:
+    image: marcokuok/calculator:1.0
+    restart: always
+    environment:
+      dbURL: postgresql+psycopg2://default:s2fbryFa6Yej@ep-old-darkness-a1f9hm2w-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+    networks:
+      - trainerSwift-net
+      
+  checkingdiet:
+    image: marcokuok/checkingdiet:1.0
+    depends_on:
+      - diet
+      - calculator
+    environment:
+      dietURL: http://diet:5000
+      calculatorURL: http://calculator:5000
+    networks:
+      - trainerSwift-net
+
+

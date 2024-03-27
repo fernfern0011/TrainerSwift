@@ -115,7 +115,7 @@ services:
     environment:
       dietURL: http://diet:5000
       calcURL: http://calculator:5000
-      traineeURL: http://trainee:5003
+      traineeURL: http://trainee:5000
     networks:
       - trainerSwift-net
 

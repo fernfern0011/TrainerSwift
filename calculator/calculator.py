@@ -1,19 +1,21 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from invokes import invoke_http
 
 app = Flask(__name__)
 CORS(app)
 
 physical_activity_level = 1.6
 
-@app.route('/calculator')
+@app.route('/calculator', methods=["POST"])
 def calculate():
     data = request.get_json()
-    clientid = data["clientid"]
     weight = data["weight"]
     height = data["height"]
     age = data["age"]
+    average_calories = float(data["info"]["average_calories"])
+    average_carbs = float(data["info"]["average_carbs"])
+    average_protein = float(data["info"]["average_protein"])
+    average_fat = float(data["info"]["average_fat"])
 
     is_bulk = request.args.get('type') == "bulk"
 
@@ -26,24 +28,20 @@ def calculate():
 
     # https://www.omnicalculator.com/health/maintenance-calorie
 
-    response = invoke_http('http://127.0.0.1:5000/diet/get_monthly_average',json={"clientid":clientid})
-    average_value = response["data"]
-    average_calories = float(average_value["average_calories"])
-    average_carbs = float(average_value["average_carbs"])
-    average_protein = float(average_value["average_protein"])
-    average_fat = float(average_value["average_fat"])
-
     
     return jsonify({
-        "calories": calories_needed,
-        "carbs": carbs_needed,
-        "protein": protein_needed,
-        "fat": fat_needed,
-        "calories_diff":calories_needed-average_calories,
-        "carbs_diff":carbs_needed-average_carbs,
-        "protein_diff":protein_needed-average_protein,
-        "fat_diff":fat_needed-average_fat
+        "code": 200,
+        "data": {
+            "calories_needed": calories_needed,
+            "carbs_needed": carbs_needed,
+            "protein_needed": protein_needed,
+            "fat_needed": fat_needed,
+            "calories_diff":calories_needed-average_calories,
+            "carbs_diff":carbs_needed-average_carbs,
+            "protein_diff":protein_needed-average_protein,
+            "fat_diff":fat_needed-average_fat
+        }
     })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

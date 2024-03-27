@@ -88,7 +88,7 @@ services:
       image: marcokuok/diet:1.0
       restart: always
       environment:
-        dbURL: postgresql+psycopg2://default:l6RzivXEm0Ur@ep-falling-cake-a1k7bq9a-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+        dbURL: postgresql+psycopg2://default:Bp4Y7dJRPtuf@ep-white-shadow-a1u84a9p-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
       networks:
         - trainerSwift-net
 

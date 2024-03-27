@@ -14,19 +14,18 @@ nutrition_type="logging"
 
 @app.route('/diet/all/<string:sort>') # Provide 'calories' or 'date_time' for sort
 def get_all_meal(sort):
-    print(sort)
     data = request.get_json()
-    clientid = data["clientid"]
+    traineeid = data["traineeid"]
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM meal WHERE clientid={clientid} ORDER BY {sort} DESC")
+    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} ORDER BY {sort} DESC")
 
     meallist = cur.fetchall()
     cur.close()
     con.close()
 
-    meallist_json = [{"clientid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7], "date_time": meal[8]} for meal in meallist]
+    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7], "date_time": meal[8]} for meal in meallist]
 
     if len(meallist):
         return jsonify({
@@ -44,17 +43,17 @@ def get_all_meal(sort):
 @app.route('/diet/<string:month>/<string:sort>') # Provide 'January', 'February', etc. for month; 'calories' or 'date_time' for sort
 def get_all_meal_by_month(month, sort):
     data = request.get_json()
-    clientid = data["clientid"]
+    traineeid = data["traineeid"]
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM meal WHERE clientid={clientid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY {sort} DESC")
+    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY {sort} DESC")
 
     meallist = cur.fetchall()
     cur.close()
     con.close()
 
-    meallist_json = [{"clientid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7]} for meal in meallist]
+    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7]} for meal in meallist]
 
     if len(meallist):
         return jsonify({
@@ -72,11 +71,11 @@ def get_all_meal_by_month(month, sort):
 @app.route('/diet/get_monthly_average')
 def get_monthly_average():
     data = request.get_json()
-    clientid = data["clientid"]
+    traineeid = data["traineeid"]
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT AVG(calories), AVG(carbs), AVG(protein), AVG(fat) FROM meal WHERE clientid={clientid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP)")
+    cur.execute(f"SELECT AVG(calories), AVG(carbs), AVG(protein), AVG(fat) FROM meal WHERE traineeid={traineeid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND EXTRACT(YEAR FROM date_time)=EXTRACT(YEAR FROM CURRENT_TIMESTAMP) ")
 
     average_value = cur.fetchone()
     cur.close()
@@ -101,9 +100,9 @@ def get_monthly_average():
 @app.route('/diet/add', methods=['POST'])
 def add_meal():
     data = request.get_json()
-    clientid = data["clientid"]
-    foodname = data["foodname"]
-    quantity = data["quantity"]
+    traineeid = data["traineeid"]
+    foodname = data["meal"]["foodname"]
+    quantity = data["meal"]["quantity"]
 
     global calories_URL
     calories_URL+=f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
@@ -118,9 +117,10 @@ def add_meal():
     cur = con.cursor()
 
     try:
-        cur.execute(f'INSERT INTO meal (clientid, foodname, quantity, calories, carbs, protein, fat) VALUES (%s, %s, %s, %s, %s, %s, %s)', (clientid, foodname, quantity, calories, carbs, protein, fat))
+        cur.execute(f'INSERT INTO meal (traineeid, foodname, quantity, calories, carbs, protein, fat) VALUES (%s, %s, %s, %s, %s, %s, %s)', (traineeid, foodname, quantity, calories, carbs, protein, fat))
         cur.execute(f'SELECT * FROM meal ORDER BY mealid DESC')
-        new_meal=cur.fetchone()[2]
+        new_meal=cur.fetchone()
+        meal_json={"traineeid": new_meal[0], "mealid": new_meal[1], "foodname": new_meal[2], "quantity": new_meal[3], "calories": new_meal[4], "carbs": new_meal[5], "protein": new_meal[6], "fat": new_meal[7]}
 
         con.commit()
         cur.close()
@@ -128,8 +128,8 @@ def add_meal():
 
         return jsonify({
             "code":201,
-            "new_meal": new_meal,
-            "message": f"Meal {new_meal} successfully added."
+            "data": meal_json,
+            "message": f"Meal {meal_json['foodname']} successfully added."
         })
 
     except:

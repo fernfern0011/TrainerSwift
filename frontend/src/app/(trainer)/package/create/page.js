@@ -229,6 +229,7 @@ export default function CreateNewPackage() {
                         toast({
                             title: 'Package is created.',
                             status: 'success',
+                            position: 'top-right',
                             duration: 5000,
                             isClosable: true,
                         })

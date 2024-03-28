@@ -2,17 +2,20 @@
 
 import React, { useState, useEffect } from 'react'
 import { AddIcon } from '@chakra-ui/icons'
-import { SimpleGrid, Box, Flex, Button, Stack, Text } from '@chakra-ui/react';
+import { SimpleGrid, Box, Flex, Button, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation'
 import SearchBar from '../../../components/searchBar';
 import TrainerPostCard from '../../../components/trainerPostCard';
 
 export default function Post() {
     const router = useRouter()
+    const [loading, setLoading] = useState(false)
     const [data, setData] = useState([])
     const [error, setError] = useState('')
 
     useEffect(() => {
+        setLoading(true)
+
         const fetchData = async () => {
             const response = await fetch('http://localhost:3000/api/post', {
                 method: "GET",
@@ -23,8 +26,10 @@ export default function Post() {
             const result = await response.json()
             if (result.code == 200) {
                 setData(result.data.post)
+                setLoading(false)
             } else {
-                setError('Failed to fetch post.')
+                setError('Failed to retrieve post data.')
+                setLoading(false)
             }
         }
 
@@ -47,14 +52,16 @@ export default function Post() {
                     Create Post
                 </Button>
             </Flex>
-            {error ? <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
-                <SimpleGrid columns={2} spacing={4} mt={4}>
-                    {data.map((data) => (
-                        <Box key={data.postid} width="200%" height="100%">
-                            <TrainerPostCard {...data} />
-                        </Box>
-                    ))}
-                </SimpleGrid>}
-        </Box>
+            {loading ?
+                <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retriving post data...</Text> : (
+                    error ?
+                        <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
+                        <SimpleGrid columns={2} spacing={4} mt={4}>
+                            {data.map((data) => (
+                                <TrainerPostCard key={data.postid} {...data} />
+                            ))}
+                        </SimpleGrid>
+                )}
+        </Box >
     );
 }

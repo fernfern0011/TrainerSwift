@@ -10,7 +10,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
-    const { title, description, category, trainerid } = await req.json()
+    const { title, description, category, image, trainerid } = await req.json()
 
     if (!title || !description || !category || !trainerid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
@@ -24,7 +24,8 @@ export async function POST(req) {
             title: title,
             description: description,
             category: category,
-            trainerid: trainerid
+            trainerid: trainerid,
+            image: image
         })
     })
 
@@ -34,17 +35,20 @@ export async function POST(req) {
 
 export async function DELETE(req) {
     const { postid } = await req.json()
+    
+    if (!postid) return NextResponse.json({ "code": 400, "message": "Failed to delete post" })
 
-    if (!postid) return NextResponse.json({ "message": "Post id is required!" })
-
-    await fetch(`${DATA_SOURCE_URL}/${postid}`, {
+    const res = await fetch(`${DATA_SOURCE_URL}/post/${postid}`, {
         method: 'DELETE',
         headers: {
             "Content-Type": "application/json",
             'API-Key': process.env.DATA_API_KEY
-        }
+        },
+        body: JSON.stringify({
+            postid: postid
+        })
     })
 
-    return NextResponse.json({ "message": `Post ${postid} deleted successfully.` })
-
+    const result = await res.json()
+    return NextResponse.json(result)
 }

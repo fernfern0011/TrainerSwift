@@ -39,7 +39,7 @@ export async function DELETE(req) {
 
     if (!packageid) return NextResponse.json({ "message": "Package id is required!" })
 
-    await fetch(`${DATA_SOURCE_URL}/${packageid}`, {
+    await fetch(`${DATA_SOURCE_URL}/package/${packageid}`, {
         method: 'DELETE',
         headers: {
             "Content-Type": "application/json",

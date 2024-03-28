@@ -177,3 +177,30 @@ services:
     networks:
       - trainerSwift-net
 
+  diet:
+      image: marcokuok/diet:1.0
+      restart: always
+      environment:
+        dbURL: postgresql+psycopg2://default:Bp4Y7dJRPtuf@ep-white-shadow-a1u84a9p-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+      networks:
+        - trainerSwift-net
+
+  calculator:
+    image: marcokuok/calculator:1.0
+    restart: always
+    networks:
+      - trainerSwift-net
+      
+  checkingdiet:
+    image: marcokuok/checkingdiet:1.0
+    depends_on:
+      - diet
+      - calculator
+      - trainee
+    environment:
+      dietURL: http://diet:5000
+      calcURL: http://calculator:5000
+      traineeURL: http://trainee:5000
+    networks:
+      - trainerSwift-net
+

@@ -203,19 +203,19 @@ def read_package_by_id_query(packageid):
     })
 
 # [GET] getAllPackageByPostid
-@app.route('/post/<int:postid>/packagelist', methods=['GET'])
+@app.route('/post/<int:postid>/package', methods=['GET'])
 def read_packagelist_by_postid_query(postid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f'SELECT * FROM package p INNER JOIN availability a ON a.packageid = p.packageid WHERE postid = %s;', (postid, ))
+        f"SELECT p.*, a.day, json_agg(jsonb_build_object('availabilityid', a.availabilityid, 'time', a.time, 'status', a.status)) AS timeslots FROM package p INNER JOIN availability a ON a.packageid = p.packageid WHERE p.postid = %s GROUP BY p.packageid, a.day;", (postid, ))
 
     packagelist = cur.fetchall()
     cur.close()
     con.close()
 
     packagelist_json = [{'packageid': package[0], 'name': package[1], 'detail': package[2],
-                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8], 'day': package[10], 'time': package[11], 'status': package[12]} for package in packagelist]
+                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8], 'day': package[9], 'timeslots': package[10]} for package in packagelist]
 
     if len(packagelist):
         return jsonify({

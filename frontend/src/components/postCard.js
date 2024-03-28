@@ -2,7 +2,12 @@
 import { Card, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box } from '@chakra-ui/react';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 
-export default function PostCard() {
+export default function PostCard({ dob, content }) {
+
+  const birth = new Date(dob);
+  const ageDate = new Date(Date.now() - birth.getTime());
+  const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+  
   return (
     <Box>
       <Card
@@ -20,10 +25,9 @@ export default function PostCard() {
 
         <Stack>
           <CardBody>
-            <Heading size='md'>John Doe, 24</Heading>
+            <Heading size='md'>{ age }</Heading>
             <Text py='2'>
-              Expert in:
-              Yoga, Pilates, Swimming
+              { content }
             </Text>
           </CardBody>
 

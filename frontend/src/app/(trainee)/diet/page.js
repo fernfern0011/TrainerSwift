@@ -9,8 +9,6 @@ export default function DietPage() {
         { food: 'Apple', quantity: '1', carbohydrates: '20g', protein: '1g', fats: '0.5g', calories: '95' },
         { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
         { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
-
-        // Add more sample data as needed
     ];
 
     const smallData = [

@@ -15,8 +15,7 @@ export default function MyBookingPage() {
                     throw new Error('Failed to fetch bookings');
                 }
                 const data = await response.json();
-                console.log(data.data)
-                setBookings([data.data.booking]); // Assuming you want to display only one booking
+                setBookings(data.data.bookedby);
             } catch (error) {
                 console.error('Error fetching bookings:', error);
             }
@@ -30,9 +29,14 @@ export default function MyBookingPage() {
             <Flex justifyContent='center' paddingBottom='5px'>
                 <SearchBar />
             </Flex>
-            {bookings.map((booking, index) => (
-                <BookingCard key={index} booking={booking} />
-            ))}
+            {bookings && bookings.length > 0 && bookings[0] ? (
+                bookings.map((booking, index) => (
+                    <BookingCard key={index} booking={booking} />
+                ))
+            ) : (
+                <p>No bookings found.</p>
+            )}
+
         </Box>
     );
 }

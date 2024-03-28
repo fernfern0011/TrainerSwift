@@ -34,7 +34,7 @@ export default function Checkout() {
       //   throw new Error('Error triggering microservice');
       // }
 
-      const response = await fetch('https://stripe-service-delta.vercel.app/api/cart/get-all-cartitems');
+      const response = await fetch('http://localhost:5000/api/cart/get-all-cartitems');
 
       if (!response.ok) {
         throw new Error('Error fetching product information');
@@ -49,7 +49,7 @@ export default function Checkout() {
       const products = [];
 
       for (const cartItem of cartItems) {
-        const productName = cartItem.productname;
+        const productName = cartItem.packagename + " with " + cartItem.trainername;
         const productPrice = parseFloat(cartItem.price);
 
         const product = await stripe.products.create({

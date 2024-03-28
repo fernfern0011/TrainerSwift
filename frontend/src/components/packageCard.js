@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState } from 'react'
 import {
   Flex,
   Box,
@@ -9,75 +10,69 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
-  Button
+  Button,
+  useToast,
+  Spinner,
+  UnorderedList,
+  ListItem,
 } from '@chakra-ui/react'
+import Link from 'next/link';
 
-function PackageCard() {
+export default function PackageCard(data) {
+  const [loading, setLoading] = useState(false)
+  const toast = useToast()
+
   return (
-    <Flex p={50} w="full" alignItems="center" justifyContent="center">
-      <Box
-        bg={useColorModeValue('white', 'gray.800')}
-        maxW="sm"
-        borderWidth="1px"
-        rounded="lg"
-        shadow="lg"
-        position="relative">
-        <Box p="6">
-          <Flex mt="1" justifyContent="space-between" alignContent="center">
-            <Box
-              fontSize="2xl"
-              fontWeight="semibold"
-              as="h4"
-              lineHeight="tight"
-              isTruncated>
-            Cruel Summer Yoga Package
-            </Box>
-          </Flex>                
-          <Flex justifyContent="space-between" alignContent="center">
-          <Accordion allowMultiple>
+    <Flex p={50} w="full">
+      {loading ? <Spinner /> :
+        <Box
+          bg={useColorModeValue('white', 'gray.800')}
+          maxW="sm"
+          borderWidth="1px"
+          rounded="lg"
+          shadow="lg"
+          position="relative">
+          <Box p="6">
+            <Flex mt="1" justifyContent="space-between">
+              <Box
+                fontSize="2xl"
+                fontWeight="semibold"
+                as="h4"
+                lineHeight="tight"
+                isTruncated>
+                {data.name}
+              </Box>
+            </Flex>
+            <Flex justifyContent="space-between">
+              <Accordion allowMultiple>
                 <AccordionItem>
-                    <AccordionButton>
-                    <Flex justifyContent="space-between" alignContent="center">
-                    <Box mr={15}>
-                        <Box>Day: Monday</Box>
-                        <Box>Location: To be Discussed</Box>
-                    </Box>
+                  <AccordionButton>
+                    <Flex justifyContent="space-between">
+                      <UnorderedList>
+                        <ListItem>Day: {data.day ? data.day : 'To Be Updated'}</ListItem>
+                        <ListItem>Mode: {data.mode}</ListItem>
+                        <ListItem>Location: {data.address ? data.address : 'To Be Updated'}</ListItem>
+                      </UnorderedList>
                     </Flex>
                     <Box fontSize="2xl" ml={15} color={useColorModeValue('gray.800', 'white')}>
-                        <Box as="span" color={'gray.600'} fontSize="lg">
-                            $
-                        </Box>
-                        120
+                      ${data.price}
                     </Box>
                     <AccordionIcon />
-                    </AccordionButton>
-                <AccordionPanel pb={4}>
+                  </AccordionButton>
+                  <AccordionPanel pb={4}>
                     Timeslots Available:
                     <Button mr={2} bg={'blue.300'}>8:00 AM</Button>
                     <Button mr={2} bg={'blue.300'}>9:00 AM</Button>
                     <Button mr={2} bg={'blue.300'}>10:00 AM</Button>
                     <Button mr={2} bg={'blue.300'}>11:00 AM</Button>
                     <Button mr={2} bg={'blue.300'}>12:00 PM</Button>
-                </AccordionPanel>
+                  </AccordionPanel>
                 </AccordionItem>
-            </Accordion>
-
-            {/* <Box>
-                <Box>Day: Monday</Box>
-                <Box>Location: To be Discussed</Box>
-            </Box>
-            <Box fontSize="2xl" color={useColorModeValue('gray.800', 'white')}>
-              <Box as="span" color={'gray.600'} fontSize="lg">
-                $
-              </Box>
-              120
-            </Box> */}
-          </Flex>
+              </Accordion>
+            </Flex>
+          </Box>
         </Box>
-      </Box>
-      
+      }
     </Flex>
   )
 }
-
-export default PackageCard

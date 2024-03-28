@@ -201,21 +201,22 @@ def read_package_by_id_query(packageid):
         "code": 400,
         "message": "There is no package."
     })
-    
+
 # [GET] getAllPackageByPostid
 @app.route('/post/<int:postid>/package', methods=['GET'])
 def read_package_by_postid_query(postid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f'SELECT * FROM package WHERE postid = %s;', (postid, ))
+        f'SELECT * FROM package p INNER JOIN availability a ON a.packageid = p.packageid WHERE postid = %s;', (postid, ))
 
     packagelist = cur.fetchall()
+    print(packagelist[0])
     cur.close()
     con.close()
 
     packagelist_json = [{'packageid': package[0], 'name': package[1], 'detail': package[2],
-                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8]} for package in packagelist]
+                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8], 'day': package[10], 'time': package[11], 'status': package[12]} for package in packagelist]
 
     if len(packagelist):
         return jsonify({
@@ -643,6 +644,33 @@ def read_bookedby_by_traineeid_query(traineeid):
             "code": 200,
             "data": {
                 "bookedby": [booked for booked in bookedbylist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no booking."
+    })
+    
+# [GET] getAllBookedbyDetailsByTraineeid
+@app.route('/trainee/<int:traineeid>/bookedbydetails', methods=['GET'])
+def read_bookedbydetails_by_traineeid_query(traineeid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f'SELECT b.trainerid, a.day, a.time, pa.name, pa.address FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.traineeid = %s;', (traineeid, ))
+
+    bookedbydetailslist = cur.fetchall()
+    cur.close()
+    con.close()
+    
+    bookedbydetailslist_json = [{
+            'trainerid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
+
+    if len(bookedbydetailslist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "bookedby_details": [bookedbydetail for bookedbydetail in bookedbydetailslist_json]
             }
         })
     return jsonify({

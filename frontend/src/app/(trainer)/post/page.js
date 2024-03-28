@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { AddIcon } from '@chakra-ui/icons'
-import { SimpleGrid, Box, Flex, Button, Text } from '@chakra-ui/react';
+import { SimpleGrid, Box, Flex, Button, Text, Heading } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation'
 import SearchBar from '../../../components/searchBar';
 import TrainerPostCard from '../../../components/trainerPostCard';
@@ -41,6 +41,7 @@ export default function Post() {
 
     return (
         <Box p={20}>
+            <Heading mb={10}>Post List</Heading>
             <Flex justifyContent='center' paddingBottom='5px' gap='3'>
                 <SearchBar mr={10} />
                 <Button

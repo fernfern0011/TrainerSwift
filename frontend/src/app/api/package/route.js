@@ -10,7 +10,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
-    const { name, detail, price, mode, address, postid } = await req.json()
+    const { name, detail, price, mode, address, postid, ispremium } = await req.json()
 
     if (!name || !detail || !price || !mode || !postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
@@ -26,7 +26,8 @@ export async function POST(req) {
             price: price,
             mode: mode,
             address: address,
-            postid: postid
+            postid: postid,
+            ispremium: ispremium
         })
     })
 

@@ -1,7 +1,9 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { AddIcon } from '@chakra-ui/icons'
-import { SimpleGrid, Box, Flex, Button, Heading, Text } from '@chakra-ui/react';
+import { AddIcon, ChevronLeftIcon } from '@chakra-ui/icons'
+import {
+    SimpleGrid, Box, Flex, Button, Heading, Text, Stack, IconButton
+} from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation'
 import SearchBar from '../../../../components/searchBar';
 import PackageCard from '../../../../components/packageCard'
@@ -12,7 +14,6 @@ export default function PackageByPostID({ params }) {
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState([])
     const [error, setError] = useState('')
-    console.log(data);
 
     useEffect(() => {
         setLoading(true)
@@ -25,10 +26,15 @@ export default function PackageByPostID({ params }) {
 
             // if package successfully fetched
             const result = await response.json()
+
             if (result.code == 200) {
                 setData(result.data.package)
                 setLoading(false)
-            } else {
+            } else if (result.code == 400) {
+                setError('There is no package.')
+                setLoading(false)
+            }
+            else {
                 setError('Failed to retrieve package data.')
                 setLoading(false)
             }
@@ -42,7 +48,19 @@ export default function PackageByPostID({ params }) {
 
     return (
         <Box p={20}>
-            <Heading mb={20}>{getTitle.get("title")} Packages</Heading>
+            <Stack direction='row' align={'center'} mb={10}>
+                <IconButton
+                    isRound={true}
+                    variant='solid'
+                    colorScheme='teal'
+                    aria-label='Done'
+                    fontSize='36px'
+                    mr={'10px'}
+                    icon={<ChevronLeftIcon />}
+                    onClick={() => router.push('/post')}
+                />
+                <Heading>{getTitle.get("title")} Packages</Heading>
+            </Stack>
             <Flex justifyContent='center' paddingBottom='2px' gap='2' mt={5}>
                 <SearchBar mr={10} />
                 <Button
@@ -50,15 +68,16 @@ export default function PackageByPostID({ params }) {
                     colorScheme={'blue'}
                     variant={'solid'}
                     borderRadius={'50px'}
-                    onClick={() => router.push('/package/create')}>
+                    onClick={() => router.push(`/package/create?postid=${params.postid}&title=${getTitle.get("title")}`)}>
                     Create Package
                 </Button>
             </Flex>
             {loading ?
                 <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retriving package data...</Text> : (
-                    error ?
+                    error
+                        ?
                         <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
-                        <SimpleGrid columns={3} spacing={4} mt={4}>
+                        <SimpleGrid columns={2} spacing={5} mt={4}>
                             {data.map((data) => (
                                 <PackageCard key={data.packageid} {...data} />
                             ))}

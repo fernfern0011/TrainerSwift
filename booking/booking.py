@@ -161,7 +161,7 @@ def read_all_packages_query():
     con.close()
 
     packagelist_json = [{'packageid': package[0], 'name': package[1], 'detail': package[2],
-                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'created_timestamp': package[7]} for package in packagelist]
+                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8]} for package in packagelist]
 
     if len(packagelist):
         return jsonify({
@@ -189,12 +189,39 @@ def read_package_by_id_query(packageid):
 
     if packageinfo:
         package_json = {'packageid': packageinfo[0], 'name': packageinfo[1], 'detail': packageinfo[2],
-                        'price': packageinfo[3], 'mode': packageinfo[4], 'address': packageinfo[5], 'postid': packageinfo[6], 'created_timestamp': packageinfo[7]}
+                        'price': packageinfo[3], 'mode': packageinfo[4], 'address': packageinfo[5], 'postid': packageinfo[6], 'ispremium': packageinfo[7], 'created_timestamp': packageinfo[8]}
 
         return jsonify({
             "code": 200,
             "data": {
                 "package": package_json
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no package."
+    })
+    
+# [GET] getAllPackageByPostid
+@app.route('/post/<int:postid>/package', methods=['GET'])
+def read_package_by_postid_query(postid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f'SELECT * FROM package WHERE postid = %s;', (postid, ))
+
+    packagelist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    packagelist_json = [{'packageid': package[0], 'name': package[1], 'detail': package[2],
+                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8]} for package in packagelist]
+
+    if len(packagelist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "package": [package for package in packagelist_json]
             }
         })
     return jsonify({
@@ -213,6 +240,7 @@ def create_new_package_query():
         mode = data.get('mode')
         address = data.get('address')
         postid = data.get('postid')
+        ispremium = data.get('ispremium')
 
         con = get_db_connection(config)
         cur = con.cursor()
@@ -230,8 +258,8 @@ def create_new_package_query():
 
         try:
             # Create new package
-            cur.execute("INSERT INTO package (packageid, name, detail, price, mode, address, postid) VALUES (nextval('package_id_seq'), %s, %s, %s, %s, %s, %s) RETURNING packageid;",
-                        (name, detail, price, mode, address, postid, ))
+            cur.execute("INSERT INTO package (packageid, name, detail, price, mode, address, postid, ispremium) VALUES (nextval('package_id_seq'), %s, %s, %s, %s, %s, %s, %s) RETURNING packageid;",
+                        (name, detail, price, mode, address, postid, ispremium, ))
 
             # Get the ID of the newly inserted package
             new_packageid = cur.fetchone()[0]
@@ -262,8 +290,8 @@ def update_package_by_id_query(packageid):
 
         try:
             # Update a package
-            cur.execute(f"""UPDATE package SET name = %s, detail = %s, price = %s, mode = %s, address = %s WHERE postid = %s AND packageid = %s;""",
-                        (data['name'], data['detail'], data['price'], data['mode'], data['address'], data['postid'], packageid, ))
+            cur.execute(f"""UPDATE package SET name = %s, detail = %s, price = %s, mode = %s, address = %s, ispremium = %s WHERE postid = %s AND packageid = %s;""",
+                        (data['name'], data['detail'], data['price'], data['mode'], data['address'], data['postid'], data['ispremium'], packageid, ))
 
             con.commit()
             cur.close()
@@ -502,7 +530,7 @@ def read_all_bookedby_query():
     con.close()
 
     bookedbylist_json = [{"bookedbyid": booked[0], "trainerid": booked[1],
-                          "traineeid": booked[2], "availabilityid": booked[3], "ispremium": booked[4], "created_timestamp": booked[5] } for booked in bookedbylist]
+                          "traineeid": booked[2], "availabilityid": booked[3], "ispremium": booked[4], "created_timestamp": booked[5]} for booked in bookedbylist]
 
     if len(bookedbylist):
         return jsonify({
@@ -535,7 +563,60 @@ def read_bookedby_by_id_query(bookedbyid):
         return jsonify({
             "code": 200,
             "data": {
-                "booking": bookedby_json
+                "bookedby": bookedby_json
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no booking."
+    })
+
+# [GET] getOneBookedbyDetails
+@app.route('/bookedby/<int:bookedbyid>/details', methods=['GET'])
+def read_bookedby_details_by_id_query(bookedbyid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f'SELECT b.trainerid, a.day, a.time, pa.name, pa.address FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.bookedbyid = %s;', (bookedbyid, ))
+
+    bookedbydetails = cur.fetchone()
+    cur.close()
+    con.close()
+
+    if bookedbydetails:
+        bookedbydetails_json = {
+            'trainerid': bookedbydetails[0], 'availability_day': bookedbydetails[1], 'availability_time': bookedbydetails[2], 'package_name': bookedbydetails[3], 'address': bookedbydetails[4]}
+
+        return jsonify({
+            "code": 200,
+            "data": {
+                "bookedby_details": bookedbydetails_json
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no booking."
+    })
+
+# [GET] getAllBookedbyByTrainerid
+@app.route('/trainer/<int:trainerid>/bookedby', methods=['GET'])
+def read_bookedby_by_trainerid_query(trainerid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f'SELECT * FROM bookedby WHERE trainerid = %s;', (trainerid, ))
+
+    bookedbylist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    bookedbylist_json = [{"bookedbyid": booked[0], "trainerid": booked[1],
+                          "traineeid": booked[2], "availabilityid": booked[3], "ispremium": booked[4], "created_timestamp": booked[5]} for booked in bookedbylist]
+
+    if len(bookedbylist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "bookedby": [booked for booked in bookedbylist_json]
             }
         })
     return jsonify({

@@ -203,15 +203,14 @@ def read_package_by_id_query(packageid):
     })
 
 # [GET] getAllPackageByPostid
-@app.route('/post/<int:postid>/package', methods=['GET'])
-def read_package_by_postid_query(postid):
+@app.route('/post/<int:postid>/packagelist', methods=['GET'])
+def read_packagelist_by_postid_query(postid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
         f'SELECT * FROM package p INNER JOIN availability a ON a.packageid = p.packageid WHERE postid = %s;', (postid, ))
 
     packagelist = cur.fetchall()
-    print(packagelist[0])
     cur.close()
     con.close()
 

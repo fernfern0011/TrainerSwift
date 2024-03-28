@@ -624,6 +624,32 @@ def read_bookedby_by_trainerid_query(trainerid):
         "message": "There is no booking."
     })
 
+# [GET] getAllBookedbyByTraineeid
+@app.route('/trainee/<int:traineeid>/bookedby', methods=['GET'])
+def read_bookedby_by_traineeid_query(traineeid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f'SELECT * FROM bookedby WHERE traineeid = %s;', (traineeid, ))
+
+    bookedbylist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    bookedbylist_json = [{"bookedbyid": booked[0], "trainerid": booked[1],
+                          "traineeid": booked[2], "availabilityid": booked[3], "ispremium": booked[4], "created_timestamp": booked[5]} for booked in bookedbylist]
+
+    if len(bookedbylist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "bookedby": [booked for booked in bookedbylist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no booking."
+    })
+
 # [POST] createNewBookedby
 @app.route('/bookedby/create', methods=['POST'])
 def create_bookedby_query():

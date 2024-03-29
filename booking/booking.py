@@ -291,7 +291,7 @@ def update_package_by_id_query(packageid):
         try:
             # Update a package
             cur.execute(f"""UPDATE package SET name = %s, detail = %s, price = %s, mode = %s, address = %s, ispremium = %s WHERE postid = %s AND packageid = %s;""",
-                        (data['name'], data['detail'], data['price'], data['mode'], data['address'], data['postid'], data['ispremium'], packageid, ))
+                        (data['name'], data['detail'], data['price'], data['mode'], data['address'], data['ispremium'], data['postid'], packageid, ))
 
             con.commit()
             cur.close()

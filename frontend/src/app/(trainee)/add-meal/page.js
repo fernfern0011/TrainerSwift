@@ -74,7 +74,7 @@ export default function AddMeal() {
               <Input type="text" onChange={(e) => setFoodName(e.target.value)} />
             </FormControl>
             <FormControl id="quantity">
-              <FormLabel>Quantity (in grams)</FormLabel>
+              <FormLabel>Quantity</FormLabel>
               <Input type="number" onChange={(e) => setQuantity(e.target.value)} />
             </FormControl>
             <Stack spacing={4}>

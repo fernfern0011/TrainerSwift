@@ -102,10 +102,10 @@ def add_meal():
     calories_URL+=f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
     
     response = invoke_http(calories_URL)
-    calories = response['calories'] * quantity
-    carbs = response['totalNutrients']['CHOCDF']['quantity'] * quantity
-    protein = response['totalNutrients']['PROCNT']['quantity'] * quantity
-    fat = response['totalNutrients']['FAT']['quantity'] * quantity
+    calories = round(response['calories'], 2) * quantity
+    carbs = round(response['totalNutrients']['CHOCDF']['quantity'], 2) * quantity
+    protein = round(response['totalNutrients']['PROCNT']['quantity'], 2) * quantity
+    fat = round(response['totalNutrients']['FAT']['quantity'], 2) * quantity
 
     con = get_db_connection(config)
     cur = con.cursor()

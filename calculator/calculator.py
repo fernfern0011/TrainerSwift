@@ -31,16 +31,32 @@ def calculate():
     
     return jsonify({
         "code": 200,
-        "data": {
-            "calories_needed": calories_needed,
-            "carbs_needed": carbs_needed,
-            "protein_needed": protein_needed,
-            "fat_needed": fat_needed,
-            "calories_diff":calories_needed-average_calories,
-            "carbs_diff":carbs_needed-average_carbs,
-            "protein_diff":protein_needed-average_protein,
-            "fat_diff":fat_needed-average_fat
-        }
+        "data": [
+            {
+                "nutrients": "Calories",
+                "current": average_calories,
+                "target": calories_needed,
+                "diff": average_calories-calories_needed,
+            },
+            {
+                "nutrients": "Carbs",
+                "current": average_carbs,
+                "target": carbs_needed,
+                "diff": average_carbs-carbs_needed,
+            },
+            {
+                "nutrients": "Protein",
+                "current": average_protein,
+                "target": protein_needed,
+                "diff": average_protein-protein_needed,
+            },
+            {
+                "nutrients": "Fats",
+                "current": average_fat,
+                "target": fat_needed,
+                "diff": average_fat-fat_needed,
+            },
+        ]
     })
 
 if __name__ == "__main__":

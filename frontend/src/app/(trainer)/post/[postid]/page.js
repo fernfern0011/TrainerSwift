@@ -14,7 +14,7 @@ export default function PackageByPostID({ params }) {
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState([])
     const [error, setError] = useState('')
-
+    console.log(data);
     useEffect(() => {
         setLoading(true)
 
@@ -28,7 +28,12 @@ export default function PackageByPostID({ params }) {
             const result = await response.json()
 
             if (result.code == 200) {
-                setData(result.data.package)
+
+                const updatedData = result.data.package.map(item => {
+                    return { ...item, title: getTitle.get('title') }
+                })
+
+                setData(updatedData)
                 setLoading(false)
             } else if (result.code == 400) {
                 setError('There is no package.')
@@ -59,7 +64,7 @@ export default function PackageByPostID({ params }) {
                     icon={<ChevronLeftIcon />}
                     onClick={() => router.push('/post')}
                 />
-                <Heading>{getTitle.get("title")} Packages</Heading>
+                <Heading>{getTitle.get('title')} Packages</Heading>
             </Stack>
             <Flex justifyContent='center' paddingBottom='2px' gap='2' mt={5}>
                 <SearchBar mr={10} />
@@ -68,7 +73,7 @@ export default function PackageByPostID({ params }) {
                     colorScheme={'blue'}
                     variant={'solid'}
                     borderRadius={'50px'}
-                    onClick={() => router.push(`/package/create?postid=${params.postid}&title=${getTitle.get("title")}`)}>
+                    onClick={() => router.push(`/package/create?postid=${params.postid}&title=${getTitle.get('title')}`)}>
                     Create Package
                 </Button>
             </Flex>

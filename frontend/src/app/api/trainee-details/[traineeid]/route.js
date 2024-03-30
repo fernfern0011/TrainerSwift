@@ -6,11 +6,10 @@ export async function GET(req, context) {
     const { traineeid } = await context.params
     console.log(traineeid)
     
-    const res = await fetch(`${DATA_SOURCE_URL}/${traineeid}/bookedby`)
+    const res = await fetch(`${DATA_SOURCE_URL}/${traineeid}/bookedbydetails`)
     const getUser = await res.json()
 
     return NextResponse.json(getUser)
 }
-
 
 

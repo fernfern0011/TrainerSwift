@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi/bookedby'
+const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi/trainer'
 
 
 export async function GET(req) {

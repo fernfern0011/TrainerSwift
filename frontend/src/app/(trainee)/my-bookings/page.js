@@ -6,16 +6,27 @@ import SearchBar from '../../../components/searchBar';
 
 export default function MyBookingPage() {
     const [bookings, setBookings] = useState([]);
+    const [traineeDetails, setTraineeDetails] = useState([]);
 
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/trainee-booking');
-                if (!response.ok) {
+                const responseBookings = await fetch('http://localhost:3000/api/trainee-booking/1');
+                if (!responseBookings.ok) {
                     throw new Error('Failed to fetch bookings');
                 }
-                const data = await response.json();
-                setBookings(data.data.bookedby);
+                const dataBookings = await responseBookings.json();
+                setBookings(dataBookings.data.bookedby);
+
+                const responseTraineeDetails = await fetch('http://localhost:3000/api/trainee-details/1');
+                if (!responseTraineeDetails.ok) {
+                    throw new Error('Failed to fetch trainee details');
+                }
+                const dataTraineeDetails = await responseTraineeDetails.json();
+                setTraineeDetails(dataTraineeDetails.data.bookedby_details);
+                console.log(dataTraineeDetails.data.bookedby_details)
+
+
             } catch (error) {
                 console.error('Error fetching bookings:', error);
             }
@@ -29,9 +40,13 @@ export default function MyBookingPage() {
             <Flex justifyContent='center' paddingBottom='5px'>
                 <SearchBar />
             </Flex>
-            {bookings && bookings.length > 0 && bookings[0] ? (
+            {bookings && bookings.length > 0 ? (
                 bookings.map((booking, index) => (
-                    <BookingCard key={index} booking={booking} />
+                    <BookingCard
+                        key={index}
+                        booking={booking}
+                        traineeDetails={traineeDetails[index]} // Pass corresponding traineeDetails
+                    />
                 ))
             ) : (
                 <p>No bookings found.</p>

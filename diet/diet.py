@@ -79,10 +79,10 @@ def get_monthly_average(traineeid):
         return jsonify({
             "code": 200,
             "data": {
-                "average_calories": average_value[0],
-                "average_carbs": average_value[1],
-                "average_protein": average_value[2],
-                "average_fat": average_value[3]
+                "average_calories": round(average_value[0], 2),
+                "average_carbs": round(average_value[1], 2),
+                "average_protein": round(average_value[2], 2),
+                "average_fat": round(average_value[3], 2)
             }
         })
     

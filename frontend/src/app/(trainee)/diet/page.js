@@ -27,8 +27,8 @@ export default function DietPage() {
 
     useEffect(() => {
         const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
-        const data = 0
-        setCalcData(data);
+        console.log(storedCalcData);
+        setCalcData(storedCalcData);
     }, []);
 
     // Function to generate an array of dates for the past 7 days

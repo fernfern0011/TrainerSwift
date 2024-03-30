@@ -6,7 +6,7 @@ export default function ClientCard({booking, traineeDetails}) {
 
 
     if (!traineeDetails) {
-        return <p>Loading. YAYAYAY..</p>;
+        return <p>Loading...</p>;
     }
 
     return (

@@ -701,7 +701,7 @@ def read_bookedbydetails_by_traineeid_query(traineeid):
     con.close()
 
     bookedbydetailslist_json = [{
-        'trainerid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
+        'trainerid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4], 'mode': bookedbydetail[5]} for bookedbydetail in bookedbydetailslist]
 
     if len(bookedbydetailslist):
         return jsonify({
@@ -728,7 +728,7 @@ def read_bookedbydetails_by_trainerid_query(trainerid):
     con.close()
 
     bookedbydetailslist_json = [{
-        'traineeid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
+        'traineeid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4], 'mode': bookedbydetail[5]} for bookedbydetail in bookedbydetailslist]
 
     if len(bookedbydetailslist):
         return jsonify({

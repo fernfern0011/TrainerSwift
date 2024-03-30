@@ -79,7 +79,7 @@ def processDiet(diet):
         }
     
     print('\n-----Invoking trainee microservice-----')
-    monthlyAverageMeal = invoke_http(f"{dietURL}/diet/average?traineeid={traineeid}", method='GET')
+    monthlyAverageMeal = invoke_http(f"{dietURL}/diet/{traineeid}/average", method='GET')
     averageValue = monthlyAverageMeal["data"]
     
     print('\n\n-----Invoking calculator microservice-----')

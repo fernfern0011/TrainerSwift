@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req, context) {
     const { packageid } = await context.params
 
@@ -22,7 +24,6 @@ export async function GET(req, context) {
 
 export async function PUT(req) {
     const { packageid, name, detail, price, mode, address, postid, ispremium } = await req.json()
-    console.log(name, detail, price, mode, address, postid, ispremium);
 
     if (!packageid || !name || !detail || !price || !mode || !postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 

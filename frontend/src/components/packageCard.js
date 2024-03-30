@@ -108,7 +108,7 @@ export default function PackageCard(data) {
                 <UnorderedList>
                   <ListItem><b>Day:</b> {data.day ? data.day : 'To Be Updated'}</ListItem>
                   <ListItem><b>Mode:</b> {data.mode}</ListItem>
-                  <ListItem><b>Location:</b> {data.address ? data.address : 'To Be Updated'}</ListItem>
+                  {data.mode == 'offline' ? (<ListItem><b>Location:</b> {data.address ? data.address : 'To Be Updated'}</ListItem>) : ""}
                   <ListItem><b>Detail:</b> {data.detail}</ListItem>
                 </UnorderedList>
                 <Box fontSize="22px" ml={25}>
@@ -128,7 +128,7 @@ export default function PackageCard(data) {
                   <AccordionPanel pb={4}>
                     {(data.timeslots).sort(function (a, timeslot) { return a.availabilityid - timeslot.availabilityid }).map((timeslot) =>
                     (
-                      <Button variant='outline' colorScheme='blue' mr={2} key={timeslot.availabilityid} >{timeslot.time}</Button>
+                      <Button variant='outline' colorScheme='blue' mr={2} mb={2} key={timeslot.availabilityid} >{timeslot.time}</Button>
                     )
                     )}
                   </AccordionPanel>

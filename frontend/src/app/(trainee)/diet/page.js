@@ -1,23 +1,36 @@
 "use client"
 import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 
 export default function DietPage() {
-    // Sample data
-    const data = [
-        { food: 'Apple', quantity: '1', carbohydrates: '20g', protein: '1g', fats: '0.5g', calories: '95' },
-        { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
-        { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
-    ];
+    const [meals, setMeals] = useState([]);
+    const [calcData, setCalcData] = useState([]);
+    const [type, setType] = useState('bulk');
 
-    const smallData = [
-        { nutrients: 'Kcal', current: '20g', target: '1g', diff: '-300'},
-        { nutrients: 'Carbs', current: '27g', target: '1.3g', diff: '+300'},
-        { nutrients: 'Protein', current: '27g', target: '1.3g', diff: '+300'},
-        { nutrients: 'Fats', current: '27g', target: '1.3g', diff: '-300'},
-        // Add more sample data as needed
-    ];
+    useEffect(() => {
+        const fetchMeals = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/diet/7');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch meals');
+                }
+                const data = await response.json();
+                console.log(data.data.meal)
+                setMeals(data.data.meal);
+            } catch (error) {
+                console.error('Error fetching meals:', error);
+            }
+        };
+
+        fetchMeals();
+    }, []);
+
+    useEffect(() => {
+        const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
+        console.log(storedCalcData);
+        setCalcData(storedCalcData);
+    }, []);
 
     // Function to generate an array of dates for the past 7 days
     const generatePastWeekDates = () => {
@@ -63,10 +76,10 @@ export default function DietPage() {
                 <Flex alignItems="center">
                     <Heading size="md" ml={5}>This Month</Heading>
                     <Spacer />
-                    <Button colorScheme="teal" variant="outline" mr={4}>
+                    <Button colorScheme="teal" variant="outline" mr={4} onclick={setType('bulk')}>
                         Bulk
                     </Button>
-                    <Button colorScheme="teal" variant="outline">
+                    <Button colorScheme="teal" variant="outline" onclick={setType('cut')}>
                         Cut
                     </Button>
                 </Flex>
@@ -81,12 +94,12 @@ export default function DietPage() {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {smallData.map((item, index) => (
+                                {calcData.map((item, index) => (
                                     <Tr key={index}>
                                         <Td>{item.nutrients}</Td>
                                         <Td isNumeric>{item.current}</Td>
-                                        <Td isNumeric>{item.target}</Td>
-                                        <Td>{item.diff}</Td>
+                                        <Td isNumeric>{ type == 'bulk' ? item.bulk.target : item.cut.target}</Td>
+                                        <Td>{ type == 'bulk' ? item.bulk.diff : item.cut.diff }</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
@@ -111,13 +124,13 @@ export default function DietPage() {
                         </Tr>
                     </Thead>
                     <Tbody>
-                        {data.map((item, index) => (
+                        {meals.map((item, index) => (
                             <Tr key={index}>
-                                <Td>{item.food}</Td>
+                                <Td>{item.foodname}</Td>
                                 <Td isNumeric>{item.quantity}</Td>
-                                <Td isNumeric>{item.carbohydrates}</Td>
+                                <Td isNumeric>{item.carbs}</Td>
                                 <Td isNumeric>{item.protein}</Td>
-                                <Td isNumeric>{item.fats}</Td>
+                                <Td isNumeric>{item.fat}</Td>
                                 <Td isNumeric>{item.calories}</Td>
                                 <Td>
                                     <Center>

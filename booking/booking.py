@@ -208,7 +208,7 @@ def read_packagelist_by_postid_query(postid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f"SELECT p.*, a.day, json_agg(jsonb_build_object('availabilityid', a.availabilityid, 'time', a.time, 'status', a.status)) AS timeslots FROM package p INNER JOIN availability a ON a.packageid = p.packageid WHERE p.postid = %s GROUP BY p.packageid, a.day;", (postid, ))
+        f"SELECT p.*, a.day, json_agg(jsonb_build_object('availabilityid', a.availabilityid, 'time', a.time, 'status', a.status)) AS timeslots FROM package p INNER JOIN availability a ON a.packageid = p.packageid WHERE p.postid = %s AND a.status = 'Open' GROUP BY p.packageid, a.day;", (postid, ))
 
     packagelist = cur.fetchall()
     cur.close()

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     const res = await fetch(`${DATA_SOURCE_URL}/availability`)
     const getAllAvailability = await res.json()
@@ -11,32 +13,11 @@ export async function GET() {
 
 export async function POST(req) {
     const { day, newTime, toRemoveTime, packageid } = await req.json()
-    console.log(day, newTime, toRemoveTime, packageid);
 
     if (!day || !packageid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
     try {
-
         var addedNewTimeResult, removedTimeResult, updatedDayResult
-
-        if (day && newTime == [] && toRemoveTime == []) {
-
-            const updateDayRes = await fetch(`${DATA_SOURCE_URL}/availability/update_day`, {
-                method: 'PUT',
-                headers: {
-                    "Content-Type": "application/json",
-                    'API-Key': process.env.DATA_API_KEY
-                },
-                body: JSON.stringify({
-                    day: day,
-                    status: 'Open',
-                    packageid: packageid
-                })
-            });
-
-            const updateDayInfo = await updateDayRes.json()
-            updatedDayResult = updateDayInfo
-        }
 
         if (newTime) {
             const newTimeResult = await Promise.all(newTime.map(async (timeItem) => {
@@ -83,4 +64,25 @@ export async function POST(req) {
         console.error("Error:", error);
         return NextResponse.json({ "code": 500, "message": error })
     }
+}
+
+export async function PUT(req) {
+    const { day, packageid } = await req.json()
+
+    const updateDayRes = await fetch(`${DATA_SOURCE_URL}/availability/update_day`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            'API-Key': process.env.DATA_API_KEY
+        },
+        body: JSON.stringify({
+            day: day,
+            status: 'Open',
+            packageid: packageid
+        })
+    });
+
+    const updateDayInfo = await updateDayRes.json()
+
+    return NextResponse.json(updateDayInfo)
 }

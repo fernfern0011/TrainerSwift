@@ -128,7 +128,7 @@ export default function PackageCard(data) {
                   <AccordionPanel pb={4}>
                     {(data.timeslots).sort(function (a, timeslot) { return a.availabilityid - timeslot.availabilityid }).map((timeslot) =>
                     (
-                      <Button variant='outline' colorScheme='blue' mr={2} key={timeslot.availabilityid} >{timeslot.time}</Button>
+                      <Button variant='outline' colorScheme='blue' mr={2} mb={2} key={timeslot.availabilityid} >{timeslot.time}</Button>
                     )
                     )}
                   </AccordionPanel>

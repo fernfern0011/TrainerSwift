@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     const res = await fetch(`${DATA_SOURCE_URL}/post`)
     const getAllPost = await res.json()

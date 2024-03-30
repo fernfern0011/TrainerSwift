@@ -54,14 +54,13 @@ export default function PackageEditPage({ params }) {
     const getName = useSearchParams()
     const getTitle = useSearchParams()
     const [loading, setLoading] = useState(false)
-
     const [isModeSelected, setIsModeSelected] = useState('')
     const [timeList, setTimeList] = useState([])
     const [newTimeList, setNewTimeList] = useState([])
     const [filterTimeList, setFilterTimeList] = useState([])
     const [toRemoveTimeList, setToRemoveTimeList] = useState([])
     const [availabilityList, setAvailabilityList] = useState([])
-    const [newDay, setNewDay] = useState([])
+    const [newDay, setNewDay] = useState('')
     const [error, setError] = useState('')
     const [isUploading, setIsUploading] = useState(false)
     const toast = useToast()
@@ -100,7 +99,6 @@ export default function PackageEditPage({ params }) {
                 setFormData({
                     name: packageInfo.name,
                     detail: packageInfo.detail,
-                    day: packageInfo.day,
                     mode: packageInfo.mode,
                     address: packageInfo.address,
                     price: packageInfo.price,
@@ -304,18 +302,22 @@ export default function PackageEditPage({ params }) {
             })
 
             const updatePackageResult = await updatePackage.json();
-            console.log(updatePackageResult);
 
             switch (updatePackageResult.code) {
                 case 200:
-                    console.log(newDay);
 
-                    if (newDay != "" || newTimeList.length != 0) {
+                    var isSuccess = false
+
+                    if (newTimeList.length == 0 && newDay == "") {
+                        isSuccess = true
+                    }
+
+                    if (newTimeList.length != 0 || filterTimeList != 0) {
                         const updateAvailability = await fetch('http://localhost:3000/api/availability', {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                day: newDay,
+                                day: formData.day,
                                 newTime: (newTimeList ? newTimeList : filterTimeList),
                                 toRemoveTime: toRemoveTimeList,
                                 packageid: params.packageid
@@ -326,7 +328,6 @@ export default function PackageEditPage({ params }) {
                         const result1 = updateAvailabilityResult.addedNewTimeResult
                         const result2 = updateAvailabilityResult.removedTimeResult
                         const result3 = updateAvailabilityResult.updatedDay
-                        console.log(updateAvailabilityResult);
 
                         var newAvailabilityCode = 0
                         var updatedRemoveAvailabilityCode = 0
@@ -346,38 +347,51 @@ export default function PackageEditPage({ params }) {
 
                         if (newAvailabilityCode == 201 || updatedRemoveAvailabilityCode == 200 || updatedDayCode == 200) {
                             setIsUploading(false)
-
-                            // whenever package is successfully updated
-                            toast({
-                                title: 'Package is updated.',
-                                status: 'success',
-                                position: 'top-right',
-                                duration: 5000,
-                                isClosable: true,
-                            })
-
-                            // push back to the post with package page
-                            router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
+                            isSuccess = true
                         } else {
                             setError('Failed to update package data.')
                             setIsUploading(false)
                         }
                     }
 
-                    // if availability data is not being changed, return success
-                    setIsUploading(false)
+                    if (newDay != '') {
+                        const updateDay = await fetch(`http://localhost:3000/api/availability`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(
+                                {
+                                    day: newDay,
+                                    packageid: params.packageid
+                                })
+                        })
 
-                    // whenever package is successfully updated
-                    toast({
-                        title: 'Package is updated.',
-                        status: 'success',
-                        position: 'top-right',
-                        duration: 5000,
-                        isClosable: true,
-                    })
+                        const updateDayResult = await updateDay.json()
+                        if (updateDayResult.code == 200) {
+                            setIsUploading(false)
+                            isSuccess = true
+                        } else {
+                            setError('Failed to update package data.')
+                            setIsUploading(false)
+                        }
+                    }
 
-                    // push back to the post with package page
-                    router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
+                    if (isSuccess == true) {
+                        // if availability data is not being changed, return success
+                        setIsUploading(false)
+
+                        // whenever package is successfully updated
+                        toast({
+                            title: 'Package is updated.',
+                            status: 'success',
+                            position: 'top-right',
+                            duration: 5000,
+                            isClosable: true,
+                        })
+
+                        // push back to the post with package page
+                        router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
+                    }
+
                     break;
                 case 400:
                     setError('Missing required data.')

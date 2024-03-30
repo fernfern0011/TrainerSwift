@@ -88,7 +88,7 @@ services:
       DECK_KONG_ADDR: http://kong:8001
     depends_on:
       - kong
-    entrypoint: sh -c "sleep 15 && deck sync --kong-addr http://kong:8001"
+    entrypoint: sh -c "sleep 25 && deck sync --kong-addr http://kong:8001"
     volumes:
       - ./kong.yaml:/kong.yaml
     networks:

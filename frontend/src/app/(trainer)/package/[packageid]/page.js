@@ -54,11 +54,14 @@ export default function PackageEditPage({ params }) {
     const getName = useSearchParams()
     const getTitle = useSearchParams()
     const [loading, setLoading] = useState(false)
+
     const [isModeSelected, setIsModeSelected] = useState('')
     const [timeList, setTimeList] = useState([])
+    const [newTimeList, setNewTimeList] = useState([])
     const [filterTimeList, setFilterTimeList] = useState([])
     const [toRemoveTimeList, setToRemoveTimeList] = useState([])
-    const [availabilityStatus, setAvailabilityStatus] = useState([])
+    const [availabilityList, setAvailabilityList] = useState([])
+    const [newDay, setNewDay] = useState([])
     const [error, setError] = useState('')
     const [isUploading, setIsUploading] = useState(false)
     const toast = useToast()
@@ -111,20 +114,19 @@ export default function PackageEditPage({ params }) {
                     }))
 
                     var timeslots = []
-                    var statusList = []
-                    console.log(availabilityInfo);
-
+                    var availabilityList = []
                     availabilityInfo.map((availability) => {
                         timeslots.push(availability.time)
-                        statusList.push(availability.status)
-                        console.log(availability.availabilityid);
-                    })
 
-                    console.log(statusList);
+                        availabilityList.push({
+                            timeslot: availability.time,
+                            availabilityid: availability.availabilityid
+                        })
+                    })
 
                     const sortedTimeStrings = timeslots.sort((starttime, endtime) => SortTime(starttime, endtime))
                     setTimeList(sortedTimeStrings)
-                    setAvailabilityStatus(statusList)
+                    setAvailabilityList(availabilityList)
                     setLoading(false)
                 }
             } else if (packageResCode == 400) {
@@ -164,6 +166,10 @@ export default function PackageEditPage({ params }) {
 
         if (name == "mode") {
             setIsModeSelected(value)
+        }
+
+        if (name == 'day') {
+            setNewDay(value)
         }
     }
 
@@ -224,7 +230,11 @@ export default function PackageEditPage({ params }) {
             if (!isInvalid) {
                 if (!timeList.includes(selectedTime) && timeList.length < 10) {
                     const newTimeslot = timeList.concat(selectedTime);
-                    setTimeList(newTimeslot);
+                    setTimeList(newTimeslot)
+
+                    // add to-be-updated timeslots into the list
+                    const updateTimeslot = newTimeList.concat(selectedTime)
+                    setNewTimeList(updateTimeslot)
                     setError('')
                 } else if (timeList.length >= 10) {
                     setError('Timeslot can\'t exceed 10 slots.')
@@ -237,7 +247,21 @@ export default function PackageEditPage({ params }) {
     }
 
     const handleRemoveTimeslot = (time) => {
-        // find whether the timeslot exists
+
+        // get to-be-removed timeslot index
+        var timeslotIndex
+        availabilityList.map((item, index) => {
+            if (item.timeslot == time) {
+                timeslotIndex = index
+            }
+        })
+
+        // then update toRemoveTimeList
+        var toRemoveTime = availabilityList.splice(timeslotIndex, 1)
+        const updatedToRemoveTimeList = toRemoveTimeList.concat(toRemoveTime)
+        setToRemoveTimeList(updatedToRemoveTimeList)
+
+        // find whether the timeslot exists so can update the timelist to display on the website
         const removeIndex = timeList.indexOf(time);
 
         // only splice array when item is found
@@ -247,23 +271,13 @@ export default function PackageEditPage({ params }) {
             // after that store into the timelist
             const updatedTimeList = [...timeList]
             updatedTimeList.splice(removeIndex, 1)
-
-            const toRemoveTime = timeList.splice(removeIndex, 1)
-            const updatedToRemoveTimeList = toRemoveTimeList.concat(toRemoveTime)
-            setToRemoveTimeList(updatedToRemoveTimeList)
-
-            const updatedStatusList = [...availabilityStatus]
-            updatedStatusList.splice(removeIndex, 1)
-
             setTimeList(updatedTimeList)
-            setAvailabilityStatus(updatedStatusList)
         }
     }
 
     // whenever the timelist changes, filtertimelist gets updated
     useEffect(() => {
         setFilterTimeList(timeList)
-        console.log(availabilityStatus);
     }, [timeList]);
 
     // Trigger updatePackage api and craeteNewAvailability api
@@ -272,7 +286,6 @@ export default function PackageEditPage({ params }) {
         setError("")
 
         if (formData.name != '' && formData.day != '' && formData.price != 0 && filterTimeList.length != 0) {
-
             const bodyData = {
                 packageid: params.packageid,
                 name: formData.name,
@@ -291,42 +304,48 @@ export default function PackageEditPage({ params }) {
             })
 
             const updatePackageResult = await updatePackage.json();
+            console.log(updatePackageResult);
 
             switch (updatePackageResult.code) {
                 case 200:
+                    console.log(newDay);
 
-                    if (timeList != []) {
+                    if (newDay != "" || newTimeList.length != 0) {
                         const updateAvailability = await fetch('http://localhost:3000/api/availability', {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                day: formData.day,
-                                time: filterTimeList,
+                                day: newDay,
+                                newTime: (newTimeList ? newTimeList : filterTimeList),
                                 toRemoveTime: toRemoveTimeList,
-                                status: availabilityStatus,
                                 packageid: params.packageid
                             })
                         })
 
-                        const updateAvailabilityResult = await updateAvailability.json();
+                        const updateAvailabilityResult = await updateAvailability.json()
+                        const result1 = updateAvailabilityResult.addedNewTimeResult
+                        const result2 = updateAvailabilityResult.removedTimeResult
+                        const result3 = updateAvailabilityResult.updatedDay
                         console.log(updateAvailabilityResult);
 
-                        if (updateAvailabilityResult[0].code == 201) {
-                            // clear the value
+                        var newAvailabilityCode = 0
+                        var updatedRemoveAvailabilityCode = 0
+                        var updatedDayCode = 0
+
+                        if (result1.length != 0) {
+                            newAvailabilityCode = result1[0].code
+                        }
+
+                        if (result2.length != 0) {
+                            updatedRemoveAvailabilityCode = result2[0].code
+                        }
+
+                        if (result3) {
+                            updatedDayCode = result3[0].code
+                        }
+
+                        if (newAvailabilityCode == 201 || updatedRemoveAvailabilityCode == 200 || updatedDayCode == 200) {
                             setIsUploading(false)
-                            setFormData({
-                                name: '',
-                                detail: '',
-                                day: '',
-                                mode: '',
-                                address: '',
-                                price: 0
-                            })
-                            setTimeList([])
-                            setTimeValue({
-                                starttime: '',
-                                endtime: ''
-                            })
 
                             // whenever package is successfully updated
                             toast({
@@ -337,10 +356,28 @@ export default function PackageEditPage({ params }) {
                                 isClosable: true,
                             })
 
+                            // push back to the post with package page
                             router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
+                        } else {
+                            setError('Failed to update package data.')
+                            setIsUploading(false)
                         }
                     }
 
+                    // if availability data is not being changed, return success
+                    setIsUploading(false)
+
+                    // whenever package is successfully updated
+                    toast({
+                        title: 'Package is updated.',
+                        status: 'success',
+                        position: 'top-right',
+                        duration: 5000,
+                        isClosable: true,
+                    })
+
+                    // push back to the post with package page
+                    router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
                     break;
                 case 400:
                     setError('Missing required data.')

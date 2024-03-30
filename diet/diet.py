@@ -12,10 +12,8 @@ app_id="70f0b79f"
 app_key="2ad7ba4942b277d6e7b316a5d45c39cc"
 nutrition_type="logging"
 
-@app.route('/diet/all')
-def get_all_meal():
-    traineeid = request.args.get('traineeid')
-
+@app.route('/diet/<int:traineeid>/all')
+def get_all_meal(traineeid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} ORDER BY date_time DESC")
@@ -39,10 +37,9 @@ def get_all_meal():
         "message": "There is no meal."
     })
 
-@app.route('/diet/monthly')
-def get_all_meal_by_month():
+@app.route('/diet/<int:traineeid>/monthly')
+def get_all_meal_by_month(traineeid):
     month = request.args.get('month')
-    traineeid = request.args.get('traineeid')
 
     con = get_db_connection(config)
     cur = con.cursor()
@@ -67,9 +64,8 @@ def get_all_meal_by_month():
         "message": "There is no meal."
     })
 
-@app.route('/diet/average')
-def get_monthly_average():
-    traineeid = request.args.get('traineeid')
+@app.route('/diet/<int:traineeid>/average')
+def get_monthly_average(traineeid):
 
     con = get_db_connection(config)
     cur = con.cursor()

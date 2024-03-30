@@ -10,7 +10,6 @@ export default function DietPage() {
         const fetchMeals = async () => {
             try {
                 const response = await fetch('http://localhost:3000/api/diet/7');
-                console.log('hi')
                 if (!response.ok) {
                     throw new Error('Failed to fetch meals');
                 }

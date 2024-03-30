@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'
 import {
   Center,
   Box,
@@ -18,6 +19,7 @@ import {
 export default function AddMeal() {
   const [foodname, setFoodName] = useState('');
   const [quantity, setQuantity] = useState('');
+  const router = useRouter();
 
   const handleAddMeal = async () => {
 
@@ -46,6 +48,8 @@ export default function AddMeal() {
       console.error('Error:', error);
       // Handle error appropriately
     }
+
+    router.push('/diet')
   };
   
   return (

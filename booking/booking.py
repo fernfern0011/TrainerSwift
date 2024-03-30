@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request
 from config import load_config
 from dbConnection import *
+from flask_cors import CORS
 app = Flask(__name__)  # special variable that will call __main__
-
+CORS(app)
 
 # Post #
 # [GET] getAllPost

@@ -21,10 +21,14 @@ def calculate():
 
     # https://steelsupplements.com/blogs/steel-blog/lean-bulking-macros-everything-you-need-to-know#:~:text=When%20you%20are%20bulking%2C%20the,of%20which%20are%20important%20macros.
 
-    calories_needed = (10 * weight + 6.25 * height - 5 * age - 161) * physical_activity_level * (1.1 if is_bulk else 0.9)
-    protein_needed = weight * (2.5 if is_bulk else 2.2)
-    carbs_needed = weight * (7 if is_bulk else 2)
-    fat_needed = weight * (2 if is_bulk else 1)
+    calories_needed_bulk = (10 * weight + 6.25 * height - 5 * age - 161) * physical_activity_level * 1.1
+    calories_needed_cut = (10 * weight + 6.25 * height - 5 * age - 161) * physical_activity_level * 0.9
+    protein_needed_bulk = weight * 2.5 
+    protein_needed_cut = weight * 2.2
+    carbs_needed_bulk = weight * 7
+    carbs_needed_cut = weight * 2
+    fat_needed_bulk = weight * 2
+    fat_needed_cut = weight * 1
 
     # https://www.omnicalculator.com/health/maintenance-calorie
 
@@ -35,26 +39,50 @@ def calculate():
             {
                 "nutrients": "Calories",
                 "current": average_calories,
-                "target": calories_needed,
-                "diff": average_calories-calories_needed,
+                "target": {
+                    "bulk": calories_needed_bulk,
+                    "cut": calories_needed_cut
+                },
+                "diff": {
+                    "bulk": average_calories-calories_needed_bulk,
+                    "cut": average_calories-calories_needed_cut
+                },
             },
             {
                 "nutrients": "Carbs",
                 "current": average_carbs,
-                "target": carbs_needed,
-                "diff": average_carbs-carbs_needed,
+                "target": {
+                    "bulk": carbs_needed_bulk,
+                    "cut": carbs_needed_cut
+                },
+                "diff": {
+                    "bulk": average_carbs-carbs_needed_bulk,
+                    "cut": average_carbs-carbs_needed_cut
+                },
             },
             {
                 "nutrients": "Protein",
                 "current": average_protein,
-                "target": protein_needed,
-                "diff": average_protein-protein_needed,
+                "target": {
+                    "bulk": protein_needed_bulk,
+                    "cut": protein_needed_cut
+                },
+                "diff": {
+                    "bulk": average_protein-protein_needed_bulk,
+                    "cut": average_protein-protein_needed_cut
+                },
             },
             {
                 "nutrients": "Fats",
                 "current": average_fat,
-                "target": fat_needed,
-                "diff": average_fat-fat_needed,
+                "target": {
+                    "bulk": fat_needed_bulk,
+                    "cut": fat_needed_cut
+                },
+                "diff": {
+                    "bulk": average_fat-fat_needed_bulk,
+                    "cut": average_fat-fat_needed_cut
+                },
             },
         ]
     })

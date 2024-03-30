@@ -108,7 +108,7 @@ export default function PackageCard(data) {
                 <UnorderedList>
                   <ListItem><b>Day:</b> {data.day ? data.day : 'To Be Updated'}</ListItem>
                   <ListItem><b>Mode:</b> {data.mode}</ListItem>
-                  <ListItem><b>Location:</b> {data.address ? data.address : 'To Be Updated'}</ListItem>
+                  {data.mode == 'offline' ? (<ListItem><b>Location:</b> {data.address ? data.address : 'To Be Updated'}</ListItem>) : ""}
                   <ListItem><b>Detail:</b> {data.detail}</ListItem>
                 </UnorderedList>
                 <Box fontSize="22px" ml={25}>

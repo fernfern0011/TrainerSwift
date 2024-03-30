@@ -22,7 +22,6 @@ export async function GET(req, context) {
 
 export async function PUT(req) {
     const { packageid, name, detail, price, mode, address, postid, ispremium } = await req.json()
-    console.log(name, detail, price, mode, address, postid, ispremium);
 
     if (!packageid || !name || !detail || !price || !mode || !postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 

@@ -17,7 +17,7 @@ def websocketchat():
 
     #create connection + send message
     async def connect(message):
-        async with websockets.connect("ws://websocket-server:8765") as websocket:
+        async with websockets.connect("ws://localhost:8765") as websocket:
             await websocket.send(message)
             response = await websocket.recv()
             print("Received", repr(response))
@@ -32,11 +32,19 @@ def websocketchat():
     #test 
     async def main():
         nonlocal data
+        if data["traineeID"].isnumeric() == True:
+            data["traineeID"] = str("trainee" + data["traineeID"])
+        if data["trainerID"].isnumeric() == True:
+            data["trainerID"] = str("trainer" + data["trainerID"])
+
         if (data["connection"] == True):
             print(data)
-            await connect(["trainer",data["traineeID"]+","+ "trainee",data["trainerID"]+","+"connection created"])
+            await connect([data["traineeID"]+","+ data["trainerID"]+","+"connection created"])
         else:
-            await connect(["trainer",data["traineeID"]+","+  "trainee",data["trainerID"]+","+"test message"])
+            if data["sender"] == "trainee":
+                await connect([data["traineeID"]+","+ data["trainerID"]+","+data["message"]])
+            else:
+                await connect([data["trainerID"]+","+ data["traineeID"]+","+data["message"]])
 
     asyncio.run(main())
     return jsonify({"response": "success"})

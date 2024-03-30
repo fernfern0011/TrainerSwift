@@ -395,7 +395,7 @@ def read__availability_by_packageid_query(packageid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f'SELECT * FROM availability WHERE packageid = %s ORDER BY availabilityid ASC;', (packageid, ))
+        f"SELECT * FROM availability WHERE packageid = %s AND status = 'Open' ORDER BY availabilityid ASC;", (packageid, ))
 
     availabilityinfo = cur.fetchall()
     cur.close()

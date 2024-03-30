@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
+import CheckoutReceipt from '../../../components/checkoutReceipt';
 const stripe = require('stripe')('sk_test_51O2p9QFD3c4VDISeYPMwEIN9FUSwgdfeqZpcGhhQ6l7af7xrQAXIJ6mb3bbcRNfJFA2zuOojGGtLukbwuEdmgyqt00MRd5fHHK');
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -116,6 +117,7 @@ export default function Checkout() {
   return (
     <form>
       <section>
+        <CheckoutReceipt/>
         <button type="button" onClick={createCheckoutSession}>
           Checkout
         </button>

@@ -6,6 +6,7 @@ import { React, useState, useEffect } from 'react';
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
+    const [type, setType] = useState('bulk');
 
     useEffect(() => {
         const fetchMeals = async () => {
@@ -75,10 +76,10 @@ export default function DietPage() {
                 <Flex alignItems="center">
                     <Heading size="md" ml={5}>This Month</Heading>
                     <Spacer />
-                    <Button colorScheme="teal" variant="outline" mr={4}>
+                    <Button colorScheme="teal" variant="outline" mr={4} onclick={setType('bulk')}>
                         Bulk
                     </Button>
-                    <Button colorScheme="teal" variant="outline">
+                    <Button colorScheme="teal" variant="outline" onclick={setType('cut')}>
                         Cut
                     </Button>
                 </Flex>
@@ -97,8 +98,8 @@ export default function DietPage() {
                                     <Tr key={index}>
                                         <Td>{item.nutrients}</Td>
                                         <Td isNumeric>{item.current}</Td>
-                                        <Td isNumeric>{item.target}</Td>
-                                        <Td>{item.diff}</Td>
+                                        <Td isNumeric>{ type == 'bulk' ? item.bulk.target : item.cut.target}</Td>
+                                        <Td>{ type == 'bulk' ? item.bulk.diff : item.cut.diff }</Td>
                                     </Tr>
                                 ))}
                             </Tbody>

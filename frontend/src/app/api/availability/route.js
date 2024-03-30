@@ -10,31 +10,33 @@ export async function GET() {
 }
 
 export async function POST(req) {
-    const { day, time, status, packageid } = await req.json()
+    const { day, time, toRemoveTime, status, packageid } = await req.json()
 
     if (!day || time.length == 0 || !status || !packageid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
+    console.log(day, time, toRemoveTime, status, packageid);
+
     try {
-        const responses = await Promise.all(time.map(async (timeItem) => {
-            const res = await fetch(`${DATA_SOURCE_URL}/availability/create`, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                    'API-Key': process.env.DATA_API_KEY
-                },
-                body: JSON.stringify({
-                    day: day,
-                    time: timeItem,
-                    status: status,
-                    packageid: packageid
-                })
-            });
+        // const responses = await Promise.all(time.map(async (timeItem) => {
+        //     const res = await fetch(`${DATA_SOURCE_URL}/availability/create`, {
+        //         method: 'POST',
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //             'API-Key': process.env.DATA_API_KEY
+        //         },
+        //         body: JSON.stringify({
+        //             day: day,
+        //             time: timeItem,
+        //             status: status,
+        //             packageid: packageid
+        //         })
+        //     });
 
-            const result = await res.json()
-            return result
-        }));
+        //     const result = await res.json()
+        //     return result
+        // }));
 
-        return NextResponse.json(responses)
+        return NextResponse.json('responses')
     } catch (error) {
         console.error("Error:", error);
         return NextResponse.json({ "code": 500, "message": error })

@@ -46,7 +46,6 @@ export default function CreateNewPost() {
     const handleSubmit = async () => {
         setIsUploading(true)
         setError("")
-        console.log(formData);
 
         if (formData.title != "" && formData.description != "" && formData.category != "") {
 

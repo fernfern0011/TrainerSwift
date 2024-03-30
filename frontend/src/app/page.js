@@ -12,8 +12,6 @@ export default function Landing() {
       <Hero />
       <Qualities />
       <Contact />
-      <PackageCard />
-      <PostCard />
     </Box>
   )
 }

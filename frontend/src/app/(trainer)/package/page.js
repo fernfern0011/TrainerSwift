@@ -33,7 +33,7 @@ export default function Package() {
       <SimpleGrid columns={3} spacing={4} mt={4}>
         {sampleData.map((data) => (
           <Box key={data.id} width="100%" height="100%">
-            <PackageCard {...data} />
+            {/* <PackageCard {...data} /> */}
           </Box>
         ))}
       </SimpleGrid>

@@ -1,9 +1,8 @@
 from flask import Flask, jsonify, request
 from config import load_config
 from dbConnection import *
-from flask_cors import CORS
+
 app = Flask(__name__)  # special variable that will call __main__
-CORS(app)
 
 # Post #
 # [GET] getAllPost
@@ -492,14 +491,14 @@ def update_availability_status_query():
                 "message": "Failed to update an availability."
             })
 
-# [PUT] updateAvailabilityDay            
+# [PUT] updateAvailabilityDay
 @app.route('/availability/update_day', methods=['PUT'])
 def update_availability_day_query():
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
         cur = con.cursor()
-        
+
         # check if the availability exists
         cur.execute(
             f"SELECT EXISTS(SELECT 1 FROM availability WHERE day = %s AND status = %s AND packageid = %s);", (data['day'], data['status'], data['packageid'], ))
@@ -514,7 +513,7 @@ def update_availability_day_query():
         try:
             # Update an availability status
             cur.execute(f"""UPDATE availability SET day = %s WHERE packageid = %s AND status = %s;""",
-                        (data['day'], data['packageid'], data['status'] ))
+                        (data['day'], data['packageid'], data['status']))
 
             con.commit()
             cur.close()
@@ -528,7 +527,7 @@ def update_availability_day_query():
             return jsonify({
                 "code": 400,
                 "message": "Failed to update an availability."
-            })            
+            })
 
 # [DELETE] deleteAvailability
 @app.route('/availability/<int:availabilityid>', methods=['DELETE'])
@@ -688,21 +687,21 @@ def read_bookedby_by_traineeid_query(traineeid):
         "code": 400,
         "message": "There is no booking."
     })
-    
+
 # [GET] getAllBookedbyDetailsByTraineeid
 @app.route('/trainee/<int:traineeid>/bookedbydetails', methods=['GET'])
 def read_bookedbydetails_by_traineeid_query(traineeid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f'SELECT b.trainerid, a.day, a.time, pa.name, pa.address FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.traineeid = %s;', (traineeid, ))
+        f'SELECT b.trainerid, a.day, a.time, pa.name, pa.address, pa.mode FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.traineeid = %s;', (traineeid, ))
 
     bookedbydetailslist = cur.fetchall()
     cur.close()
     con.close()
-    
+
     bookedbydetailslist_json = [{
-            'trainerid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
+        'trainerid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
 
     if len(bookedbydetailslist):
         return jsonify({
@@ -722,14 +721,14 @@ def read_bookedbydetails_by_trainerid_query(trainerid):
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f'SELECT b.traineeid, a.day, a.time, pa.name, pa.address FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.trainerid = %s;', (trainerid, ))
+        f'SELECT b.traineeid, a.day, a.time, pa.name, pa.address, pa.mode FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.trainerid = %s;', (trainerid, ))
 
     bookedbydetailslist = cur.fetchall()
     cur.close()
     con.close()
-    
+
     bookedbydetailslist_json = [{
-            'traineeid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
+        'traineeid': bookedbydetail[0], 'availability_day': bookedbydetail[1], 'availability_time': bookedbydetail[2], 'package_name': bookedbydetail[3], 'address': bookedbydetail[4]} for bookedbydetail in bookedbydetailslist]
 
     if len(bookedbydetailslist):
         return jsonify({
@@ -741,6 +740,31 @@ def read_bookedbydetails_by_trainerid_query(trainerid):
     return jsonify({
         "code": 400,
         "message": "There is no booking."
+    })
+
+# [GET] getAllCartItems
+@app.route('/trainee/<int:traineeid>/get-all-cartitems', methods=['GET'])
+def get_all_cartitems(traineeid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f'SELECT b.trainerid, b.traineeid, pa.name, pa.price FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.traineeid = %s;', (traineeid, ))
+
+    cartDetails = cur.fetchone()
+    cur.close()
+    con.close()
+
+    if cartDetails:
+        cartDetails_json = {
+            'trainerid': cartDetails[0], 'traineeid': cartDetails[1], 'packagename': cartDetails[2], 'price': (cartDetails[3]*100)}
+
+        return jsonify({
+            "code": 200,
+            "data": cartDetails_json
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no cart items."
     })
 
 # [POST] createNewBookedby

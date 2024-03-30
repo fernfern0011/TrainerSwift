@@ -2,7 +2,7 @@
 import { Card, Flex, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box } from '@chakra-ui/react';
 import { ChatIcon, CalendarIcon } from '@chakra-ui/icons';
 
-export default function BookingCard({booking, traineeDetails}) {
+export default function ClientCard({booking, traineeDetails}) {
 
 
     if (!traineeDetails) {

@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react'
 import React, { useState, useEffect } from "react"
 
-function convertTimeIntoInt(starttime, endtime) {
+function ConvertTimeIntoInt(starttime, endtime) {
     const intStartTime = parseInt(starttime.replace(":", ""))
     const intEndTime = parseInt(endtime.replace(":", ""))
 
@@ -106,7 +106,7 @@ export default function CreateNewPackage() {
                     // Convert time into int
                     const checkStartTime = time.split(" - ")[0]
                     const checkEndTime = time.split(" - ")[1]
-                    const intTimeArray = convertTimeIntoInt(checkStartTime, checkEndTime)
+                    const intTimeArray = ConvertTimeIntoInt(checkStartTime, checkEndTime)
 
                     // Check whether the start time overlaps
                     const checkNewStartTime = parseInt(timeValue.starttime.replace(":", ""))
@@ -125,7 +125,7 @@ export default function CreateNewPackage() {
                     }
                 })
             } else if (timeList.length == 0) {
-                const intTimeArray = convertTimeIntoInt(timeValue.starttime, timeValue.endtime)
+                const intTimeArray = ConvertTimeIntoInt(timeValue.starttime, timeValue.endtime)
 
                 // If starttime is less than endtime
                 if (intTimeArray[0] < intTimeArray[1]) {
@@ -177,7 +177,7 @@ export default function CreateNewPackage() {
         setIsUploading(true)
         setError("")
 
-        if (formData.name != '' && formData.day != '' && formData.price != 0 && timeList.length != 0) {
+        if (formData.name != '' && formData.day != '' && formData.price != 0 && filterTimeList.length != 0) {
 
             const bodyData = {
                 name: formData.name,
@@ -260,7 +260,7 @@ export default function CreateNewPackage() {
                     aria-label='Done'
                     fontSize='36px'
                     icon={<ChevronLeftIcon />}
-                    onClick={() => router.push('/post')}
+                    onClick={() => router.push(`/post/${getPostid.get('postid')}?title=${getTitle.get('title')}`)}
                 />
                 <Heading ml={'30px'}>Create New Package</Heading>
             </Stack>
@@ -393,6 +393,5 @@ export default function CreateNewPackage() {
                 </Button>
             </Stack >
         </Stack >
-
     )
 }

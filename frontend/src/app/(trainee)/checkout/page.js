@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
+import CheckoutReceipt from '../../../components/checkoutReceipt';
 const stripe = require('stripe')('sk_test_51O2p9QFD3c4VDISeYPMwEIN9FUSwgdfeqZpcGhhQ6l7af7xrQAXIJ6mb3bbcRNfJFA2zuOojGGtLukbwuEdmgyqt00MRd5fHHK');
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -14,25 +15,6 @@ export default function Checkout() {
 
   const createCheckoutSession = async () => {
     try {
-
-      // const jsonData = {
-      //   "traineeID": "1",
-      //   "trainerID": "2",
-      //   "packageID": "3",
-      //   "availabilityID": 9
-      // }
-
-      // const microserviceResponse = await fetch('http://localhost:8000/bookingaslotapi/payment', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(jsonData)
-      // });
-
-      // if (!microserviceResponse.ok) {
-      //   throw new Error('Error triggering microservice');
-      // }
 
       const response = await fetch('http://localhost:5000/api/cart/get-all-cartitems');
 
@@ -116,6 +98,7 @@ export default function Checkout() {
   return (
     <form>
       <section>
+        <CheckoutReceipt/>
         <button type="button" onClick={createCheckoutSession}>
           Checkout
         </button>

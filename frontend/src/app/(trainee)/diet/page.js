@@ -9,12 +9,14 @@ export default function DietPage() {
     useEffect(() => {
         const fetchMeals = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/diet');
+                const response = await fetch('http://localhost:3000/api/diet/7');
+                console.log('hi')
                 if (!response.ok) {
                     throw new Error('Failed to fetch meals');
                 }
                 const data = await response.json();
-                setMeals(data.data.bookedby);
+                console.log(data.data.meal)
+                setMeals(data.data.meal);
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
@@ -125,11 +127,11 @@ export default function DietPage() {
                     <Tbody>
                         {meals.map((item, index) => (
                             <Tr key={index}>
-                                <Td>{item.food}</Td>
+                                <Td>{item.foodname}</Td>
                                 <Td isNumeric>{item.quantity}</Td>
-                                <Td isNumeric>{item.carbohydrates}</Td>
+                                <Td isNumeric>{item.carbs}</Td>
                                 <Td isNumeric>{item.protein}</Td>
-                                <Td isNumeric>{item.fats}</Td>
+                                <Td isNumeric>{item.fat}</Td>
                                 <Td isNumeric>{item.calories}</Td>
                                 <Td>
                                     <Center>

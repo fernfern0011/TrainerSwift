@@ -491,6 +491,44 @@ def update_availability_status_query():
                 "message": "Failed to update an availability."
             })
 
+# [PUT] updateAvailabilityDay            
+@app.route('/availability/update_day', methods=['PUT'])
+def update_availability_day_query():
+    if request.method == 'PUT':
+        data = request.get_json()
+        con = get_db_connection(config)
+        cur = con.cursor()
+        
+        # check if the availability exists
+        cur.execute(
+            f"SELECT EXISTS(SELECT 1 FROM availability WHERE day = %s AND status = %s AND packageid = %s);", (data['day'], data['status'], data['packageid'], ))
+        availability_exists = cur.fetchone()[0]
+
+        if availability_exists:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to update. Availability already exists."
+            })
+
+        try:
+            # Update an availability status
+            cur.execute(f"""UPDATE availability SET day = %s WHERE packageid = %s AND status = %s;""",
+                        (data['day'], data['packageid'], data['status'] ))
+
+            con.commit()
+            cur.close()
+            con.close()
+
+            return jsonify({
+                "code": 200,
+                "message": "Availability updated successfully."
+            })
+        except:
+            return jsonify({
+                "code": 400,
+                "message": "Failed to update an availability."
+            })            
+
 # [DELETE] deleteAvailability
 @app.route('/availability/<int:availabilityid>', methods=['DELETE'])
 def delete_availability_query(availabilityid):

@@ -71,7 +71,7 @@ def create_new_trainer_query():
         con = get_db_connection(config)
         cur = con.cursor()
 
-        # Check whether Post ID exists
+        # Check whether account exists
         cur.execute(
             f'SELECT EXISTS(SELECT 1 FROM account WHERE email = %s);', (email, ))
         email_exists = cur.fetchone()[0]
@@ -86,7 +86,7 @@ def create_new_trainer_query():
             # Insert the new trainer into the database
             cur.execute(
                 f"INSERT INTO account (trainerid, username, email, password, name) VALUES (nextval('account_id_seq'), %s, %s, %s, %s) RETURNING trainerid;",
-                (username, email, password, ))
+                (username, email, password, name, ))
 
             # Get the ID of the newly inserted trainer
             new_trainerid = cur.fetchone()[0]
@@ -122,11 +122,18 @@ def update_trainer_query(trainerid):
         data = request.get_json()
         con = get_db_connection(config)
         cur = con.cursor()
+        username = data['username']
+        email = data['email']
+        password = data['password']
+        name = data['name']
 
         try:
-            # Update a post
+            # Update a trainer and trainerinfo
             cur.execute(f"""UPDATE account SET username = %s, email = %s, password = %s, name = %s WHERE trainerid = %s;""",
-                        (data['username'], data['email'], data['password'], data['name'], trainerid, ))
+                        (username, email, password, name, trainerid, ))
+
+            cur.execute(f"""UPDATE info SET name = %s WHERE trainerid = %s;""",
+                        (name, trainerid, ))
 
             con.commit()
             cur.close()

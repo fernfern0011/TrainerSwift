@@ -1,7 +1,7 @@
 'use client'
 import { Box, Flex } from '@chakra-ui/react'
-import BookingCard from '../../../components/bookingCard'
 import SearchBar from '../../../components/searchBar'
+import ClientCard from './../../../components/clientCard';
 
 export default function MyClientPage() {
 
@@ -19,7 +19,7 @@ export default function MyClientPage() {
                 <SearchBar />
             </Flex>
             {sampleData.map((data) => (
-                <BookingCard key={data.id} {...data} />))}
+                <ClientCard key={data.id} {...data} />))}
         </Box>
     )
 }

@@ -17,8 +17,6 @@ def calculate():
     average_protein = float(data["info"]["average_protein"])
     average_fat = float(data["info"]["average_fat"])
 
-    is_bulk = request.args.get('type') == "bulk"
-
     # https://steelsupplements.com/blogs/steel-blog/lean-bulking-macros-everything-you-need-to-know#:~:text=When%20you%20are%20bulking%2C%20the,of%20which%20are%20important%20macros.
 
     calories_needed_bulk = (10 * weight + 6.25 * height - 5 * age - 161) * physical_activity_level * 1.1

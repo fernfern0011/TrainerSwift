@@ -5,6 +5,7 @@ import { React, useState, useEffect } from 'react';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
+    const [calcData, setCalcData] = useState([]);
 
     useEffect(() => {
         const fetchMeals = async () => {
@@ -24,13 +25,11 @@ export default function DietPage() {
         fetchMeals();
     }, []);
 
-    const smallData = [
-        { nutrients: 'Kcal', current: '20g', target: '1g', diff: '-300'},
-        { nutrients: 'Carbs', current: '27g', target: '1.3g', diff: '+300'},
-        { nutrients: 'Protein', current: '27g', target: '1.3g', diff: '+300'},
-        { nutrients: 'Fats', current: '27g', target: '1.3g', diff: '-300'},
-        // Add more sample data as needed
-    ];
+    useEffect(() => {
+        const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
+        const data = 0
+        setCalcData(data);
+    }, []);
 
     // Function to generate an array of dates for the past 7 days
     const generatePastWeekDates = () => {
@@ -94,7 +93,7 @@ export default function DietPage() {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {smallData.map((item, index) => (
+                                {calcData.map((item, index) => (
                                     <Tr key={index}>
                                         <Td>{item.nutrients}</Td>
                                         <Td isNumeric>{item.current}</Td>

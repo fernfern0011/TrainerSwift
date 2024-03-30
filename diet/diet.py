@@ -12,14 +12,13 @@ app_id="70f0b79f"
 app_key="2ad7ba4942b277d6e7b316a5d45c39cc"
 nutrition_type="logging"
 
-@app.route('/diet/all/<string:sort>') # Provide 'calories' or 'date_time' for sort
-def get_all_meal(sort):
-    data = request.get_json()
-    traineeid = data["traineeid"]
+@app.route('/diet/all')
+def get_all_meal():
+    traineeid = request.args.get('traineeid')
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} ORDER BY {sort} DESC")
+    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} ORDER BY date_time DESC")
 
     meallist = cur.fetchall()
     cur.close()
@@ -40,14 +39,14 @@ def get_all_meal(sort):
         "message": "There is no meal."
     })
 
-@app.route('/diet/<string:month>/<string:sort>') # Provide 'January', 'February', etc. for month; 'calories' or 'date_time' for sort
-def get_all_meal_by_month(month, sort):
-    data = request.get_json()
-    traineeid = data["traineeid"]
+@app.route('/diet/monthly')
+def get_all_meal_by_month():
+    month = request.args.get('month')
+    traineeid = request.args.get('traineeid')
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY {sort} DESC")
+    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY date_time DESC")
 
     meallist = cur.fetchall()
     cur.close()
@@ -68,10 +67,9 @@ def get_all_meal_by_month(month, sort):
         "message": "There is no meal."
     })
 
-@app.route('/diet/get_monthly_average')
+@app.route('/diet/average')
 def get_monthly_average():
-    data = request.get_json()
-    traineeid = data["traineeid"]
+    traineeid = request.args.get('traineeid')
 
     con = get_db_connection(config)
     cur = con.cursor()

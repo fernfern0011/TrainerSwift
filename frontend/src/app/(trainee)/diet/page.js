@@ -1,15 +1,27 @@
 "use client"
 import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 
 export default function DietPage() {
-    // Sample data
-    const data = [
-        { food: 'Apple', quantity: '1', carbohydrates: '20g', protein: '1g', fats: '0.5g', calories: '95' },
-        { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
-        { food: 'Banana', quantity: '1', carbohydrates: '27g', protein: '1.3g', fats: '0.4g', calories: '105' },
-    ];
+    const [meals, setMeals] = useState([]);
+
+    useEffect(() => {
+        const fetchMeals = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/diet');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch meals');
+                }
+                const data = await response.json();
+                setMeals(data.data.bookedby);
+            } catch (error) {
+                console.error('Error fetching meals:', error);
+            }
+        };
+
+        fetchMeals();
+    }, []);
 
     const smallData = [
         { nutrients: 'Kcal', current: '20g', target: '1g', diff: '-300'},
@@ -111,7 +123,7 @@ export default function DietPage() {
                         </Tr>
                     </Thead>
                     <Tbody>
-                        {data.map((item, index) => (
+                        {meals.map((item, index) => (
                             <Tr key={index}>
                                 <Td>{item.food}</Td>
                                 <Td isNumeric>{item.quantity}</Td>

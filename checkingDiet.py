@@ -40,7 +40,7 @@ def check_my_diet():
 
 def processDiet(diet):
     traineeExist = False
-    mealAddedSuccessfully = False
+    mealChangedSuccessfully = False
 
     print('\n-----Invoking trainee microservice-----')
     traineeid = diet.get('traineeid', None)
@@ -64,18 +64,25 @@ def processDiet(diet):
         }
     
     print('\n\n-----Invoking diet microservice-----')
-    dietResult = invoke_http(f"{dietURL}/diet/add", method='POST', json=diet)
+    method_used = diet.get('method_used', None)
+
+    if method_used == 'POST':
+        dietResult = invoke_http(f"{dietURL}/diet/add", method='POST', json=diet)
+    elif method_used == 'DELETE':
+        dietResult = invoke_http(f"{dietURL}/diet/delete", method='DELETE', json=diet)
+    elif method_used == 'PUT':
+        dietResult = invoke_http(f"{dietURL}/diet/update", method='PUT', json=diet)
+    
     print("dietResult:", dietResult, '\n')
 
     if dietResult['code'] == 201:
-        mealAddedSuccessfully=True
-        added_meal = dietResult["data"]["foodname"]
-        print(f"Meal {added_meal} added")
+        mealChangedSuccessfully = True
+        print(dietResult["message"])
 
     else:
         return {
             "code": 500,
-            "message": "Meal failed to update."
+            "message": "Meal failed to be processed."
         }
     
     print('\n-----Invoking trainee microservice-----')
@@ -102,8 +109,7 @@ def processDiet(diet):
     "code": 201,
         "data": {
             "traineeExist": traineeExist,
-            "mealAddedSuccessfully": mealAddedSuccessfully,
-            "addedMeal": added_meal,
+            "mealChangedSuccessfully": mealChangedSuccessfully,
             "calcResult": calcResult
         }
     }

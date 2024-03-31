@@ -79,10 +79,10 @@ def get_monthly_average(traineeid):
         return jsonify({
             "code": 200,
             "data": {
-                "average_calories": round(average_value[0], 2),
-                "average_carbs": round(average_value[1], 2),
-                "average_protein": round(average_value[2], 2),
-                "average_fat": round(average_value[3], 2)
+                "average_calories": average_value[0],
+                "average_carbs": average_value[1],
+                "average_protein": average_value[2],
+                "average_fat": average_value[3]
             }
         })
     
@@ -102,10 +102,10 @@ def add_meal():
     calories_URL+=f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
     
     response = invoke_http(calories_URL)
-    calories = round(response['calories'], 2) * quantity
-    carbs = round(response['totalNutrients']['CHOCDF']['quantity'], 2) * quantity
-    protein = round(response['totalNutrients']['PROCNT']['quantity'], 2) * quantity
-    fat = round(response['totalNutrients']['FAT']['quantity'], 2) * quantity
+    calories = response['calories'] * quantity
+    carbs = response['totalNutrients']['CHOCDF']['quantity'] * quantity
+    protein = response['totalNutrients']['PROCNT']['quantity'] * quantity
+    fat = response['totalNutrients']['FAT']['quantity'] * quantity
 
     con = get_db_connection(config)
     cur = con.cursor()
@@ -166,8 +166,8 @@ def delete_meal():
 def update_meal():
     data = request.get_json()
     mealid = data["mealid"]
-    foodname = data["foodname"]
-    quantity = data["quantity"]
+    foodname = data["meal"]["foodname"]
+    quantity = data["meal"]["quantity"]
 
     con = get_db_connection(config)
     cur = con.cursor()
@@ -210,7 +210,7 @@ def update_meal():
         con.close()
 
         return jsonify({
-            "code":200,
+            "code":201,
             "new_meal": updated_meal,
             "message": f"Meal {updated_meal} successfully updated."
         })

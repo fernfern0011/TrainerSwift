@@ -6,6 +6,7 @@ import { React, useState, useEffect } from 'react';
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(null);
     const [type, setType] = useState('bulk');
 
     useEffect(() => {
@@ -42,10 +43,14 @@ export default function DietPage() {
     };
 
     const dates = generatePastWeekDates();
-    const [selectedDate, setSelectedDate] = useState(null);
+    
 
     const handleDateSelect = (date) => {
         setSelectedDate(date);
+    };
+
+    const handleTypeSelect = (type) => {
+        setType(type);
     };
 
     return (
@@ -73,10 +78,10 @@ export default function DietPage() {
                 <Flex alignItems="center">
                     <Heading size="md" ml={5}>This Month</Heading>
                     <Spacer />
-                    <Button colorScheme="teal" variant="outline" mr={4} onclick={setType('bulk')}>
+                    <Button colorScheme="teal" variant="outline" mr={4} onclick={() => handleTypeSelect('bulk')}>
                         Bulk
                     </Button>
-                    <Button colorScheme="teal" variant="outline" onclick={setType('cut')}>
+                        <Button colorScheme="teal" variant="outline" onclick={() => handleTypeSelect('cut')}>
                         Cut
                     </Button>
                 </Flex>

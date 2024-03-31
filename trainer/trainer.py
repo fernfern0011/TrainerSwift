@@ -69,32 +69,27 @@ def verify_account():
         con = get_db_connection(config)
         cur = con.cursor()
 
-        try:
-            # Check whether account exists
-            cur.execute(
-                f'SELECT * FROM account WHERE email = %s AND password = %s;', (email, password, ))
+        # Check whether account exists
+        cur.execute(
+            f'SELECT * FROM account WHERE email = %s AND password = %s;', (email, password, ))
+        trainerInfo = cur.fetchone()
+        cur.close()
+        con.close()
+        
+        if trainerInfo:
+            trainer_json = {"trainerid": trainerInfo[0], "username": trainerInfo[1], "email": trainerInfo[2],
+                            "stripeid": trainerInfo[4], "name": trainerInfo[5]}
 
-            trainerInfo = cur.fetchone()
-            cur.close()
-            con.close()
-            
-            if trainerInfo:
-                trainer_json = {"trainerid": trainerInfo[0], "username": trainerInfo[1], "email": trainerInfo[2],
-                                "stripeid": trainerInfo[4], "name": trainerInfo[5]}
-    
-                return jsonify({
-                    "code": 201,
-                    "data": {
-                        "trainer": trainer_json
-                    }
-                })
-
-        except:
             return jsonify({
-                "code": 400,
-                "message": "Trainer does not exist."
+                "code": 201,
+                "data": {
+                    "trainer": trainer_json
+                }
             })
-
+        return jsonify({
+            "code": 400,
+            "message": "Account does not exist."
+        })
 
 # [POST] createNewTrainer
 @app.route('/trainer/create', methods=['POST'])

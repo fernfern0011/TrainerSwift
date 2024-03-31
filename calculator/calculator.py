@@ -28,6 +28,15 @@ def calculate():
     fat_needed_bulk = weight * 2
     fat_needed_cut = weight * 1
 
+    calories_diff_bulk = average_calories-calories_needed_bulk
+    calories_diff_cut = average_calories-calories_needed_cut
+    carbs_diff_bulk = average_carbs-carbs_needed_bulk
+    carbs_diff_cut = average_carbs-carbs_needed_cut
+    protein_diff_bulk = average_protein-protein_needed_bulk
+    protein_diff_cut = average_protein-protein_needed_cut
+    fat_diff_bulk = average_fat-fat_needed_bulk
+    fat_diff_cut = average_fat-fat_needed_cut
+
     # https://www.omnicalculator.com/health/maintenance-calorie
 
     
@@ -36,50 +45,50 @@ def calculate():
         "data": [
             {
                 "nutrients": "Calories",
-                "current": average_calories,
+                "current": round(average_calories,2),
                 "target": {
-                    "bulk": calories_needed_bulk,
-                    "cut": calories_needed_cut
+                    "bulk": round(calories_needed_bulk,2),
+                    "cut": round(calories_needed_cut,2)
                 },
                 "diff": {
-                    "bulk": average_calories-calories_needed_bulk,
-                    "cut": average_calories-calories_needed_cut
+                    "bulk": round(calories_diff_bulk,2),
+                    "cut": round(calories_diff_cut,2)
                 },
             },
             {
                 "nutrients": "Carbs",
-                "current": average_carbs,
+                "current": round(average_carbs,2),
                 "target": {
-                    "bulk": carbs_needed_bulk,
-                    "cut": carbs_needed_cut
+                    "bulk": round(carbs_needed_bulk,2),
+                    "cut": round(carbs_needed_cut,2)
                 },
                 "diff": {
-                    "bulk": average_carbs-carbs_needed_bulk,
-                    "cut": average_carbs-carbs_needed_cut
+                    "bulk": round(carbs_diff_bulk,2),
+                    "cut": round(carbs_diff_cut,2)
                 },
             },
             {
                 "nutrients": "Protein",
-                "current": average_protein,
+                "current": round(average_protein,2),
                 "target": {
-                    "bulk": protein_needed_bulk,
-                    "cut": protein_needed_cut
+                    "bulk": round(protein_needed_bulk,2),
+                    "cut": round(protein_needed_cut,2)
                 },
                 "diff": {
-                    "bulk": average_protein-protein_needed_bulk,
-                    "cut": average_protein-protein_needed_cut
+                    "bulk": round(protein_diff_bulk,2),
+                    "cut": round(protein_diff_cut,2)
                 },
             },
             {
                 "nutrients": "Fats",
-                "current": average_fat,
+                "current": round(average_fat,2),
                 "target": {
-                    "bulk": fat_needed_bulk,
-                    "cut": fat_needed_cut
+                    "bulk": round(fat_needed_bulk,2),
+                    "cut": round(fat_needed_cut,2)
                 },
                 "diff": {
-                    "bulk": average_fat-fat_needed_bulk,
-                    "cut": average_fat-fat_needed_cut
+                    "bulk": round(fat_diff_bulk,2),
+                    "cut": round(fat_diff_cut,2)
                 },
             },
         ]

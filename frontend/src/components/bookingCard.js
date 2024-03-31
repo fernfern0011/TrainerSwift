@@ -1,6 +1,6 @@
 "use client"
 import { Card, Flex, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box } from '@chakra-ui/react';
-import { ChatIcon, CalendarIcon } from '@chakra-ui/icons';
+import { ChatIcon, CalendarIcon, PhoneIcon } from '@chakra-ui/icons';
 
 export default function BookingCard({booking, traineeDetails}) {
 
@@ -30,9 +30,15 @@ export default function BookingCard({booking, traineeDetails}) {
                                         <ChatIcon ml='5px' />
                                     </Button>
                                     {booking.ispremium && (
-                                        <Button variant='solid' colorScheme='red' as='a' href={'/diet'} >
+                                        <Button variant='solid' colorScheme='red' as='a' href={'/diet'} mr="2%" >
                                             Macro
                                             <CalendarIcon ml='5px' />
+                                        </Button>
+                                    )}
+                                    {traineeDetails.mode == "offline" && (
+                                        <Button variant='solid' colorScheme='red' as='a' href={'/'} >
+                                            Video Chat
+                                            <PhoneIcon ml='5px' />
                                         </Button>
                                     )}
                                 </Flex>

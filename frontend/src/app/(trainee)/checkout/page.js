@@ -16,7 +16,7 @@ export default function Checkout() {
   const createCheckoutSession = async () => {
     try {
 
-      const response = await fetch('http://localhost:5000/api/cart/get-all-cartitems');
+      const response = await fetch('http://localhost:3000/api/cart/1');
 
       if (!response.ok) {
         throw new Error('Error fetching product information');
@@ -25,39 +25,31 @@ export default function Checkout() {
       const stripes = await stripePromise;
       console.log(stripes);      
       const responseData = await response.json();
-      const cartItems = responseData.data;
-      console.log(cartItems)
+      const cartItem = responseData.data;
+      console.log(cartItem)
 
-      const products = [];
+      const productName = cartItem.packagename;
+      const productPrice = parseFloat(cartItem.price);
 
-      for (const cartItem of cartItems) {
-        const productName = cartItem.packagename + " with " + cartItem.trainername;
-        const productPrice = parseFloat(cartItem.price);
+      const product = await stripe.products.create({
+        name: productName,
+      });
 
-        const product = await stripe.products.create({
-          name: productName,
-        });
+      const priceInCents = Math.round(productPrice * 100);
 
-        const priceInCents = Math.round(productPrice * 100);
+      const price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: priceInCents,
+        currency: 'sgd',
+      });
 
-        const price = await stripe.prices.create({
-          product: product.id,
-          unit_amount: priceInCents,
-          currency: 'sgd',
-        });
-
-        products.push({ product, price });
-      }
-
-      const lineItems = products.map((item) => ({
-        price: item.price.id,
+      const lineItems = [{
+        price: price.id,
         quantity: 1,
-      }));
+      }];
 
-      const totalAmount = productData.reduce((total, item) => total + item.price.unit_amount, 0);
-      console.log(totalAmount)
-      const applicationFeeAmount = Math.round(totalAmount * 0.0002 * 100);
-      console.log(applicationFeeAmount)
+      const totalAmount = priceInCents;
+      const applicationFeeAmount = Math.round(totalAmount * 0.0002);
 
       const session = await stripe.checkout.sessions.create({
         line_items: lineItems,
@@ -73,7 +65,7 @@ export default function Checkout() {
         automatic_tax: { enabled: true },
       });
 
-      setProductData(products);
+      setProductData([{ product, price }]);
       setNewSession(session);
 
       // Redirect to the Stripe Checkout page

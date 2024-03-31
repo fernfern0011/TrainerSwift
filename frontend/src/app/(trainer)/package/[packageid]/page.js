@@ -55,6 +55,7 @@ export default function PackageEditPage({ params }) {
     const getTitle = useSearchParams()
     const [loading, setLoading] = useState(false)
     const [isModeSelected, setIsModeSelected] = useState('')
+    const [newAddress, setNewAddress] = useState('')
     const [timeList, setTimeList] = useState([])
     const [newTimeList, setNewTimeList] = useState([])
     const [filterTimeList, setFilterTimeList] = useState([])
@@ -70,7 +71,6 @@ export default function PackageEditPage({ params }) {
         detail: '',
         day: '',
         mode: '',
-        address: '',
         price: 0,
         ispremium: false
     })
@@ -100,10 +100,11 @@ export default function PackageEditPage({ params }) {
                     name: packageInfo.name,
                     detail: packageInfo.detail,
                     mode: packageInfo.mode,
-                    address: packageInfo.address,
                     price: packageInfo.price,
                     ispremium: packageInfo.ispremium
                 })
+
+                setNewAddress(packageInfo.address)
 
                 if (availabilityInfo != []) {
                     setFormData((prevFormData) => ({
@@ -278,6 +279,13 @@ export default function PackageEditPage({ params }) {
         setFilterTimeList(timeList)
     }, [timeList]);
 
+    // whenever the mode changes, address gets updated
+    useEffect(() => {
+        if (isModeSelected == 'online') {
+            setNewAddress('')
+        }
+    }, [formData.mode]);
+
     // Trigger updatePackage api and craeteNewAvailability api
     const handleUpdate = async () => {
         setIsUploading(true)
@@ -290,7 +298,7 @@ export default function PackageEditPage({ params }) {
                 detail: formData.detail,
                 price: formData.price,
                 mode: formData.mode,
-                address: formData.address != '' ? formData.address : '',
+                address: newAddress != '' ? newAddress : '',
                 postid: getPostid.get("postid"),
                 ispremium: formData.ispremium
             }
@@ -348,9 +356,6 @@ export default function PackageEditPage({ params }) {
                         if (newAvailabilityCode == 201 || updatedRemoveAvailabilityCode == 200 || updatedDayCode == 200) {
                             setIsUploading(false)
                             isSuccess = true
-                        } else {
-                            setError('Failed to update package data.')
-                            setIsUploading(false)
                         }
                     }
 
@@ -369,9 +374,6 @@ export default function PackageEditPage({ params }) {
                         if (updateDayResult.code == 200) {
                             setIsUploading(false)
                             isSuccess = true
-                        } else {
-                            setError('Failed to update package data.')
-                            setIsUploading(false)
                         }
                     }
 
@@ -456,9 +458,9 @@ export default function PackageEditPage({ params }) {
                                 </Flex>
 
                                 {/* If Offline mode is selected, address field is shown */}
-                                <FormControl hidden={isModeSelected || formData.mode == 'offline' ? false : true}>
+                                <FormControl hidden={isModeSelected == 'offline' || formData.mode == 'offline' ? false : true}>
                                     <FormLabel fontSize={'24px'}>Address<Text as='sup' color={'red'}>*</Text> </FormLabel>
-                                    <Input type='text' name='address' value={formData.address} placeholder="Type your address..." mb={'20px'} onChange={(e) => handleChange(e)} />
+                                    <Input type='text' name='address' value={newAddress} placeholder="Type your address..." mb={'20px'} onChange={(e) => setNewAddress(e.target.value)} />
                                 </FormControl>
 
                                 <FormControl>

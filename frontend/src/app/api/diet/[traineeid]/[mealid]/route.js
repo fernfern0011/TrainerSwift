@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const DATA_SOURCE_URL = 'http://localhost:8000/dietapi/diet/delete'
+const DATA_SOURCE_URL = 'http://localhost:8000/checkingdietapi/check_my_diet'
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +9,7 @@ export async function DELETE(req) {
 
     const deleteData = {
         mealid: mealid,
+        method_used: "DELETE"
     }
 
     const requestOptions = {
@@ -24,8 +25,9 @@ export async function DELETE(req) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const deleteStatus = await response.json();
-        return NextResponse.json(deleteStatus);
+        const data = await response.json();
+        sessionStorage.setItem('calcData', JSON.stringify(data));
+        return NextResponse.json(data);
 
     } catch (error) {
         console.error('Error:', error);

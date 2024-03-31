@@ -44,7 +44,6 @@ export default function AddMeal() {
       }
       const data = await response.json();
       console.log(data); // Handle response data as needed
-      sessionStorage.setItem('calcData', JSON.stringify(data));
     } catch (error) {
       console.error('Error:', error);
       // Handle error appropriately

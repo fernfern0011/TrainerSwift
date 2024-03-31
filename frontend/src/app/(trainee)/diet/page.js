@@ -7,6 +7,7 @@ export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [refresh, setRefresh] = useState(false);
     const [type, setType] = useState('bulk');
 
     useEffect(() => {
@@ -17,18 +18,20 @@ export default function DietPage() {
                     throw new Error('Failed to fetch meals');
                 }
                 const data = await response.json();
-                console.log(data.data.meal);
+                console.log(data.data.meal)
                 setMeals(data.data.meal);
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
         };
 
-        const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
-        setCalcData(storedCalcData);
-
+        if (JSON.parse(sessionStorage.getItem('calcData')) != null) {
+            const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
+            setCalcData(storedCalcData);
+        }
+        
         fetchMeals();
-    }, []);
+    }, [refresh]);
 
     // Function to generate an array of dates for the past 7 days
     const generatePastWeekDates = () => {
@@ -52,6 +55,34 @@ export default function DietPage() {
     const handleTypeSelect = (type) => {
         setType(type);
     };
+
+    const deleteMeal = async (mealid) => {
+        
+        const deleteData = {
+            mealid: mealid,
+        };
+
+        const requestOptions = {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(deleteData)
+        };
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/diet/7/${mealid}`, requestOptions);
+            if (!response.ok) {
+                throw new Error('Failed to delete meal');
+            }
+            const data = await response.json();
+
+            console.log(data)
+            setRefresh(prevRefresh => !prevRefresh);
+        } catch (error) {
+            console.error('Error deleting meals:', error);
+        }        
+    }
 
     return (
         <Box>
@@ -78,10 +109,10 @@ export default function DietPage() {
                 <Flex alignItems="center">
                     <Heading size="md" ml={5}>This Month</Heading>
                     <Spacer />
-                    <Button colorScheme="teal" variant="outline" mr={4} onclick={() => handleTypeSelect('bulk')}>
+                    <Button colorScheme="teal" variant="outline" mr={4} onClick={() => handleTypeSelect('bulk')}>
                         Bulk
                     </Button>
-                        <Button colorScheme="teal" variant="outline" onclick={() => handleTypeSelect('cut')}>
+                        <Button colorScheme="teal" variant="outline" onClick={() => handleTypeSelect('cut')}>
                         Cut
                     </Button>
                 </Flex>
@@ -137,7 +168,7 @@ export default function DietPage() {
                                 <Td>
                                     <Center>
                                         <EditIcon boxSize={5} mr={2} />
-                                        <DeleteIcon boxSize={5} />
+                                        <DeleteIcon boxSize={5} onClick={() => deleteMeal(item.mealid) } />
                                     </Center>
                                 </Td>
                             </Tr>

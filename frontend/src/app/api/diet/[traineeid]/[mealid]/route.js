@@ -1,26 +1,22 @@
 import { NextResponse } from "next/server";
 
-const DATA_SOURCE_URL = 'http://localhost:8000/checkingdietapi/check_my_diet'
+const DATA_SOURCE_URL = 'http://localhost:8000/dietapi/diet/delete'
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req) {
-    const { traineeid, foodname, quantity } = await req.json()
+export async function DELETE(req) {
+    const { mealid } = await req.json();
 
-    const postData = {
-        traineeid: traineeid,
-        meal: {
-            foodname: foodname,
-            quantity: quantity
-        }
-    };
+    const deleteData = {
+        mealid: mealid,
+    }
 
     const requestOptions = {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(postData)
+        body: JSON.stringify(deleteData)
     };
 
     try {
@@ -28,8 +24,9 @@ export async function POST(req) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const addStatus = await response.json();
-        return NextResponse.json(addStatus);
+        const deleteStatus = await response.json();
+        return NextResponse.json(deleteStatus);
+
     } catch (error) {
         console.error('Error:', error);
         // Handle error appropriately

@@ -57,6 +57,39 @@ def read_trainee_by_id_query(traineeid):
         "message": "There is no trainee."
     })
 
+# [POST] verifyAccount
+@app.route('/trainee/login', methods=['POST'])
+def verify_account():
+    if request.method == 'POST':
+        data = request.get_json()
+        email = data['email']
+        password = data['password']
+
+        con = get_db_connection(config)
+        cur = con.cursor()
+
+        # Check whether account exists
+        cur.execute(
+            f'SELECT * FROM account WHERE email = %s AND password = %s;', (email, password, ))
+        traineeInfo = cur.fetchone()
+        cur.close()
+        con.close()
+        
+        if traineeInfo:
+            trainee_json = {"traineeid": traineeInfo[0], "username": traineeInfo[1], "email": traineeInfo[2],
+                            "stripeid": traineeInfo[4], "name": traineeInfo[5]}
+
+            return jsonify({
+                "code": 201,
+                "data": {
+                    "trainee": trainee_json
+                }
+            })
+        return jsonify({
+            "code": 400,
+            "message": "Account does not exist."
+        })
+
 # [POST] createNewTrainee
 @app.route('/trainee/create', methods=['POST'])
 def create_new_trainee_query():

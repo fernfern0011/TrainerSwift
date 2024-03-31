@@ -16,19 +16,17 @@ export default function DietPage() {
                     throw new Error('Failed to fetch meals');
                 }
                 const data = await response.json();
-                console.log(data.data.meal)
+                console.log(data.data.meal);
                 setMeals(data.data.meal);
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
         };
 
-        fetchMeals();
-    }, []);
-
-    useEffect(() => {
         const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
         setCalcData(storedCalcData);
+
+        fetchMeals();
     }, []);
 
     // Function to generate an array of dates for the past 7 days

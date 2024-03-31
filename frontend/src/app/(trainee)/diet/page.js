@@ -28,7 +28,6 @@ export default function DietPage() {
 
     useEffect(() => {
         const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
-        console.log(storedCalcData);
         setCalcData(storedCalcData);
     }, []);
 
@@ -98,8 +97,8 @@ export default function DietPage() {
                                     <Tr key={index}>
                                         <Td>{item.nutrients}</Td>
                                         <Td isNumeric>{item.current}</Td>
-                                        <Td isNumeric>{ type == 'bulk' ? item.bulk.target : item.cut.target}</Td>
-                                        <Td>{ type == 'bulk' ? item.bulk.diff : item.cut.diff }</Td>
+                                        <Td isNumeric>{ type == 'bulk' ? item.target.bulk : item.target.cut}</Td>
+                                        <Td>{ type == 'bulk' ? item.diff.bulk : item.diff.cut }</Td>
                                     </Tr>
                                 ))}
                             </Tbody>

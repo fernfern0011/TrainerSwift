@@ -2,6 +2,7 @@
 import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
@@ -9,6 +10,7 @@ export default function DietPage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [refresh, setRefresh] = useState(false);
     const [type, setType] = useState('bulk');
+    const router = useRouter();
 
     useEffect(() => {
         const fetchMeals = async () => {
@@ -76,8 +78,8 @@ export default function DietPage() {
                 throw new Error('Failed to delete meal');
             }
             const data = await response.json();
-
             console.log(data)
+            sessionStorage.setItem('calcData', JSON.stringify(data));
             setRefresh(prevRefresh => !prevRefresh);
         } catch (error) {
             console.error('Error deleting meals:', error);
@@ -167,8 +169,12 @@ export default function DietPage() {
                                 <Td isNumeric>{item.calories}</Td>
                                 <Td>
                                     <Center>
-                                        <EditIcon boxSize={5} mr={2} />
-                                        <DeleteIcon boxSize={5} onClick={() => deleteMeal(item.mealid) } />
+                                        <Button colorScheme="teal" variant="outline" as={'a'} href={`/update-meal?mealid=${item.mealid}`} mr="3%">
+                                            <EditIcon boxSize={5} />
+                                        </Button>
+                                        <Button colorScheme="teal" variant="outline" onClick={() => deleteMeal(item.mealid) }>
+                                            <DeleteIcon boxSize={5} />
+                                        </Button>
                                     </Center>
                                 </Td>
                             </Tr>

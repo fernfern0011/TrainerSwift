@@ -4,16 +4,17 @@ const DATA_SOURCE_URL = 'http://localhost:8000/checkingdietapi/check_my_diet'
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req) {
-    const { traineeid, foodname, quantity } = await req.json()
+export async function PUT(req) {
+    const { traineeid, foodname, quantity, mealid } = await req.json()
 
     const postData = {
+        mealid: mealid,
         traineeid: traineeid,
         meal: {
             foodname: foodname,
             quantity: quantity
         },
-        method_used: "POST"
+        method_used: "PUT"
     };
 
     const requestOptions = {

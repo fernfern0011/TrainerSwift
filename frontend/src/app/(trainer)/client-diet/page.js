@@ -1,13 +1,12 @@
 "use client"
-import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
-import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, Thead, Tr, Th, Td, Tbody, Tfoot, Stack } from '@chakra-ui/react';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
-    const [refresh, setRefresh] = useState(false);
     const [type, setType] = useState('bulk');
 
     useEffect(() => {
@@ -23,21 +22,15 @@ export default function DietPage() {
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
-
-            try {
-                const response = await fetch('http://localhost:3000/api/calculator/7');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch calculator data');
-                }
-                const data = await response.json();
-                setCalcData(data.data);
-            } catch (error) {
-                console.error('Error fetching calculator data:', error);
-            }
         };
+
+        if (JSON.parse(sessionStorage.getItem('calcData')) != null) {
+            const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
+            setCalcData(storedCalcData);
+        }
         
         fetchMeals();
-    }, [refresh]);
+    }, []);
 
     // Function to generate an array of dates for the past 7 days
     const generatePastWeekDates = () => {
@@ -62,34 +55,6 @@ export default function DietPage() {
         setType(type);
     };
 
-    const deleteMeal = async (mealid) => {
-        
-        const deleteData = {
-            mealid: mealid,
-        };
-
-        const requestOptions = {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(deleteData)
-        };
-
-        try {
-            const response = await fetch(`http://localhost:3000/api/diet/7/${mealid}`, requestOptions);
-            if (!response.ok) {
-                throw new Error('Failed to delete meal');
-            }
-            const data = await response.json();
-            console.log(data)
-            sessionStorage.setItem('calcData', JSON.stringify(data));
-            setRefresh(prevRefresh => !prevRefresh);
-        } catch (error) {
-            console.error('Error deleting meals:', error);
-        }        
-    }
-
     return (
         <Box>
             <Flex alignItems="center" mt={5}>
@@ -106,9 +71,6 @@ export default function DietPage() {
                                 ))}
                             </MenuList>
                         </Menu>
-                        <Button rightIcon={<AddIcon />} colorScheme="teal" variant="outline" as={'a'} href={'/add-meal'}>
-                            Add Meal
-                        </Button>
                     </Stack>
                 </Box>
                 <Box bg="gray.200" p={4} ml="auto" mr={12} borderRadius="md">
@@ -171,16 +133,6 @@ export default function DietPage() {
                                 <Td isNumeric>{item.protein}</Td>
                                 <Td isNumeric>{item.fat}</Td>
                                 <Td isNumeric>{item.calories}</Td>
-                                <Td>
-                                    <Center>
-                                        <Button colorScheme="teal" variant="outline" as={'a'} href={`/update-meal?mealid=${item.mealid}&foodname=${item.foodname}&quantity=${item.quantity}`} mr="3%">
-                                            <EditIcon boxSize={5} />
-                                        </Button>
-                                        <Button colorScheme="teal" variant="outline" onClick={() => deleteMeal(item.mealid) }>
-                                            <DeleteIcon boxSize={5} />
-                                        </Button>
-                                    </Center>
-                                </Td>
                             </Tr>
                         ))}
                     </Tbody>

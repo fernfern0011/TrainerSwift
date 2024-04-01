@@ -119,4 +119,5 @@ def calculate(traineeid):
     })
 
 if __name__ == "__main__":
+    config = load_config()
     app.run(host="0.0.0.0", port=5000, debug=True)

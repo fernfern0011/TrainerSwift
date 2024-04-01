@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const DATA_SOURCE_URL = 'http://localhost:5000'
+const DATA_SOURCE_URL = 'http://localhost:8000/websocketapi'
 
 export async function GET() {
     const res = await fetch(`${DATA_SOURCE_URL}/getchats`)

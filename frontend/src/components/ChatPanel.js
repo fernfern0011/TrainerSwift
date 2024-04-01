@@ -1,8 +1,12 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Box, Flex, Text, Input, Button } from '@chakra-ui/react';
 import { ChatContext } from '../store/chatStore';
+//import { RootLayout } from "../app/layout";
 
-const ChatMessage = ({ message, currentUser }) => {
+
+
+const ChatMessage = ({ message, currentUser="trainer113" }) => {
+  console.log(currentUser);
   const alignSelf = message.sender_info === currentUser ? 'flex-end' : 'flex-start';
   const messageColor = message.sender_info === currentUser ? 'blue.500' : 'red.500';
   const textColor = message.sender_info === currentUser ? 'white' : 'black';
@@ -22,10 +26,12 @@ const ChatMessage = ({ message, currentUser }) => {
   );
 };
 
-const ChatPanel = () => {
+const ChatPanel = ({trainerinfo,traineeinfo}) => {
   const { selectedChat, sendMessage } = useContext(ChatContext);
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef(null);
+
+  console.log(trainerinfo, traineeinfo);
 
   const scrollToBottom = () => {
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -64,7 +70,8 @@ const ChatPanel = () => {
           <Box flex="1" overflowY="auto" mb="4" display="flex" flexDirection="column-reverse">
             <div ref={messagesEndRef} />
             {selectedChat.messages.slice().reverse().map((message, index) => {
-              const isTrainer = message.sender_info === 'trainer113';
+              const isTrainer = (message.sender_info === 'trainer113');
+              //console.log(message.sender_info === 'trainer113')
               return (
                 <ChatMessage
                   key={index}

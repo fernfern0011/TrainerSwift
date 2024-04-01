@@ -2,8 +2,8 @@
 
 import { Providers } from "./Providers"
 import Navbar from "../components/navbar"
-import TraineeNavbar from "@/components/navbarTrainee"
-import TrainerNavbar from "@/components/navbarTrainer"
+import TraineeNavbar from "../components/navbarTrainee"
+import TrainerNavbar from "../components/navbarTrainer"
 import Footer from "../components/footer"
 import Cookies from 'js-cookie'
 import { useEffect, useState } from "react"
@@ -49,3 +49,5 @@ export default function RootLayout({ children }) {
     </html>
   )
 }
+
+

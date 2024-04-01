@@ -1,0 +1,249 @@
+version: "4.28.0"
+
+volumes:
+  pgdata:
+
+networks:
+  trainerSwift-net:
+    driver: bridge
+    name: trainerSwift-net
+
+services:
+  #######################################
+  # Postgres: The database used by Kong
+  #######################################
+  kong-database:
+    image: postgres:15 # tested 20231101; Ref: https://docs.konghq.com/gateway/latest/support/third-party/
+    restart: always
+    networks:
+      - trainerSwift-net
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  #######################################
+  # Kong database migration
+  #######################################
+  kong-migration:
+    image: kong/kong-gateway:3.2.2.5 # tested 20231101
+    command: "kong migrations bootstrap"
+    restart: on-failure
+    networks:
+      - trainerSwift-net
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+    depends_on:
+      - kong-database
+
+  #######################################
+  # Kong: The API Gateway
+  #######################################
+  kong:
+    image: kong/kong-gateway:3.2.2.5 # tested 20231101
+    restart: always
+    networks:
+      - trainerSwift-net
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+    depends_on:
+      - kong-migration
+    ports: # https://docs.konghq.com/gateway/latest/production/networking/default-ports/
+      - "8000:8000" # Takes incoming HTTP traffic from Consumers, and forwards it to upstream Services.
+      - "8443:8443" # Takes incoming HTTPS traffic from Consumers, and forwards it to upstream Services.
+      - "8001:8001" # Admin API. Listens for calls from the command line over HTTP.
+      - "8444:8444" # Admin API. Listens for calls from the command line over HTTPS.
+      - "8002:8002" # Kong Manager (GUI). Listens for HTTP traffic.
+      - "8445:8445" # Kong Manager (GUI). Listens for HTTPS traffic.
+      - "8003:8003" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
+      - "8446:8446" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
+      - "8004:8004" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.
+      - "8447:8447" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.\
+
+  deck:
+    image: kong/deck
+    container_name: deck
+    environment: 
+      DECK_KONG_ADDR: http://kong:8001
+    depends_on:
+      - kong
+    entrypoint: sh -c "sleep 15 && deck sync --kong-addr http://kong:8001"
+    volumes:
+      - ./kong.yaml:/kong.yaml
+    networks:
+      - trainerSwift-net
+
+  trainee:
+      image: nangkhongkham/trainee:1.0
+      restart: always
+      environment:
+        dbURL: postgresql+psycopg2://default:l6RzivXEm0Ur@ep-falling-cake-a1k7bq9a-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+      networks:
+        - trainerSwift-net
+
+  trainer:
+    image: nangkhongkham/trainer:1.0
+    restart: always
+    environment:
+      dbURL: postgresql+psycopg2://default:s2fbryFa6Yej@ep-old-darkness-a1f9hm2w-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+    networks:
+      - trainerSwift-net
+
+  booking:
+    image: nangkhongkham/booking:1.0
+    restart: always
+    environment:
+      dbURL: postgresql+psycopg2://default:YjmL6GzAh7Wn@ep-rough-water-a1qqu7ye-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+    networks:
+      - trainerSwift-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - trainerSwift-net
+
+  websocket-server:
+    image: melodywong2022/websocket-server:1.2 
+    networks:
+      - trainerSwift-net
+  
+  websocket-client:
+    image: melodywong2022/websocket-client:1.2
+    depends_on:
+      - websocket-server
+    networks:
+      - trainerSwift-net
+
+  notification:
+    image: sathwikch/notification:1.0
+    networks:
+      - trainerSwift-net
+      
+  bookingaslot1:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainee
+      - trainer
+      - booking
+      - rabbitmq
+      - websocket-server
+      - websocket-client
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketServerURL: http://websocket-server:5000
+      websocketClientURL: http://websocket-client:5000
+    networks:
+      - trainerSwift-net
+
+  bookingaslot2:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainee
+      - trainer
+      - booking
+      - rabbitmq
+      - websocket-server
+      - websocket-client
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketServerURL: http://websocket-server:5000
+      websocketClientURL: http://websocket-client:5000
+    networks:
+      - trainerSwift-net
+
+  bookingaslot3:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainee
+      - trainer
+      - booking
+      - rabbitmq
+      - websocket-server
+      - websocket-client
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketServerURL: http://websocket-server:5000
+      websocketClientURL: http://websocket-client:5000
+    networks:
+      - trainerSwift-net
+
+  bookingaslot4:
+    image: dylanchua/bookingaslot:1.0
+    depends_on:
+      - trainee
+      - trainer
+      - booking
+      - rabbitmq
+      - websocket-server
+      - websocket-client
+    environment:
+      traineeURL: http://trainee:5000
+      trainerURL: http://trainer:5000
+      bookingURL: http://booking:5000
+      notificationURL: http://notification:5000
+      websocketServerURL: http://websocket-server:5000
+      websocketClientURL: http://websocket-client:5000
+    networks:
+      - trainerSwift-net
+
+  diet:
+    image: marcokuok/diet:1.0
+    restart: always
+    environment:
+      dbURL: postgresql+psycopg2://default:Bp4Y7dJRPtuf@ep-white-shadow-a1u84a9p-pooler.ap-southeast-1.aws.neon.tech:5432/verceldb
+    networks:
+      - trainerSwift-net
+
+  calculator:
+    image: marcokuok/calculator:1.0
+    restart: always
+    networks:
+      - trainerSwift-net
+      
+  checkingdiet:
+    image: marcokuok/checkingdiet:1.0
+    depends_on:
+      - diet
+      - calculator
+      - trainee
+    environment:
+      dietURL: http://diet:5000
+      calcURL: http://calculator:5000
+      traineeURL: http://trainee:5000
+    networks:
+      - trainerSwift-net
+

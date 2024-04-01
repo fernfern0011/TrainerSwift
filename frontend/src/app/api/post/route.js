@@ -6,7 +6,13 @@ const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req) {
+    const url = new URL(req.url)
+    const searchParam = new URLSearchParams(url.searchParams)
+    const trainerid = searchParam.get('trainerid')
+
+    if (!trainerid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
+
     try {
         const headersInstance = headers()
         const authHeader = headersInstance.get('Authorization')
@@ -19,10 +25,10 @@ export async function GET() {
         } else if (decoded.exp < Math.floor(Date.now() / 1000)) {
             return NextResponse.json({ "code": 400, "message": "Expired" })
         } else {
-            const res = await fetch(`${DATA_SOURCE_URL}/post`)
-            const getAllPost = await res.json()
+            const res = await fetch(`${DATA_SOURCE_URL}/trainer/${trainerid}/post`)
+            const getAllPostByTrainerid = await res.json()
 
-            return NextResponse.json(getAllPost)
+            return NextResponse.json(getAllPostByTrainerid)
         }
     } catch (error) {
         console.error('Token verification failed', error)
@@ -47,6 +53,32 @@ export async function POST(req) {
             category: category,
             trainerid: trainerid,
             image: image
+        })
+    })
+
+    const result = await res.json()
+    return NextResponse.json(result)
+}
+
+export async function PUT(req) {
+    const { title, description, category, image, trainerid, postid } = await req.json()
+
+    console.log(title, description, category, image, trainerid, postid);
+
+    if (!title || !description || !category || !trainerid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
+
+    const res = await fetch(`${DATA_SOURCE_URL}/post/${postid}`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            'API-Key': process.env.DATA_API_KEY
+        },
+        body: JSON.stringify({
+            title: title,
+            description: description,
+            category: category,
+            image: image,
+            trainerid: trainerid
         })
     })
 

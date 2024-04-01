@@ -9,9 +9,9 @@ export async function GET(req, context) {
 
     if (!postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
-    const res = await fetch(`${DATA_SOURCE_URL}/post/${postid}`)
-    const getPost = await res.json()
+    const res = await fetch(`${DATA_SOURCE_URL}/post/${postid}/package`)
+    const getPackage = await res.json()
 
-    return NextResponse.json(getPost)
+    return NextResponse.json(getPackage)
 }
 

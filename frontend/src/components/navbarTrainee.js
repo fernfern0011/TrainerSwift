@@ -20,7 +20,7 @@ import {
   Text
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Cookies from 'js-cookie'
 
 const Links = ['Search Trainer', 'My Bookings', 'Payment History'];
@@ -66,7 +66,11 @@ export default function TraineeNavbar(traineeinfo) {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={'center'}>
-            <Box color={'white'}>Trainer Swift</Box>
+            <Link href={'/'}>
+              <Box color={'white'}>
+                Trainer Swift
+              </Box>
+            </Link>
             <HStack color={'white'} as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
               {Links.map((link) => (
                 <NavLink key={link}>{link}</NavLink>

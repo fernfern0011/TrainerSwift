@@ -1,11 +1,13 @@
 "use client"
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box, HStack, Tag, Spinner, useToast } from '@chakra-ui/react';
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 
-export default function trainerPostCard(data) {
+export default function TrainerPostCard(data) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const toast = useToast()
 
@@ -51,13 +53,14 @@ export default function trainerPostCard(data) {
   }
 
   return (
-
-    <Box m={'auto'} >
+    <Box m={'auto'} width={'full'} minH={'260px'}>
       {loading ? <Spinner /> :
         <Card
           direction={{ base: 'column', sm: 'row' }}
           overflow='hidden'
           variant='outline'
+          minH={'inherit'}
+          justifyContent={'space-between'}
           id={data.postid}
         >
           <Stack>
@@ -75,7 +78,7 @@ export default function trainerPostCard(data) {
 
             <CardFooter alignItems={'center'}>
               <Link href={{
-                pathname: `/post/${data.postid}`,
+                pathname: `/post/${data.postid}/package`,
                 query: { title: data.title }
               }}>
                 <Button variant='solid' colorScheme='red' mr={5}>
@@ -83,7 +86,7 @@ export default function trainerPostCard(data) {
                   <ArrowForwardIcon mt={0.5} ml={1} />
                 </Button>
               </Link>
-              <EditIcon boxSize={5} mr={'15px'} cursor={'pointer'} />
+              <EditIcon boxSize={5} mr={'15px'} cursor={'pointer'} onClick={() => router.push(`/post/${data.postid}`)} />
               <DeleteIcon boxSize={5} onClick={() => handleDelete(data.postid)} cursor={'pointer'} />
             </CardFooter>
           </Stack>

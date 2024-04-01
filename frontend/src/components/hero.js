@@ -1,40 +1,30 @@
 import {
-    Flex,
-    Container,
-    Heading,
-    Stack,
-    Text,
-    Button,
-    Icon,
-    Box
-  } from '@chakra-ui/react'
-  
-  import backgroundImage from '../assets/gym_img.png'
-  
-  export default function Hero() {
-    return (
-      <Box
-        bgImage={`url(${backgroundImage})`}
-        // bgColor={'#0c6ff0'}
-        bgSize="cover"
-        minH="500px"
-        blur={'2px'}
-      >
+  Container,
+  Heading,
+  Stack,
+  Button,
+  Box
+} from '@chakra-ui/react'
+
+export default function Hero() {
+  return (
+    <Box
+      bgImage={`url(/assets/img/gym_img.png)`}
+      bgSize="fill"
+      minH="500px"
+    >
       <Container maxW={'5xl'} minH={'500px'}>
         <Stack
-          textAlign={'center'}
           align={'center'}
           spacing={{ base: '200px', md: '45px' }}
-          py={{ base: 24, md: '182px'}}
+          py={{ base: 24, md: '182px' }}
           minH={'100%'}>
-
-        <Heading
-          fontWeight={700}
-          fontSize={{ base: '3xl', sm: '4xl', md: '6xl' }}
-          color={'black'}
-          lineHeight={'110%'}>
-          JOIN US TODAY!{' '}
-        </Heading>
+          <Heading
+            fontWeight={700}
+            fontSize={{ base: '3xl', sm: '4xl', md: '6xl' }}
+            color={'black'}>
+            JOIN US TODAY!
+          </Heading>
           <Stack spacing={6} direction={'row'}>
             <Button
               as={'a'}
@@ -52,6 +42,6 @@ import {
           </Stack>
         </Stack>
       </Container>
-      </Box>
-    )
-  }
+    </Box>
+  )
+}

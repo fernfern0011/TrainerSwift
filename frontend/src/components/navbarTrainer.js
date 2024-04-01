@@ -19,7 +19,8 @@ import {
   Center
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-
+import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'
 
 const Links = ['My Packages', 'My Clients', 'My Broadcasts'];
 
@@ -40,8 +41,19 @@ const NavLink = ({ children }) => {
   );
 };
 
-export default function Simple() {
+export default function TraineeNavbar() {
+  const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleLogout = () => {
+    // clear session cookie
+    Cookies.remove('token');
+    Cookies.remove('trainerinfo')
+
+    // redirect to the main page
+    router.push('/');
+    window.location.reload();
+  };
 
   return (
     <>
@@ -90,7 +102,9 @@ export default function Simple() {
                   </Center>
                   <br />
                   <MenuDivider />
-                  <MenuItem>Logout</MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    Logout
+                  </MenuItem>
                 </MenuList>
               </Menu>
             </Stack>

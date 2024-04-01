@@ -132,7 +132,7 @@ def update_post_query(postid):
         try:
             # Update a post
             cur.execute(f"""UPDATE post SET title = %s, description = %s, category = %s, image = %s WHERE trainerid = %s AND postid = %s;""",
-                        (data['title'], data['description'], data['category'], data['trainerid'], data['image'], postid, ))
+                        (data['title'], data['description'], data['category'], data['image'], data['trainerid'], postid, ))
 
             con.commit()
             cur.close()

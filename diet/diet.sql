@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS meal;
 
 CREATE TABLE IF NOT EXISTS meal(
-    clientid INTEGER NOT NULL,
+    traineeid INTEGER NOT NULL,
     mealid SERIAL NOT NULL PRIMARY KEY,
     foodname TEXT NOT NULL,
     quantity INTEGER NOT NULL,

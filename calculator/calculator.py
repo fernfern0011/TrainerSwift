@@ -14,7 +14,7 @@ def recent(traineeid):
     cur = con.cursor()
     cur.execute(f"SELECT * FROM calculator WHERE traineeid={traineeid}")
 
-    calc = cur.fetchall()
+    calc = cur.fetchall()[0]
     cur.close()
     con.close()
 

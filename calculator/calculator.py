@@ -97,15 +97,6 @@ def calculate(traineeid):
     fat_needed_bulk = weight * 2
     fat_needed_cut = weight * 1
 
-    calories_diff_bulk = average_calories-calories_needed_bulk
-    calories_diff_cut = average_calories-calories_needed_cut
-    carbs_diff_bulk = average_carbs-carbs_needed_bulk
-    carbs_diff_cut = average_carbs-carbs_needed_cut
-    protein_diff_bulk = average_protein-protein_needed_bulk
-    protein_diff_cut = average_protein-protein_needed_cut
-    fat_diff_bulk = average_fat-fat_needed_bulk
-    fat_diff_cut = average_fat-fat_needed_cut
-
     # https://www.omnicalculator.com/health/maintenance-calorie
 
 

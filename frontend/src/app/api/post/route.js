@@ -1,14 +1,33 @@
-import { NextResponse } from "next/server";
+import jwt from 'jsonwebtoken'
+import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 
 const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const res = await fetch(`${DATA_SOURCE_URL}/post`)
-    const getAllPost = await res.json()
+    try {
+        const headersInstance = headers()
+        const authHeader = headersInstance.get('Authorization')
 
-    return NextResponse.json(getAllPost)
+        const token = authHeader.split(' ')[1]
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        if (!decoded) {
+            return NextResponse.json({ "code": 400, "message": "Expired" })
+        } else if (decoded.exp < Math.floor(Date.now() / 1000)) {
+            return NextResponse.json({ "code": 400, "message": "Expired" })
+        } else {
+            const res = await fetch(`${DATA_SOURCE_URL}/post`)
+            const getAllPost = await res.json()
+
+            return NextResponse.json(getAllPost)
+        }
+    } catch (error) {
+        console.error('Token verification failed', error)
+        return NextResponse.json({ "code": 400, "message": "Unauthorized" })
+    }
 }
 
 export async function POST(req) {
@@ -37,7 +56,7 @@ export async function POST(req) {
 
 export async function DELETE(req) {
     const { postid } = await req.json()
-    
+
     if (!postid) return NextResponse.json({ "code": 400, "message": "Failed to delete post" })
 
     const res = await fetch(`${DATA_SOURCE_URL}/post/${postid}`, {

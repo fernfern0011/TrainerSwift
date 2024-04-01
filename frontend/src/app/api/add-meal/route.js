@@ -12,7 +12,8 @@ export async function POST(req) {
         meal: {
             foodname: foodname,
             quantity: quantity
-        }
+        },
+        method_used: "POST"
     };
 
     const requestOptions = {
@@ -28,8 +29,9 @@ export async function POST(req) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const addStatus = await response.json();
-        return NextResponse.json(addStatus);
+        const data = await response.json();
+        sessionStorage.setItem('calcData', JSON.stringify(data));
+        return NextResponse.json(data);
     } catch (error) {
         console.error('Error:', error);
         // Handle error appropriately

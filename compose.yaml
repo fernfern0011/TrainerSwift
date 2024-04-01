@@ -119,13 +119,27 @@ services:
       - trainerSwift-net
 
   rabbitmq:
-    image: rabbitmq:3-management
-    restart: always
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=default
+      - RABBITMQ_DEFAULT_PASS=default
     ports:
-      - "15672:15672"
       - "5672:5672"
-    networks:
-      - trainerSwift-net
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    
+  stripe-service:
+    image: sathwikch/stripe-service:1.0
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   websocket-server:
     image: dylanchua/websocket-server:1.0 

@@ -124,56 +124,7 @@ def calculate(traineeid):
     
     return jsonify({
         "code": 200,
-        "data": [
-            {
-                "nutrients": "Calories",
-                "current": round(average_calories,2),
-                "target": {
-                    "bulk": round(calories_needed_bulk,2),
-                    "cut": round(calories_needed_cut,2)
-                },
-                "diff": {
-                    "bulk": round(calories_diff_bulk,2),
-                    "cut": round(calories_diff_cut,2)
-                },
-            },
-            {
-                "nutrients": "Carbs",
-                "current": round(average_carbs,2),
-                "target": {
-                    "bulk": round(carbs_needed_bulk,2),
-                    "cut": round(carbs_needed_cut,2)
-                },
-                "diff": {
-                    "bulk": round(carbs_diff_bulk,2),
-                    "cut": round(carbs_diff_cut,2)
-                },
-            },
-            {
-                "nutrients": "Protein",
-                "current": round(average_protein,2),
-                "target": {
-                    "bulk": round(protein_needed_bulk,2),
-                    "cut": round(protein_needed_cut,2)
-                },
-                "diff": {
-                    "bulk": round(protein_diff_bulk,2),
-                    "cut": round(protein_diff_cut,2)
-                },
-            },
-            {
-                "nutrients": "Fats",
-                "current": round(average_fat,2),
-                "target": {
-                    "bulk": round(fat_needed_bulk,2),
-                    "cut": round(fat_needed_cut,2)
-                },
-                "diff": {
-                    "bulk": round(fat_diff_bulk,2),
-                    "cut": round(fat_diff_cut,2)
-                },
-            },
-        ]
+        "data": "Calculated successfully"
     })
 
 if __name__ == "__main__":

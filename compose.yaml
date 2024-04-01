@@ -135,8 +135,8 @@ services:
     
   stripe-service:
     image: sathwikch/stripe-service:1.0
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     depends_on:
       rabbitmq:
         condition: service_healthy

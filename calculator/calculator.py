@@ -8,7 +8,7 @@ CORS(app)
 
 physical_activity_level = 1.6
 
-@app.route('/<int:traineeid>/calculator', methods=['GET'])
+@app.route('/calculator/<int:traineeid>', methods=['GET'])
 def recent(traineeid):
     con = get_db_connection(config)
     cur = con.cursor()
@@ -20,44 +20,44 @@ def recent(traineeid):
 
     calcList_json = {
         "nutrients": "Calories",
-        "current": calc[1],
+        "current": round(calc[1],2),
         "target":{
-            "bulk": calc[5],
-            "cut": calc[9]
+            "bulk": round(calc[5],2),
+            "cut": round(calc[9],2)
         },
         "diff":{
-            "bulk": calc[1]-calc[5],
-            "cut": calc[1]-calc[9]
+            "bulk": round(calc[1]-calc[5],2),
+            "cut": round(calc[1]-calc[9],2)
         },
         "nutrients": "Carbs",
-        "current": calc[2],
+        "current": round(calc[2],2),
         "target":{
-            "bulk": calc[6],
-            "cut": calc[10]
+            "bulk": round(calc[6],2),
+            "cut": round(calc[10],2)
         },
         "diff":{
-            "bulk": calc[2]-calc[6],
-            "cut": calc[2]-calc[10]
+            "bulk": round(calc[2]-calc[6],2),
+            "cut": round(calc[2]-calc[10],2)
         },
         "nutrients": "Protein",
-        "current": calc[3],
+        "current": round(calc[3],2),
         "target":{
-            "bulk": calc[7],
-            "cut": calc[11]
+            "bulk": round(calc[7],2),
+            "cut": round(calc[11],2)
         },
         "diff":{
-            "bulk": calc[3]-calc[7],
-            "cut": calc[3]-calc[11]
+            "bulk": round(calc[3]-calc[7],2),
+            "cut": round(calc[3]-calc[11],2)
         },
         "nutrients": "Fat",
-        "current": calc[4],
+        "current": round(calc[4],2),
         "target":{
-            "bulk": calc[8],
-            "cut": calc[12]
+            "bulk": round(calc[8],2),
+            "cut": round(calc[12],2)
         },
         "diff":{
-            "bulk": calc[4]-calc[8],
-            "cut": calc[4]-calc[12]
+            "bulk": round(calc[4]-calc[8],2),
+            "cut": round(calc[4]-calc[12],2)
         }
     }
 
@@ -72,8 +72,8 @@ def recent(traineeid):
         "message": "There is no data."
     })
 
-@app.route('/calculator', methods=["POST"])
-def calculate():
+@app.route('/calculator/<int:traineeid>', methods=["POST"])
+def calculate(traineeid):
     data = request.get_json()
     weight = data["weight"]
     height = data["height"]
@@ -82,6 +82,9 @@ def calculate():
     average_carbs = float(data["info"]["average_carbs"])
     average_protein = float(data["info"]["average_protein"])
     average_fat = float(data["info"]["average_fat"])
+
+    con = get_db_connection(config)
+    cur = con.cursor()
 
     # https://steelsupplements.com/blogs/steel-blog/lean-bulking-macros-everything-you-need-to-know#:~:text=When%20you%20are%20bulking%2C%20the,of%20which%20are%20important%20macros.
 
@@ -104,6 +107,19 @@ def calculate():
     fat_diff_cut = average_fat-fat_needed_cut
 
     # https://www.omnicalculator.com/health/maintenance-calorie
+
+
+    cur.execute(f'SELECT EXISTS(SELECT 1 FROM calculator WHERE traineeid=%s);', (traineeid,))
+    trainee_exists = cur.fetchone()[0]
+
+    if trainee_exists:
+        cur.execute(f"UPDATE meal SET current_calories=%s, current_carbs=%s, current_protein=%s, current_fat=%s, target_calories_bulk=%s, target_carbs_bulk=%s, target_protein_bulk=%s, target_fat_bulk=%s, target_calories_cut=%s, target_carbs_cut=%s, target_protein_cut=%s, target_fat_cut=%s WHERE traineeid = %s",(average_calories, average_carbs, average_protein, average_fat, calories_needed_bulk, protein_needed_bulk, carbs_needed_bulk, fat_needed_bulk, calories_needed_cut, protein_needed_cut, carbs_needed_cut, fat_needed_cut, traineeid, ))
+    else:
+        cur.execute(f"INSERT INTO calculator (traineeid, current_calories, current_carbs, current_protein, current_fat, target_calories_bulk, target_carbs_bulk, target_protein_bulk, target_fat_bulk, target_calories_cut, target_carbs_cut, target_protein_cut, target_fat_cut) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (traineeid, average_calories, average_carbs, average_protein, average_fat, calories_needed_bulk, protein_needed_bulk, carbs_needed_bulk, fat_needed_bulk, calories_needed_cut, protein_needed_cut, carbs_needed_cut, fat_needed_cut, ))
+
+
+    cur.close()
+    con.close()
 
     
     return jsonify({

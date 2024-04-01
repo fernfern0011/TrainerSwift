@@ -16,7 +16,7 @@ def read_all_trainee_query():
     con.close()
 
     traineelist_json = [{"traineeid": trainee[0], "username": trainee[1], "email": trainee[2],
-                         "password": trainee[3], "created_timestamp": trainee[4]} for trainee in traineelist]
+                         "password": trainee[3], "name": trainee[4], "created_timestamp": trainee[5]} for trainee in traineelist]
 
     if len(traineelist):
         return jsonify({
@@ -44,7 +44,7 @@ def read_trainee_by_id_query(traineeid):
 
     if trainee:
         trainee_json = {"traineeid": trainee[0], "username": trainee[1], "email": trainee[2],
-                        "password": trainee[3], "created_timestamp": trainee[4]}
+                        "password": trainee[3], "name": trainee[4], "created_timestamp": trainee[5]}
 
         return jsonify({
             "code": 200,
@@ -74,10 +74,10 @@ def verify_account():
         traineeInfo = cur.fetchone()
         cur.close()
         con.close()
-        
+
         if traineeInfo:
             trainee_json = {"traineeid": traineeInfo[0], "username": traineeInfo[1], "email": traineeInfo[2],
-                            "stripeid": traineeInfo[4], "name": traineeInfo[5]}
+                            "name": traineeInfo[4]}
 
             return jsonify({
                 "code": 201,
@@ -98,6 +98,7 @@ def create_new_trainee_query():
         username = data['username']
         email = data['email']
         password = data['password']
+        name = data['name']
 
         con = get_db_connection(config)
         cur = con.cursor()
@@ -116,23 +117,23 @@ def create_new_trainee_query():
         try:
             # Insert the new trainee into the database
             cur.execute(
-                f"INSERT INTO account (traineeid, username, email, password) VALUES (nextval('account_id_seq'), %s, %s, %s) RETURNING traineeid;",
-                (username, email, password, ))
+                f"INSERT INTO account (traineeid, username, email, password, name) VALUES (nextval('account_id_seq'), %s, %s, %s, %s) RETURNING traineeid;",
+                (username, email, password, name, ))
 
             # Get the ID of the newly inserted trainee
             new_traineeid = cur.fetchone()[0]
 
             if new_traineeid:
                 # Insert the new trainee id into info database
-                cur.execute(f"INSERT INTO info (traineeid) VALUES (%s) RETURNING traineeid;",
-                            (new_traineeid, ))
-                
+                cur.execute(f"INSERT INTO info (traineeid, name) VALUES (%s, %s) RETURNING traineeid;",
+                            (new_traineeid, name, ))
+
                 confirmed_new_traineeid = cur.fetchone()[0]
 
                 con.commit()
                 cur.close()
                 con.close()
-                
+
                 return jsonify({
                     "code": 201,
                     "new_traineeid": confirmed_new_traineeid,
@@ -155,8 +156,8 @@ def update_trainee_query(traineeid):
 
         try:
             # Update a post
-            cur.execute(f"""UPDATE account SET username = %s, email = %s, password = %s WHERE traineeid = %s;""",
-                        (data['username'], data['email'], data['password'], traineeid, ))
+            cur.execute(f"""UPDATE account SET username = %s, email = %s, password = %s, name = %s WHERE traineeid = %s;""",
+                        (data['username'], data['email'], data['password'], data['name'], traineeid, ))
 
             con.commit()
             cur.close()
@@ -211,7 +212,7 @@ def read_all_traineeinfo_query():
     con.close()
 
     traineeinfolist_json = [{"traineeid": traineeinfo[0], "height": traineeinfo[1], "weight": traineeinfo[2],
-                         "age": traineeinfo[3], "created_timestamp": traineeinfo[4]} for traineeinfo in traineeinfolist]
+                             "age": traineeinfo[3], "name": traineeinfo[4], "created_timestamp": traineeinfo[5]} for traineeinfo in traineeinfolist]
 
     if len(traineeinfolist):
         return jsonify({
@@ -223,9 +224,11 @@ def read_all_traineeinfo_query():
     return jsonify({
         "code": 400,
         "message": "There is no trainee information."
-    })  
+    })
 
 # [GET] getOneTraineeInfo
+
+
 @app.route('/traineeinfo/<int:traineeid>', methods=['GET'])
 def read_traineeinfo_by_id_query(traineeid):
     con = get_db_connection(config)
@@ -238,7 +241,8 @@ def read_traineeinfo_by_id_query(traineeid):
     con.close()
 
     if traineeinfo:
-        traineeinfo_json = {"traineeid": traineeinfo[0], "height": traineeinfo[1], "weight": traineeinfo[2], "age": traineeinfo[3], "created_timestamp": traineeinfo[4]}
+        traineeinfo_json = {"traineeid": traineeinfo[0], "height": traineeinfo[1],
+                            "weight": traineeinfo[2], "age": traineeinfo[3], "name": traineeinfo[4], "created_timestamp": traineeinfo[5]}
 
         return jsonify({
             "code": 200,
@@ -250,7 +254,7 @@ def read_traineeinfo_by_id_query(traineeid):
         "code": 400,
         "message": "There is no trainee information."
     })
-    
+
 # [PUT] updateTraineeInfo
 @app.route('/traineeinfo/<int:traineeid>', methods=['PUT'])
 def update_traineeinfo_by_id_query(traineeid):
@@ -261,7 +265,7 @@ def update_traineeinfo_by_id_query(traineeid):
 
         # Check whether Trainee ID exists
         cur.execute(
-             f'SELECT EXISTS(SELECT 1 FROM info WHERE traineeid = %s);', (traineeid, ))
+            f'SELECT EXISTS(SELECT 1 FROM info WHERE traineeid = %s);', (traineeid, ))
         traineeid_exists = cur.fetchone()[0]
 
         if not traineeid_exists:
@@ -269,11 +273,11 @@ def update_traineeinfo_by_id_query(traineeid):
                 "code": 400,
                 "message": "Failed to update. Account does not exist"
             })
-            
+
         try:
             # Update the trainee info into the database
-            cur.execute(f"""UPDATE info SET height = %s, weight = %s, age = %s WHERE traineeid = %s;""",
-                (data['height'], data['weight'], data['age'], traineeid, ))
+            cur.execute(f"""UPDATE info SET height = %s, weight = %s, age = %s, name = %s WHERE traineeid = %s;""",
+                        (data['height'], data['weight'], data['age'], data['name'], traineeid, ))
 
             con.commit()
             cur.close()
@@ -287,7 +291,8 @@ def update_traineeinfo_by_id_query(traineeid):
             return jsonify({
                 "code": 400,
                 "message": "Failed to update trainee information."
-            })    
+            })
+
 
 if __name__ == '__main__':
     config = load_config()

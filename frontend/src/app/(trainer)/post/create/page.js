@@ -18,7 +18,9 @@ export default function CreateNewPost() {
 
     const [formData, setFormData] = useState({
         title: '',
-        content: ''
+        description: '',
+        category: '',
+        trainerid: '10'
     })
 
     const handleChange = (e) => {
@@ -45,7 +47,7 @@ export default function CreateNewPost() {
         setIsUploading(true)
         setError("")
 
-        if (formData.title != "" && formData.content != "") {
+        if (formData.title != "" && formData.description != "" && formData.category != "") {
 
             try {
 
@@ -61,15 +63,18 @@ export default function CreateNewPost() {
 
                 // If image successfully uploaded
                 if (data.success == true) {
+                    const s3ObjectURL = 'https://trainerswift-web-storage.s3.ap-southeast-1.amazonaws.com/post/'
+
                     // To call createNewPost api
                     const createNewPost = await fetch('http://localhost:3000/api/post', {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             title: formData.title,
-                            description: formData.content,
-                            category: "Test",
-                            trainerid: "10"
+                            description: formData.description,
+                            category: formData.category,
+                            trainerid: formData.trainerid,
+                            image: s3ObjectURL + data.fileName
                         })
                     })
 
@@ -78,7 +83,7 @@ export default function CreateNewPost() {
                     if (result.code == 201) {
                         setIsUploading(false)
                         setFile({})
-                        setFormData({ title: "", content: "" })
+                        setFormData({ title: "", description: "", category: "" })
                     }
 
                 } else {
@@ -96,7 +101,10 @@ export default function CreateNewPost() {
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         maxFiles: 1,
-        accept: 'image/*',
+        accept: {
+            'image/jpeg': ['.jpg', '.jpeg'],
+            'image/png': []
+        },
         onDrop,
     })
 
@@ -120,8 +128,10 @@ export default function CreateNewPost() {
                     <FormControl width={'100%'} justifyContent={'flex-start'}>
                         <FormLabel fontSize={'24px'}>Post Title <Text as='sup' color={'red'}>*</Text> </FormLabel>
                         <Input type='text' placeholder="Type a cool name..." mb={'20px'} name='title' value={formData.title} onChange={handleChange} required />
-                        <FormLabel fontSize={'24px'}>Content <Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Textarea type='text' placeholder="Type the description..." name='content' value={formData.content} onChange={handleChange} required />
+                        <FormLabel fontSize={'24px'}>Description <Text as='sup' color={'red'}>*</Text> </FormLabel>
+                        <Textarea type='text' placeholder="Type the description..." mb={'20px'} name='description' value={formData.description} onChange={handleChange} required />
+                        <FormLabel fontSize={'24px'}>Category <Text as='sup' color={'red'}>*</Text> </FormLabel>
+                        <Input type='text' placeholder="Type a category..." mb={'20px'} name='category' value={formData.category} onChange={handleChange} required />
                     </FormControl>
                     <Button
                         colorScheme={'red'}
@@ -156,10 +166,12 @@ export default function CreateNewPost() {
                                 overflow='hidden'
                                 {...getRootProps()}>
                                 <Input type="button" cursor={'pointer'} {...getInputProps()} />
-                                <Text>
+                                <Text textAlign={'center'}>
                                     {isDragActive ?
                                         "Release to drop the files here" :
-                                        "Drag 'n' drop some files here, or click to select files"
+                                        `Drag 'n' drop some files here, or click to select files.
+                                        (Only *.jpeg and *.png images will be accepted)
+                                        suggested size 200x200`
                                     }
                                 </Text>
 

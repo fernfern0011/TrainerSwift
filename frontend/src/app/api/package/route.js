@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     const res = await fetch(`${DATA_SOURCE_URL}/package`)
     const getAllPackage = await res.json()
@@ -10,7 +12,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
-    const { name, detail, price, mode, address, postid } = await req.json()
+    const { name, detail, price, mode, address, postid, ispremium } = await req.json()
 
     if (!name || !detail || !price || !mode || !postid) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 
@@ -26,7 +28,8 @@ export async function POST(req) {
             price: price,
             mode: mode,
             address: address,
-            postid: postid
+            postid: postid,
+            ispremium: ispremium
         })
     })
 
@@ -39,7 +42,7 @@ export async function DELETE(req) {
 
     if (!packageid) return NextResponse.json({ "message": "Package id is required!" })
 
-    await fetch(`${DATA_SOURCE_URL}/${packageid}`, {
+    await fetch(`${DATA_SOURCE_URL}/package/${packageid}`, {
         method: 'DELETE',
         headers: {
             "Content-Type": "application/json",

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronLeftIcon } from "@chakra-ui/icons"
 import {
     FormControl,
@@ -20,11 +20,11 @@ import {
     SliderFilledTrack,
     SliderThumb,
     useToast,
-    Button, Heading, IconButton, Input, Stack, Text, HStack
+    Button, Heading, IconButton, Input, Stack, Text, HStack, Checkbox, Textarea
 } from '@chakra-ui/react'
 import React, { useState, useEffect } from "react"
 
-function convertTimeIntoInt(starttime, endtime) {
+function ConvertTimeIntoInt(starttime, endtime) {
     const intStartTime = parseInt(starttime.replace(":", ""))
     const intEndTime = parseInt(endtime.replace(":", ""))
 
@@ -33,6 +33,9 @@ function convertTimeIntoInt(starttime, endtime) {
 
 export default function CreateNewPackage() {
     const router = useRouter()
+    const getPostid = useSearchParams()
+    const getTitle = useSearchParams()
+
     const [isModeSelected, setIsModeSelected] = useState('')
     const [timeList, setTimeList] = useState([])
     const [filterTimeList, setFilterTimeList] = useState([])
@@ -47,7 +50,8 @@ export default function CreateNewPackage() {
         day: '',
         mode: '',
         address: '',
-        price: 0
+        price: 0,
+        ispremium: false
     })
 
     const [timeValue, setTimeValue] = useState({
@@ -79,47 +83,49 @@ export default function CreateNewPackage() {
         }
     }
 
+    const handleCheckbox = (e) => {
+        setError('')
+
+        const { name, checked } = e.target;
+        setFormData({
+            ...formData,
+            [name]: checked
+        })
+    }
+
     const handleSubmitTimeslot = () => {
-        console.log(timeValue, error);
 
         if (timeValue.starttime != '' && timeValue.endtime != '') {
             var selectedTime;
             var isInvalid = false;
-            console.log("not error", error);
 
             // Check if the time list has any value
             if (timeList.length > 0) {
-                console.log("yes more than 1");
 
                 timeList.forEach(time => {
                     // Convert time into int
                     const checkStartTime = time.split(" - ")[0]
                     const checkEndTime = time.split(" - ")[1]
-                    const intTimeArray = convertTimeIntoInt(checkStartTime, checkEndTime)
-                    console.log(intTimeArray);
+                    const intTimeArray = ConvertTimeIntoInt(checkStartTime, checkEndTime)
 
                     // Check whether the start time overlaps
                     const checkNewStartTime = parseInt(timeValue.starttime.replace(":", ""))
                     const checkNewEndTime = parseInt(timeValue.endtime.replace(":", ""))
-                    console.log(checkNewStartTime, checkNewEndTime);
 
                     if (checkNewStartTime >= intTimeArray[0] && checkNewStartTime <= intTimeArray[1]
                         || checkNewEndTime >= intTimeArray[0] && checkNewEndTime <= intTimeArray[1]) {
-                        console.log("in between");
                         isInvalid = true
                         setError('Timeslot should not overlap.')
                     } else if (checkNewStartTime > checkNewEndTime) {
-                        console.log("invalid");
                         isInvalid = true
                         setError('Invalid timeslot.')
                     }
                     else {
-                        console.log('no');
                         selectedTime = timeValue.starttime + ' - ' + timeValue.endtime
                     }
                 })
             } else if (timeList.length == 0) {
-                const intTimeArray = convertTimeIntoInt(timeValue.starttime, timeValue.endtime)
+                const intTimeArray = ConvertTimeIntoInt(timeValue.starttime, timeValue.endtime)
 
                 // If starttime is less than endtime
                 if (intTimeArray[0] < intTimeArray[1]) {
@@ -132,7 +138,6 @@ export default function CreateNewPackage() {
 
             // Check whether there is error for starttime overlapping
             if (!isInvalid) {
-                console.log("enter");
                 if (!timeList.includes(selectedTime) && timeList.length < 10) {
                     const newTimeslot = timeList.concat(selectedTime);
                     setTimeList(newTimeslot);
@@ -171,9 +176,8 @@ export default function CreateNewPackage() {
     const handleSubmit = async () => {
         setIsUploading(true)
         setError("")
-        console.log(formData);
 
-        if (formData.name != '' && formData.day != '' && formData.price != 0 && timeList.length != 0) {
+        if (formData.name != '' && formData.day != '' && formData.price != 0 && filterTimeList.length != 0) {
 
             const bodyData = {
                 name: formData.name,
@@ -181,7 +185,8 @@ export default function CreateNewPackage() {
                 price: formData.price,
                 mode: formData.mode,
                 address: formData.address != '' ? formData.address : '',
-                postid: 1
+                postid: getPostid.get("postid"),
+                ispremium: formData.ispremium
             }
 
             const createNewPackage = await fetch('http://localhost:3000/api/package', {
@@ -190,9 +195,9 @@ export default function CreateNewPackage() {
                 body: JSON.stringify(bodyData)
             })
 
-            const CreateNewPackageResult = await createNewPackage.json();
+            const createNewPackageResult = await createNewPackage.json();
 
-            switch (CreateNewPackageResult.code) {
+            switch (createNewPackageResult.code) {
                 case 201:
                     const craeteNewAvailability = await fetch('http://localhost:3000/api/availability', {
                         method: "POST",
@@ -201,12 +206,11 @@ export default function CreateNewPackage() {
                             day: formData.day,
                             time: filterTimeList,
                             status: 'Open',
-                            packageid: 1
+                            packageid: createNewPackageResult.new_packageid
                         })
                     })
 
                     const craeteNewAvailabilityResult = await craeteNewAvailability.json();
-                    console.log(craeteNewAvailabilityResult);
 
                     if (craeteNewAvailabilityResult[0].code == 201) {
                         // clear the value
@@ -229,9 +233,12 @@ export default function CreateNewPackage() {
                         toast({
                             title: 'Package is created.',
                             status: 'success',
+                            position: 'top-right',
                             duration: 5000,
                             isClosable: true,
                         })
+
+                        router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
                     }
                     break;
                 case 400:
@@ -253,7 +260,7 @@ export default function CreateNewPackage() {
                     aria-label='Done'
                     fontSize='36px'
                     icon={<ChevronLeftIcon />}
-                    onClick={() => router.push('/post')}
+                    onClick={() => router.push(`/post/${getPostid.get('postid')}?title=${getTitle.get('title')}`)}
                 />
                 <Heading ml={'30px'}>Create New Package</Heading>
             </Stack>
@@ -266,7 +273,7 @@ export default function CreateNewPackage() {
 
                     <FormControl>
                         <FormLabel fontSize={'24px'}>Package Detail<Text as='sup' color={'red'}>*</Text> </FormLabel>
-                        <Input type='text' name='detail' value={formData.detail} placeholder="Type a brief detail..." mb={'20px'} onChange={(e) => handleChange(e)} />
+                        <Textarea type='text' name='detail' value={formData.detail} placeholder="Type a brief detail..." mb={'20px'} onChange={(e) => handleChange(e)} />
                     </FormControl>
 
                     <Flex mb={'20px'} >
@@ -341,12 +348,12 @@ export default function CreateNewPackage() {
                         </HStack>
                     </FormControl>
 
-                    <FormControl>
+                    <FormControl mb={'20px'} >
                         <FormLabel fontSize={'24px'}>Price (SGD) <Text as='sup' color={'red'}>*</Text> </FormLabel>
                         <Flex>
                             <NumberInput maxW='100px' mr='2rem' name='price' value={formData.price}
                                 onChange={(value) => handleChange({ target: { name: 'price', value } })}
-                                max={1000}>
+                                max={500}>
                                 <NumberInputField />
                                 <NumberInputStepper>
                                     <NumberIncrementStepper />
@@ -357,7 +364,7 @@ export default function CreateNewPackage() {
                                 flex='1'
                                 focusThumbOnChange={false}
                                 value={formData.price}
-                                max={1000}
+                                max={500}
                                 onChange={(value) => handleChange({ target: { name: 'price', value } })}
                             >
                                 <SliderTrack>
@@ -366,6 +373,10 @@ export default function CreateNewPackage() {
                                 <SliderThumb fontSize='sm' boxSize='32px' children={formData.price} />
                             </Slider>
                         </Flex>
+                    </FormControl>
+
+                    <FormControl>
+                        <Checkbox size='lg' name='ispremium' isChecked={formData.ispremium} onChange={(e) => handleCheckbox(e)}>Premium Package</Checkbox>
                     </FormControl>
                 </FormControl>
 
@@ -382,6 +393,5 @@ export default function CreateNewPackage() {
                 </Button>
             </Stack >
         </Stack >
-
     )
 }

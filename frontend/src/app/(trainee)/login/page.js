@@ -43,8 +43,7 @@ export default function ClientLogin() {
       // set cookies
       document.cookie = `token=${result.token}; path=/`
       document.cookie = `traineeinfo=${traineeinfo}; path=/`
-
-      router.push('/search-trainer')
+      window.location.href = '/search-trainer'
     } else {
       setError('Failed to login. Please try again.')
       setLoading(false)

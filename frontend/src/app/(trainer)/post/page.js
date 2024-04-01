@@ -55,7 +55,7 @@ export default function Post() {
     }, [])
 
     return (
-        <Box p={20}>
+        <>
             {checkToken == "" ? <Spinner m={'auto'} /> : (
                 <Box p={20}>
                     <Heading mb={10}>Post List</Heading>
@@ -71,7 +71,7 @@ export default function Post() {
                         </Button>
                     </Flex>
                     {loading ?
-                        <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retriving post data...</Text> : (
+                        <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retrieving post data...</Text> : (
                             error ?
                                 <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
                                 <SimpleGrid columns={2} spacing={4} mt={4}>
@@ -82,6 +82,6 @@ export default function Post() {
                         )}
                 </Box >
             )}
-        </Box>
+        </>
     );
 }

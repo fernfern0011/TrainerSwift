@@ -43,12 +43,7 @@ export default function ClientLogin() {
       // set cookies
       document.cookie = `token=${result.token}; path=/`
       document.cookie = `trainerinfo=${trainerinfo}; path=/`
-
-      router.push('/post').then(() => {
-        // Reload the target page
-        window.location.reload();
-      });
-
+      window.location.href = '/post'
     } else {
       setError('Failed to login. Please try again.')
       setLoading(false)
@@ -68,7 +63,7 @@ export default function ClientLogin() {
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
           <Heading fontSize={'4xl'} textAlign={'center'}>
-            Trainee Sign In
+            Trainer Sign In
           </Heading>
           <Text fontSize={'lg'} color={'gray.600'}>
             to enjoy all of our cool features ✌️

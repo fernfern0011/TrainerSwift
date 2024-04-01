@@ -2,7 +2,6 @@
 import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);

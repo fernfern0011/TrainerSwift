@@ -1,10 +1,76 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from config import *
+from dbConnection import *
 
 app = Flask(__name__)
 CORS(app)
 
 physical_activity_level = 1.6
+
+@app.route('/<int:traineeid>/calculator', methods=['GET'])
+def recent(traineeid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f"SELECT * FROM calculator WHERE traineeid={traineeid}")
+
+    calc = cur.fetchall()
+    cur.close()
+    con.close()
+
+    calcList_json = {
+        "nutrients": "Calories",
+        "current": calc[1],
+        "target":{
+            "bulk": calc[5],
+            "cut": calc[9]
+        },
+        "diff":{
+            "bulk": calc[1]-calc[5],
+            "cut": calc[1]-calc[9]
+        },
+        "nutrients": "Carbs",
+        "current": calc[2],
+        "target":{
+            "bulk": calc[6],
+            "cut": calc[10]
+        },
+        "diff":{
+            "bulk": calc[2]-calc[6],
+            "cut": calc[2]-calc[10]
+        },
+        "nutrients": "Protein",
+        "current": calc[3],
+        "target":{
+            "bulk": calc[7],
+            "cut": calc[11]
+        },
+        "diff":{
+            "bulk": calc[3]-calc[7],
+            "cut": calc[3]-calc[11]
+        },
+        "nutrients": "Fat",
+        "current": calc[4],
+        "target":{
+            "bulk": calc[8],
+            "cut": calc[12]
+        },
+        "diff":{
+            "bulk": calc[4]-calc[8],
+            "cut": calc[4]-calc[12]
+        }
+    }
+
+    if len(calc):
+        return jsonify({
+            "code": 200,
+            "data": calcList_json
+        })
+    
+    return jsonify({
+        "code": 400,
+        "message": "There is no data."
+    })
 
 @app.route('/calculator', methods=["POST"])
 def calculate():

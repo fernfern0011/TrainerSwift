@@ -10,7 +10,6 @@ export default function DietPage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [refresh, setRefresh] = useState(false);
     const [type, setType] = useState('bulk');
-    const router = useRouter();
 
     useEffect(() => {
         const fetchMeals = async () => {
@@ -25,12 +24,18 @@ export default function DietPage() {
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
-        };
 
-        if (JSON.parse(sessionStorage.getItem('calcData')) != null) {
-            const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
-            setCalcData(storedCalcData);
-        }
+            try {
+                const response = await fetch('http://localhost:3000/api/calculator/7');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch calculator data');
+                }
+                const data = await response.json();
+                setCalcData(data.data);
+            } catch (error) {
+                console.error('Error fetching calculator data:', error);
+            }
+        };
         
         fetchMeals();
     }, [refresh]);

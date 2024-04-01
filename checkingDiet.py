@@ -92,7 +92,7 @@ def processDiet(diet):
     print('\n\n-----Invoking calculator microservice-----')
 
     details = {"height": height, "weight": weight, "age":age, "info": averageValue}
-    calcResult = invoke_http(f"{calcURL}/calculator", method='POST', json=details)
+    calcResult = invoke_http(f"{calcURL}/calculator/{traineeid}", method='POST', json=details)
     print("calcResult:", calcResult, '\n')
 
     if calcResult['code'] == 200:

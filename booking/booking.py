@@ -57,6 +57,32 @@ def read_post_by_id_query(postid):
         "code": 400,
         "message": "There is no post."
     })
+    
+# [GET] getAllPostByTrainerid
+@app.route('/trainer/<int:trainerid>/post', methods=['GET'])
+def read_post_by_trainerid_query(trainerid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(f'SELECT * FROM post WHERE trainerid = %s ORDER BY postid ASC;', (trainerid, ))
+
+    postlist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    postlist_json = [{"postid": post[0], "title": post[1], "description": post[2],
+                      "category": post[3], "trainerid": post[4], "image": post[5], "created_timestamp": post[6]} for post in postlist]
+
+    if len(postlist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "post": [post for post in postlist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no post."
+    })
 
 # [POST] createNewPost
 @app.route('/post/create', methods=['POST'])

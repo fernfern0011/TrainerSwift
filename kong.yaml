@@ -84,6 +84,32 @@ services:
   write_timeout: 60000
 - connect_timeout: 60000
   enabled: true
+  host: calculator
+  name: calculatorApi
+  port: 5000
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - POST
+    name: calculatorApi
+    path_handling: v0
+    paths:
+    - /calculatorapi
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
   host: checkingdiet
   name: checkingdietApi
   port: 5000
@@ -98,6 +124,34 @@ services:
     path_handling: v0
     paths:
     - /checkingdietapi
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: diet
+  name: dietApi
+  port: 5000
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - POST
+    - DELETE
+    - PUT
+    name: dietCRUD
+    path_handling: v0
+    paths:
+    - /dietapi
     preserve_host: false
     protocols:
     - http

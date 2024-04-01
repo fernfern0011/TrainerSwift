@@ -4,16 +4,20 @@ const DATA_SOURCE_URL = 'http://localhost:8000/checkingdietapi/check_my_diet'
 
 export const dynamic = 'force-dynamic';
 
-export async function DELETE(req) {
+export async function DELETE(req, context) {
     const { mealid } = await req.json();
+    const { traineeid } = await context.params;
+
+    console.log('traineeid')
 
     const deleteData = {
+        traineeid: traineeid,
         mealid: mealid,
         method_used: "DELETE"
     }
 
     const requestOptions = {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },

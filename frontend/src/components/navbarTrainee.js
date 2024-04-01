@@ -16,7 +16,8 @@ import {
   useDisclosure,
   useColorModeValue,
   Stack,
-  Center
+  Center,
+  Text
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/navigation'
@@ -41,8 +42,7 @@ const NavLink = ({ children }) => {
   );
 };
 
-export default function TraineeNavbar() {
-  const router = useRouter()
+export default function TraineeNavbar(traineeinfo) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleLogout = () => {
@@ -51,8 +51,7 @@ export default function TraineeNavbar() {
     Cookies.remove('traineeinfo')
 
     // redirect to the main page
-    router.push('/');
-    window.location.reload();
+    window.location.href = '/'
   };
 
   return (
@@ -82,11 +81,15 @@ export default function TraineeNavbar() {
                   rounded={'full'}
                   variant={'link'}
                   cursor={'pointer'}
-                  minW={0}>
-                  <Avatar
-                    size={'sm'}
-                    src={'https://avatars.dicebear.com/api/male/username.svg'}
-                  />
+                  minW={0}
+                  _hover={{ textDecoration: 'none' }}>
+                  <Flex alignItems="center" flexDirection="row">
+                    <Text color={'white'} mr={'10px'}>{traineeinfo.name}</Text>
+                    <Avatar
+                      size={'sm'}
+                      src={'https://avatars.dicebear.com/api/male/username.svg'}
+                    />
+                  </Flex>
                 </MenuButton>
                 <MenuList alignItems={'center'}>
                   <br />
@@ -98,7 +101,7 @@ export default function TraineeNavbar() {
                   </Center>
                   <br />
                   <Center>
-                    <p>Username</p>
+                    <p>{traineeinfo.name}</p>
                   </Center>
                   <br />
                   <MenuDivider />

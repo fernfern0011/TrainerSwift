@@ -30,7 +30,6 @@ export async function DELETE(req, context) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        sessionStorage.setItem('calcData', JSON.stringify(data));
         return NextResponse.json(data);
 
     } catch (error) {

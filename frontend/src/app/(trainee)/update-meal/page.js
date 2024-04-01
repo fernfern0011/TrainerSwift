@@ -22,6 +22,8 @@ export default function UpdateMeal() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const mealid = searchParams.get('mealid');
+    const foodName = searchParams.get('foodname');
+    const qty = searchParams.get('quantity');
 
     const handleUpdateMeal = async () => {
 
@@ -79,11 +81,11 @@ export default function UpdateMeal() {
                     <Stack spacing={4}>
                         <FormControl id="foodname">
                             <FormLabel>Food Name</FormLabel>
-                            <Input type="text" onChange={(e) => setFoodName(e.target.value)} />
+                            <Input type="text" placeholder={foodName} onChange={(e) => setFoodName(e.target.value)} />
                         </FormControl>
                         <FormControl id="quantity">
                             <FormLabel>Quantity</FormLabel>
-                            <Input type="number" onChange={(e) => setQuantity(e.target.value)} />
+                            <Input type="number" placeholder={qty} onChange={(e) => setQuantity(e.target.value)} />
                         </FormControl>
                         <Stack spacing={4}>
                             <Button

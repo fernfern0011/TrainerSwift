@@ -169,7 +169,7 @@ export default function DietPage() {
                                 <Td isNumeric>{item.calories}</Td>
                                 <Td>
                                     <Center>
-                                        <Button colorScheme="teal" variant="outline" as={'a'} href={`/update-meal?mealid=${item.mealid}`} mr="3%">
+                                        <Button colorScheme="teal" variant="outline" as={'a'} href={`/update-meal?mealid=${item.mealid}&foodname=${item.foodname}&quantity=${item.quantity}`} mr="3%">
                                             <EditIcon boxSize={5} />
                                         </Button>
                                         <Button colorScheme="teal" variant="outline" onClick={() => deleteMeal(item.mealid) }>

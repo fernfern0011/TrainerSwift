@@ -25,48 +25,56 @@ def recent(traineeid):
     cur.close()
     con.close()
 
-    calcList_json = {
-        "nutrients": "Calories",
-        "current": round(calc[1],2),
-        "target":{
-            "bulk": round(calc[5],2),
-            "cut": round(calc[9],2)
+    calcList_json =[
+        {
+            "nutrients": "Calories",
+            "current": round(calc[1],2),
+            "target":{
+                "bulk": round(calc[5],2),
+                "cut": round(calc[9],2)
+            },
+            "diff":{
+                "bulk": round(calc[1]-calc[5],2),
+                "cut": round(calc[1]-calc[9],2)
+            }
         },
-        "diff":{
-            "bulk": round(calc[1]-calc[5],2),
-            "cut": round(calc[1]-calc[9],2)
+        {
+            "nutrients": "Carbs",
+            "current": round(calc[2],2),
+            "target":{
+                "bulk": round(calc[6],2),
+                "cut": round(calc[10],2)
+            },
+            "diff":{
+                "bulk": round(calc[2]-calc[6],2),
+                "cut": round(calc[2]-calc[10],2)
+            }
         },
-        "nutrients": "Carbs",
-        "current": round(calc[2],2),
-        "target":{
-            "bulk": round(calc[6],2),
-            "cut": round(calc[10],2)
+        {
+            "nutrients": "Protein",
+            "current": round(calc[3],2),
+            "target":{
+                "bulk": round(calc[7],2),
+                "cut": round(calc[11],2)
+            },
+            "diff":{
+                "bulk": round(calc[3]-calc[7],2),
+                "cut": round(calc[3]-calc[11],2)
+            }
         },
-        "diff":{
-            "bulk": round(calc[2]-calc[6],2),
-            "cut": round(calc[2]-calc[10],2)
-        },
-        "nutrients": "Protein",
-        "current": round(calc[3],2),
-        "target":{
-            "bulk": round(calc[7],2),
-            "cut": round(calc[11],2)
-        },
-        "diff":{
-            "bulk": round(calc[3]-calc[7],2),
-            "cut": round(calc[3]-calc[11],2)
-        },
-        "nutrients": "Fat",
-        "current": round(calc[4],2),
-        "target":{
-            "bulk": round(calc[8],2),
-            "cut": round(calc[12],2)
-        },
-        "diff":{
-            "bulk": round(calc[4]-calc[8],2),
-            "cut": round(calc[4]-calc[12],2)
+        {    
+            "nutrients": "Fat",
+            "current": round(calc[4],2),
+            "target":{
+                "bulk": round(calc[8],2),
+                "cut": round(calc[12],2)
+            },
+            "diff":{
+                "bulk": round(calc[4]-calc[8],2),
+                "cut": round(calc[4]-calc[12],2)
+            }
         }
-    }
+    ]
 
     if len(calc):
         return jsonify({

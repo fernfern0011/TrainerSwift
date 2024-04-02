@@ -22,7 +22,10 @@ def get_all_meal(traineeid):
     cur.close()
     con.close()
 
-    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7], "date_time": meal[8]} for meal in meallist]
+    if meallist == None:
+        meallist_json = [{"traineeid": "No Data", "mealid": "No Data", "foodname": "No Data", "quantity": "No Data", "calories": "No Data", "carbs": "No Data", "protein": "No Data", "fat": "No Data", "date_time": "No Data"}]
+    else:
+        meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": round(meal[4],2), "carbs": round(meal[5],2), "protein": round(meal[6],2), "fat": round(meal[7],2), "date_time": meal[8]} for meal in meallist]
 
     if len(meallist):
         return jsonify({

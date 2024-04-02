@@ -15,12 +15,13 @@ export default function Checkout() {
   const [productData, setProductData] = useState([]);
   const [newSession, setNewSession] = useState(null);
   const [checkToken, setCheckToken] = useState('');
+  const [trainee, setTrainee] = useState('');
   const router = useRouter();
 
   const createCheckoutSession = async () => {
     try {
 
-      const response = await fetch(`http://localhost:3000/api/cart/${traineeid.traineeid}`, {
+      const response = await fetch(`http://localhost:3000/api/cart/${trainee.traineeid}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -100,6 +101,7 @@ export default function Checkout() {
     }
 
     setCheckToken(token)
+    setTrainee(traineeid)
     
     const query = new URLSearchParams(window.location.search);
 

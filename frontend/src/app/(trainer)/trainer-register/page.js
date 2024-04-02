@@ -76,7 +76,7 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/stripe/stripe-signup', {
+      const response = await fetch('http://localhost:3000/api/stripe-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

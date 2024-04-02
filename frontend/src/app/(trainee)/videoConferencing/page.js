@@ -16,8 +16,8 @@ import { useEffect, useState } from 'react';
 
 export default function Page() {
   // TODO: get user input for room and name
-  const room = "quickstart-room";
-  const name = "quickstart-user";
+  const room = "test";
+  const name = "chris poskitt";
   const [token, setToken] = useState("");
 
   useEffect(() => {

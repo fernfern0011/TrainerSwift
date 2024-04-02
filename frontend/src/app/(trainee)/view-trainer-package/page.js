@@ -4,17 +4,41 @@ import PackageCard from '../../../components/packageCard';
 import { Button, Image, Heading, Text, Box } from '@chakra-ui/react'
 import SearchTrainer from '../search-trainer/page';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 
 export default function ViewTrainerPackage() {
 
     const [trainerInfo, setTrainerInfo] = useState(null);
     const [error, setError] = useState(null);
+    const [checkToken, setCheckToken] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
+        const token = Cookies.get('token')
+        const traineeinfo = Cookies.get('traineeinfo')
+        var traineeid
+
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        if (!(traineeinfo === undefined)) {
+            traineeid = JSON.parse(traineeinfo)
+        }
+
+        setCheckToken(token)
         const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/trainer/2');
+            const response = await fetch(`http://localhost:3000/api/trainer/${traineeid.traineeid}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
+            });
             if (!response.ok) {
             throw new Error('Failed to fetch trainer information');
             }

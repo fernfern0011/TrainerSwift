@@ -1,12 +1,11 @@
 "use client"
-import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, TableCaption, Thead, Tr, Th, Td, Tbody, Tfoot, Center, Stack } from '@chakra-ui/react';
-import { DeleteIcon, EditIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { Heading, Spacer, Box, Flex, Button, TableContainer, Table, Thead, Tr, Th, Td, Tbody, Tfoot, Center} from '@chakra-ui/react';
+import { DeleteIcon, EditIcon, AddIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
     const [refresh, setRefresh] = useState(false);
     const [type, setType] = useState('bulk');
 
@@ -18,8 +17,12 @@ export default function DietPage() {
                     throw new Error('Failed to fetch meals');
                 }
                 const data = await response.json();
-                console.log(data.data.meal)
-                setMeals(data.data.meal);
+                if (data.data == undefined) {
+                    setMeals(data.message);
+                } else {
+                    setMeals(data.data.meal);
+                }
+                
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
@@ -147,7 +150,6 @@ export default function DietPage() {
                             <Th isNumeric>Protein</Th>
                             <Th isNumeric>Fats</Th>
                             <Th isNumeric>Calories</Th>
-                            <Th></Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -160,7 +162,7 @@ export default function DietPage() {
                                 <Td isNumeric>{item.fat}</Td>
                                 <Td isNumeric>{item.calories}</Td>
                                 <Td>
-                                    <Center>
+                                    <Center display={item.foodname=="No Data" ? "none" : "block"}>
                                         <Button colorScheme="teal" variant="outline" as={'a'} href={`/update-meal?mealid=${item.mealid}&foodname=${item.foodname}&quantity=${item.quantity}`} mr="3%">
                                             <EditIcon boxSize={5} />
                                         </Button>

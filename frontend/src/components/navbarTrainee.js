@@ -16,10 +16,11 @@ import {
   useDisclosure,
   useColorModeValue,
   Stack,
-  Center
+  Center,
+  Text
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Cookies from 'js-cookie'
 
 const Links = ['Search Trainer', 'My Bookings', 'Payment History'];
@@ -41,8 +42,7 @@ const NavLink = ({ children }) => {
   );
 };
 
-export default function TraineeNavbar() {
-  const router = useRouter()
+export default function TraineeNavbar(traineeinfo) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleLogout = () => {
@@ -51,8 +51,7 @@ export default function TraineeNavbar() {
     Cookies.remove('traineeinfo')
 
     // redirect to the main page
-    router.push('/');
-    window.location.reload();
+    window.location.href = '/'
   };
 
   return (
@@ -67,7 +66,11 @@ export default function TraineeNavbar() {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={'center'}>
-            <Box color={'white'}>Trainer Swift</Box>
+            <Link href={'/'}>
+              <Box color={'white'}>
+                Trainer Swift
+              </Box>
+            </Link>
             <HStack color={'white'} as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
               {Links.map((link) => (
                 <NavLink key={link}>{link}</NavLink>
@@ -82,11 +85,15 @@ export default function TraineeNavbar() {
                   rounded={'full'}
                   variant={'link'}
                   cursor={'pointer'}
-                  minW={0}>
-                  <Avatar
-                    size={'sm'}
-                    src={'https://avatars.dicebear.com/api/male/username.svg'}
-                  />
+                  minW={0}
+                  _hover={{ textDecoration: 'none' }}>
+                  <Flex alignItems="center" flexDirection="row">
+                    <Text color={'white'} mr={'10px'}>{traineeinfo.name}</Text>
+                    <Avatar
+                      size={'sm'}
+                      src={'https://avatars.dicebear.com/api/male/username.svg'}
+                    />
+                  </Flex>
                 </MenuButton>
                 <MenuList alignItems={'center'}>
                   <br />
@@ -98,7 +105,7 @@ export default function TraineeNavbar() {
                   </Center>
                   <br />
                   <Center>
-                    <p>Username</p>
+                    <p>{traineeinfo.name}</p>
                   </Center>
                   <br />
                   <MenuDivider />

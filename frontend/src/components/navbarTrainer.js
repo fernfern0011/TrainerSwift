@@ -16,33 +16,41 @@ import {
   useDisclosure,
   useColorModeValue,
   Stack,
-  Center
+  Center,
+  Text
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-import { useRouter } from 'next/navigation'
+import Link from 'next/link';
 import Cookies from 'js-cookie'
 
-const Links = ['My Packages', 'My Clients', 'My Broadcasts'];
+const TrainerNav = [{
+  nav: 'My Packages',
+  link: '/post'
+}, {
+  nav: 'My Clients',
+  link: '#'
+}, {
+  nav: 'My Broadcasts',
+  link: '#'
+}]
 
 const NavLink = ({ children }) => {
   return (
     <Box
-      as="a"
+      key={children}
       px={2}
       py={1}
       rounded={'md'}
       _hover={{
         textDecoration: 'none',
         bg: useColorModeValue('red.900', 'red.900'),
-      }}
-      href={'#'}>
+      }}>
       {children}
     </Box>
   );
 };
 
-export default function TraineeNavbar() {
-  const router = useRouter()
+export default function TrainerNavbar(trainerinfo) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleLogout = () => {
@@ -51,8 +59,7 @@ export default function TraineeNavbar() {
     Cookies.remove('trainerinfo')
 
     // redirect to the main page
-    router.push('/');
-    window.location.reload();
+    window.location.href = '/'
   };
 
   return (
@@ -67,10 +74,16 @@ export default function TraineeNavbar() {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={'center'}>
-            <Box color={'white'}>Trainer Swift</Box>
+            <Link href={'/'}>
+              <Box color={'white'}>
+                Trainer Swift
+              </Box>
+            </Link>
             <HStack color={'white'} as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
-              {Links.map((link) => (
-                <NavLink key={link}>{link}</NavLink>
+              {TrainerNav.map(({ nav, link }) => (
+                <Link href={link} key={nav}>
+                  <NavLink>{nav}</NavLink>
+                </Link>
               ))}
             </HStack>
           </HStack>
@@ -82,11 +95,15 @@ export default function TraineeNavbar() {
                   rounded={'full'}
                   variant={'link'}
                   cursor={'pointer'}
-                  minW={0}>
-                  <Avatar
-                    size={'sm'}
-                    src={'https://avatars.dicebear.com/api/male/username.svg'}
-                  />
+                  minW={0}
+                  _hover={{ textDecoration: 'none' }}>
+                  <Flex alignItems="center" flexDirection="row">
+                    <Text color={'white'} mr={'10px'}>{trainerinfo.name}</Text>
+                    <Avatar
+                      size={'sm'}
+                      src={'https://avatars.dicebear.com/api/male/username.svg'}
+                    />
+                  </Flex>
                 </MenuButton>
                 <MenuList alignItems={'center'}>
                   <br />
@@ -98,7 +115,7 @@ export default function TraineeNavbar() {
                   </Center>
                   <br />
                   <Center>
-                    <p>Username</p>
+                    <p>{trainerinfo.name}</p>
                   </Center>
                   <br />
                   <MenuDivider />
@@ -114,13 +131,15 @@ export default function TraineeNavbar() {
         {isOpen ? (
           <Box pb={4} display={{ md: 'none' }}>
             <Stack as={'nav'} spacing={4}>
-              {Links.map((link) => (
-                <NavLink key={link}>{link}</NavLink>
+              {TrainerNav.map(({ nav, link }) => (
+                <Link href={link} key={nav}>
+                  <NavLink >{nav}</NavLink>
+                </Link>
               ))}
             </Stack>
           </Box>
         ) : null}
-      </Box>
+      </Box >
     </>
   );
 }

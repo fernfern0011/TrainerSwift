@@ -1,44 +1,79 @@
 "use client"
-import { SimpleGrid, Box, Flex } from '@chakra-ui/react';
-import SearchBar from '../../../components/searchBar';
-import PostCard from '../../../components/postCard';
+
 import { useState, useEffect } from 'react';
+import { SimpleGrid, Box, Flex, Spinner, Text, Heading } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation'
+import SearchBar from '../../../components/searchBar';
+import TrainerInfoCard from '../../../components/trainerInfoCard';
+import Cookies from 'js-cookie'
 
 export default function SearchTrainer() {
-
-  const [trainers, setTrainers] = useState([]);
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [trainerList, setTrainerList] = useState([]);
+  const [checkToken, setCheckToken] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetchTrainers = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/trainer');
-        if (!response.ok) {
-          throw new Error('Failed to fetch trainers');
+    const token = Cookies.get('token')
+
+    if (!token) {
+      router.replace('/') // If no token is found, redirect to login page
+      return
+    }
+
+    setCheckToken(token)
+    setLoading(true)
+    const fetchTrainerData = async () => {
+      const response = await fetch('http://localhost:3000/api/trainer', {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         }
-        const data = await response.json();
-        setTrainers(data.data.trainerinfo);
-        console.log(data.data.trainerinfo)
-      } catch (error) {
-        console.error('Error fetching trainers:', error);
+      })
+
+      // if trainer successfully fetched
+      const data = await response.json();
+      if (data.code == 200) {
+        setTrainerList(data.data.trainerinfo);
+        setLoading(false)
+      } else {
+        setError('Failed to retrieve trainer data.')
+        setLoading(false)
       }
     };
 
-    fetchTrainers();
+    fetchTrainerData().catch((e) => {
+      // handle the error as needed
+      console.error('An error occurred while fetching the data: ', e)
+    })
   }, []);
-
 
   return (
     <Box p={20}>
-      <Flex justifyContent='center' paddingBottom='5px'>
-        <SearchBar />
-      </Flex>
-      <SimpleGrid columns={2} spacing={4} mt={4}>
-        {trainers.map((trainer) => (
-        <Box key={trainer.trainerid} width="200%" height="100%">
-          <PostCard key={trainer.trainerid} dob={trainer.dob} content={trainer.bio} />
-        </Box>
-        ))}
-      </SimpleGrid>
+      {checkToken == "" ?
+        <Flex m={'auto'} justifyContent={'center'}>
+          <Spinner />
+        </Flex>
+        : (
+          <>
+            <Heading mb={10}>Search for Trainers</Heading>
+            <Flex justifyContent='center' paddingBottom='5px'>
+              <SearchBar />
+            </Flex>
+            {loading ?
+              <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retrieving trainer data...</Text> : (
+                error ?
+                  <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
+                  <SimpleGrid columns={2} spacing={4} mt={4}>
+                    {trainerList.map((trainer) => (
+                      <TrainerInfoCard key={trainer.trainerid} {...trainer} />
+                    ))}
+                  </SimpleGrid>
+              )}
+          </>
+        )}
     </Box>
   );
 }

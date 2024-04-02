@@ -11,6 +11,7 @@ import { useEffect, useState } from "react"
 
 export default function RootLayout({ children }) {
   const [trainerinfo, setTrainerinfo] = useState('')
+  const [traineeinfo, setTraineeinfo] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
     }
 
     if (!(traineeinfo === undefined)) {
+      setTraineeinfo(JSON.parse(traineeinfo));
       setIsAuthenticated(true)
     }
   }, [])
@@ -39,7 +41,7 @@ export default function RootLayout({ children }) {
           {isAuthenticated == false && <Navbar />}
           {isAuthenticated === true && (
             <>
-              {trainerinfo.role === 'trainer' ? <TrainerNavbar /> : <TraineeNavbar />}
+              {trainerinfo.role === 'trainer' ? <TrainerNavbar {...trainerinfo} /> : <TraineeNavbar {...traineeinfo} />}
 
             </>
           )}

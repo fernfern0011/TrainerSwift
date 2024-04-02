@@ -23,6 +23,7 @@ import {
     Button, Heading, IconButton, Input, Stack, Text, HStack, Checkbox, Textarea
 } from '@chakra-ui/react'
 import React, { useState, useEffect } from "react"
+import Cookies from 'js-cookie'
 
 function ConvertTimeIntoInt(starttime, endtime) {
     const intStartTime = parseInt(starttime.replace(":", ""))
@@ -35,13 +36,12 @@ export default function CreateNewPackage() {
     const router = useRouter()
     const getPostid = useSearchParams()
     const getTitle = useSearchParams()
-
     const [isModeSelected, setIsModeSelected] = useState('')
     const [timeList, setTimeList] = useState([])
     const [filterTimeList, setFilterTimeList] = useState([])
     const [error, setError] = useState('')
+    const [token, setToken] = useState('')
     const [isUploading, setIsUploading] = useState(false)
-    // const [isSuccess, setIsSuccess] = useState(false)
     const toast = useToast()
 
     const [formData, setFormData] = useState({
@@ -58,6 +58,17 @@ export default function CreateNewPackage() {
         starttime: '',
         endtime: ''
     })
+
+    useEffect(() => {
+        const token = Cookies.get('token')
+
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        setToken(token)
+    }, [])
 
     const handleTimeslot = (e) => {
         setError('')
@@ -191,7 +202,10 @@ export default function CreateNewPackage() {
 
             const createNewPackage = await fetch('http://localhost:3000/api/package', {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
                 body: JSON.stringify(bodyData)
             })
 
@@ -201,7 +215,10 @@ export default function CreateNewPackage() {
                 case 201:
                     const craeteNewAvailability = await fetch('http://localhost:3000/api/availability', {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
                         body: JSON.stringify({
                             day: formData.day,
                             time: filterTimeList,
@@ -212,7 +229,7 @@ export default function CreateNewPackage() {
 
                     const craeteNewAvailabilityResult = await craeteNewAvailability.json();
 
-                    if (craeteNewAvailabilityResult[0].code == 201) {
+                    if (craeteNewAvailabilityResult.availabilityResult[0].code == 201) {
                         // clear the value
                         setIsUploading(false)
                         setFormData({
@@ -238,7 +255,7 @@ export default function CreateNewPackage() {
                             isClosable: true,
                         })
 
-                        router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
+                        router.push(`/post/${getPostid.get("postid")}/package?title=${getTitle.get("title")}`)
                     }
                     break;
                 case 400:

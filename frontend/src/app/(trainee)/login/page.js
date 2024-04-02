@@ -1,21 +1,21 @@
 'use client'
-import {
-  Box,
-  FormControl,
-  FormLabel,
-  Input,
-  Stack,
-  Button,
-  Heading,
-  Text,
-  useColorModeValue,
-} from '@chakra-ui/react';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-//   import bgImage from '../assets/sign-up.jpg'; 
-// import axios from "axios";
+import {
+  Button,
+  Flex,
+  Text,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Stack,
+  Image,
+} from '@chakra-ui/react'
+import Link from 'next/link';
 
-export default function ClientLogin() {
+export default function TraineeLogin() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -43,8 +43,7 @@ export default function ClientLogin() {
       // set cookies
       document.cookie = `token=${result.token}; path=/`
       document.cookie = `traineeinfo=${traineeinfo}; path=/`
-
-      router.push('/search-trainer')
+      window.location.href = '/search-trainer'
     } else {
       setError('Failed to login. Please try again.')
       setLoading(false)
@@ -52,60 +51,54 @@ export default function ClientLogin() {
   }
 
   return (
-    <Box
-      // bgImage={`url(${bgImage})`}
-      bgSize="cover"
-      bgPosition="center"
-      minH="100vh"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-        <Stack align={'center'}>
-          <Heading fontSize={'4xl'} textAlign={'center'}>
-            Trainee Sign In
-          </Heading>
-          <Text fontSize={'lg'} color={'gray.600'}>
-            to enjoy all of our cool features ✌️
-          </Text>
+    <Stack maxH={'83.5vh'} direction={{ base: 'column', md: 'row' }}>
+      <Flex p={8} flex={1} align={'center'} justify={'center'}>
+        <Stack spacing={4} w={'full'} maxW={'md'}>
+          <Heading fontSize={'4xl'}>Trainee Login</Heading>
+          <form onSubmit={handleSubmit}>
+            <FormControl id="email" mb={'1rem'} isRequired>
+              <FormLabel>Email address</FormLabel>
+              <Input type="email" name='email' placeholder="Email" isRequired />
+            </FormControl>
+            <FormControl id="password" mb={'1rem'} isRequired>
+              <FormLabel>Password</FormLabel>
+              <Input type="password" name="password" placeholder="Password" isRequired />
+            </FormControl>
+            {error ?
+              <Text color={"red"} mb={'1rem'}>{error}</Text>
+              : ""}
+            <Stack spacing={6}>
+              <Button
+                colorScheme={'red'}
+                variant={'solid'}
+                type="submit"
+                isLoading={loading ? true : false}>
+                Login
+              </Button>
+              <Button
+                colorScheme={'gray'}
+                variant={'solid'}
+                onClick={() => router.push('/register')}>
+                Register
+              </Button>
+            </Stack>
+            <Stack pt={'3rem'}>
+              <Text align={'center'} color={'blue.400'} textDecorationLine={'underline'}>
+                <Link href={'/trainer-login'}>Login as Trainer</Link>
+              </Text>
+            </Stack>
+          </form>
         </Stack>
-        <Box
-          rounded={'lg'}
-          bg={useColorModeValue('white', 'gray.700')}
-          boxShadow={'lg'}
-          p={20}>
-          <Stack spacing={4}>
-            <form onSubmit={handleSubmit}>
-              <FormControl id="email">
-                <FormLabel>Email address</FormLabel>
-                <Input type="email" name='email' placeholder="Email" required />
-              </FormControl>
-              <FormControl id="password">
-                <FormLabel>Password</FormLabel>
-                <Input type="password" name="password" placeholder="Password" required />
-              </FormControl>
-              {error ?
-                <Text color={"red"} mt={'15px'}>{error}</Text>
-                : ""}
-              <Stack spacing={10}>
-                <Button
-                  mt={'15px'}
-                  bg={'blue.400'}
-                  color={'white'}
-                  _hover={{
-                    bg: 'blue.500',
-                  }}
-                  type="submit"
-                  isLoading={loading ? true : false}
-                >
-                  Sign in
-                </Button>
-              </Stack>
-            </form>
-          </Stack>
-        </Box>
-      </Stack>
-    </Box>
-  );
+      </Flex>
+      <Flex flex={1} w={'full'}>
+        <Image
+          alt={'Login Image'}
+          objectFit={'cover'}
+          width={'inherit'}
+          minH={'83.5vh'}
+          src={'../assets/img/login_img.jpg'}
+        />
+      </Flex>
+    </Stack>
+  )
 }

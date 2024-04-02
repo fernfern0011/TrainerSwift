@@ -12,7 +12,14 @@ physical_activity_level = 1.6
 def recent(traineeid):
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM calculator WHERE traineeid={traineeid}")
+    
+    try:
+        cur.execute(f"SELECT * FROM calculator WHERE traineeid={traineeid}")
+    except:
+        return jsonify({
+            "code": 400,
+            "message": "No data found"
+        })
 
     calc = cur.fetchall()[0]
     cur.close()

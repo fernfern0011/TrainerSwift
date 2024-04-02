@@ -2,13 +2,15 @@
 import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, Thead, Tr, Th, Td, Tbody, Tfoot, Stack } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
     const [type, setType] = useState('bulk');
-    const [checkToken, setCheckToken] = useState('')
+    const [checkToken, setCheckToken] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
         const token = Cookies.get('token')
@@ -49,7 +51,13 @@ export default function DietPage() {
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/calculator/7');
+                const response = await fetch('http://localhost:3000/api/calculator/7', {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch calculator data');
                 }

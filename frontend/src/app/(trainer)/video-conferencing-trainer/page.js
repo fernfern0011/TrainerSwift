@@ -12,20 +12,69 @@ import {
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 
 export default function Page() {
   // TODO: get user input for room and name
   const room = "test";
-  const name = "chris poskitt";
   const [token, setToken] = useState("");
+  const [checkToken, setCheckToken] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
+    const token = Cookies.get('token')
+    const trainerinfo = Cookies.get('trainerinfo')
+    var trainerid
+    var bookedby
+
+    if (!token) {
+      router.replace('/') // If no token is found, redirect to login page
+      return
+    }
+
+    if (!(trainerinfo === undefined)) {
+      trainerid = JSON.parse(trainerinfo)
+    }
+
+    setCheckToken(token)
+    const fetchBookedBy = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/trainer-booking/${trainerid.trainerid}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          }
+        });
+        console.log(response)
+        if (!response.ok) {
+          throw new Error('Failed to fetch trainer information');
+        }
+        const data = await response.json();
+        console.log(data)
+        bookedby = data.data.bookedby[0].bookedbyid;
+        console.log(bookedby)
+
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    fetchBookedBy();
+
     (async () => {
       try {
         const resp = await fetch(
-          `http://localhost:3000/api/get-participant-token?room=${room}&username=${name}`
-        );
+          `http://localhost:3000/api/get-participant-token?room=${bookedby}&username=${trainerid.trainerid}`
+          , {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            }
+          });
         const data = await resp.json();
         setToken(data.token);
       } catch (e) {

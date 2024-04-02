@@ -142,16 +142,17 @@ services:
         condition: service_healthy
 
   websocket-server:
-    image: dylanchua/websocket-server:1.0 
+    image: melodywong2022/websocket-server:1.2 
     networks:
       - trainerSwift-net
   
   websocket-client:
-    image: dylanchua/websocket-client:1.0
+    image: melodywong2022/websocket-client:1.2
     depends_on:
       - websocket-server
     networks:
       - trainerSwift-net
+
 
   notification:
     image: sathwikch/notification:1.0

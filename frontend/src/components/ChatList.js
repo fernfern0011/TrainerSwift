@@ -58,7 +58,7 @@ const ChatList = () => {
     if (!groupedChats[chatId]) {
       var name
       if (loginType === "trainer"){
-        name = "trainee7" 
+        name = "trainee123!" 
       } else{
         name = "trainer7"
       }

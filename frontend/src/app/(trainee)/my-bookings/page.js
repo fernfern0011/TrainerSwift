@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { Box, Flex } from '@chakra-ui/react';
-import BookingCard from '../../../components/bookingCard';
+import MyBookingCard from '../../../components/myBooking.Card';
 import SearchBar from '../../../components/searchBar';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -74,7 +74,7 @@ export default function MyBookingPage() {
             </Flex>
             {bookings && bookings.length > 0 ? (
                 bookings.map((booking, index) => (
-                    <BookingCard
+                    <MyBookingCard
                         key={index}
                         booking={booking}
                         traineeDetails={traineeDetails[index]} // Pass corresponding traineeDetails

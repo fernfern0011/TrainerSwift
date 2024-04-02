@@ -18,7 +18,7 @@ import Cookies from 'js-cookie';
 
 export default function Page() {
   // TODO: get user input for room and name
-  const room = "test";
+  const room = "room";
   const [token, setToken] = useState("");
   const [checkToken, setCheckToken] = useState('');
   const router = useRouter();
@@ -56,6 +56,8 @@ export default function Page() {
         console.log(data)
         bookedby = data.data.bookedby[0].bookedbyid;
         console.log(bookedby)
+        console.log(trainerid.trainerid)
+
 
       } catch (error) {
         console.log(error.message);
@@ -67,7 +69,7 @@ export default function Page() {
     (async () => {
       try {
         const resp = await fetch(
-          `http://localhost:3000/api/get-participant-token?room=${bookedby}&username=${trainerid.trainerid}`
+          `http://localhost:3000/api/get-participant-token?room=${room}&username=${trainerid.trainerid}`
           , {
             method: "GET",
             headers: {

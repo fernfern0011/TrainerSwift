@@ -1,5 +1,4 @@
-'use client'
-
+"use client"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -31,54 +30,61 @@ export default function TrainerRegister() {
     return password.length >= 5;
   };
 
-  async function handleSubmit(event) {
-    setLoading(true)
-    setError('')
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const formData = new FormData(event.currentTarget)
-    const username = formData.get('username')
-    const email = formData.get('email')
-    const password = formData.get('password')
-    const name = formData.get('name')
+    setLoading(true);
+    setError('');
 
-    // Validate Password
-    const isValidPassword = validatePassword(password);
-    if (!isValidPassword) {
-      setError('Password must be at least 5 characters long')
-      setLoading(false)
-    } else {
-      setError('')
-    }
+    try {
+      const formData = new FormData(event.currentTarget)
+      const username = formData.get('username')
+      const email = formData.get('email')
+      const password = formData.get('password')
+      const name = formData.get('name')
 
-    if (isValidPassword) {
+      // Validate Password
+      const isValidPassword = validatePassword(password);
+      if (!isValidPassword) {
+        setError('Password must be at least 5 characters long');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/auth/trainer-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password, name }),
-      })
+      });
 
-      const result = await response.json()
+      if (!response.ok) {
+        throw new Error('Failed to register. Please try again.');
+      }
 
-      if (result.code == 201) {
-        setLoading(false)
-
-        // when registered successfully
+      const result = await response.json();
+      console.log(result)
+      if (result.result.code === 201) {
+        // Registration successful
+        const { message, url } = result;
+        console.log(message)
+        console.log(url)
         toast({
-          title: 'Trainer account created successfully.',
+          title: message,
           status: 'success',
           position: 'top-right',
           duration: 5000,
           isClosable: true,
-        })
-
-        router.push('/trainer-login')
+        });
+        router.push(url);
       } else {
-        setError('Failed to register. Please try again.')
-        setLoading(false)
+        throw new Error('Failed to register. Please try again.');
       }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Stack maxH={'83.5vh'} direction={{ base: 'column', md: 'row' }}>
@@ -125,15 +131,15 @@ export default function TrainerRegister() {
                 </InputRightElement>
               </InputGroup>
             </FormControl>
-            {error ?
+            {error &&
               <Text color={"red"} mb={'1rem'}>{error}</Text>
-              : ""}
+            }
             <Stack spacing={6}>
               <Button
                 colorScheme={'red'}
                 variant={'solid'}
                 type="submit"
-                isLoading={loading ? true : false}
+                isLoading={loading}
               >
                 Register
               </Button>

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutReceipt from '../../../components/checkoutReceipt';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 const stripe = require('stripe')('sk_test_51O2p9QFD3c4VDISeYPMwEIN9FUSwgdfeqZpcGhhQ6l7af7xrQAXIJ6mb3bbcRNfJFA2zuOojGGtLukbwuEdmgyqt00MRd5fHHK');
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -12,11 +14,19 @@ const trainer_id = 'acct_1OnPQZFSwTDhdL4G';
 export default function Checkout() {
   const [productData, setProductData] = useState([]);
   const [newSession, setNewSession] = useState(null);
+  const [checkToken, setCheckToken] = useState('');
+  const router = useRouter();
 
   const createCheckoutSession = async () => {
     try {
 
-      const response = await fetch('http://localhost:3000/api/cart/1');
+      const response = await fetch(`http://localhost:3000/api/cart/${traineeid.traineeid}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${checkToken}`,
+        }
+      });
 
       if (!response.ok) {
         throw new Error('Error fetching product information');
@@ -76,6 +86,21 @@ export default function Checkout() {
   };
 
   useEffect(() => {
+    const token = Cookies.get('token')
+    const traineeinfo = Cookies.get('traineeinfo')
+    var traineeid
+
+    if (!token) {
+      router.replace('/') // If no token is found, redirect to login page
+      return
+    }
+
+    if (!(traineeinfo === undefined)) {
+      traineeid = JSON.parse(traineeinfo)
+    }
+
+    setCheckToken(token)
+    
     const query = new URLSearchParams(window.location.search);
 
     if (query.get('success')) {

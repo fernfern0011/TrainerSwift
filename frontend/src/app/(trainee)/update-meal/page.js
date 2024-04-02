@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
     Center,
@@ -15,6 +15,8 @@ import {
     Link,
     Checkbox
 } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function UpdateMeal() {
     const [foodname, setFoodName] = useState('');
@@ -24,11 +26,31 @@ export default function UpdateMeal() {
     const mealid = searchParams.get('mealid');
     const foodName = searchParams.get('foodname');
     const qty = searchParams.get('quantity');
+    const [checkToken, setCheckToken] = useState('');
+    const [trainee, setTrainee] = useState('')
 
+    useEffect(() => {
+        const token = Cookies.get('token')
+        const traineeinfo = Cookies.get('traineeinfo')
+        var traineeid
+
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        if (!(traineeinfo === undefined)) {
+            traineeid = JSON.parse(traineeinfo)
+        }
+
+        setCheckToken(token)
+        setTrainee(traineeid)
+    })
+    
     const handleUpdateMeal = async () => {
 
         const postData = {
-            traineeid: 7,
+            traineeid: trainee.traineeid,
             mealid: mealid,
             foodname: foodname,
             quantity: parseInt(quantity)
@@ -37,7 +59,8 @@ export default function UpdateMeal() {
         const requestOptions = {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${checkToken}`,
             },
             body: JSON.stringify(postData)
         };

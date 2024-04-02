@@ -15,16 +15,38 @@ import {
   Link,
   Checkbox
 } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function AddMeal() {
   const [foodname, setFoodName] = useState('');
   const [quantity, setQuantity] = useState('');
   const router = useRouter();
+  const [checkToken, setCheckToken] = useState('');
+  const [trainee, setTrainee] = useState('');
+
+  useEffect(() => {
+    const token = Cookies.get('token')
+    const traineeinfo = Cookies.get('traineeinfo')
+    var traineeid
+
+    if (!token) {
+      router.replace('/') // If no token is found, redirect to login page
+      return
+    }
+
+    if (!(traineeinfo === undefined)) {
+      traineeid = JSON.parse(traineeinfo)
+    }
+
+    setCheckToken(token)
+    setTrainee(traineeid)
+  })
 
   const handleAddMeal = async () => {
 
     const postData = {
-      traineeid: 7,
+      traineeid: trainee.traineeid,
       foodname: foodname,
       quantity: parseInt(quantity)
     };
@@ -32,7 +54,8 @@ export default function AddMeal() {
     const requestOptions = {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${checkToken}`,
       },
       body: JSON.stringify(postData)
     };

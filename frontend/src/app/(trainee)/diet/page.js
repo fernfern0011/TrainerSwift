@@ -1,18 +1,43 @@
 "use client"
-import { Heading, Spacer, Box, Flex, Button, TableContainer, Table, Thead, Tr, Th, Td, Tbody, Tfoot, Center} from '@chakra-ui/react';
+import { Heading, Spacer, Box, Flex, Button, TableContainer, Table, Thead, Tr, Th, Td, Tbody, Tfoot, Center } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon, AddIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
     const [refresh, setRefresh] = useState(false);
     const [type, setType] = useState('bulk');
+    const [checkToken, setCheckToken] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
+        const token = Cookies.get('token')
+        const traineeinfo = Cookies.get('traineeinfo')
+        var traineeid
+
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        if (!(traineeinfo === undefined)) {
+            traineeid = JSON.parse(traineeinfo)
+        }
+
+        setCheckToken(token)
+
         const fetchMeals = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/diet/7');
+                const response = await fetch(`http://localhost:3000/api/diet/${traineeid.traineeid}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch meals');
                 }
@@ -22,13 +47,19 @@ export default function DietPage() {
                 } else {
                     setMeals(data.data.meal);
                 }
-                
+
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/calculator/7');
+                const response = await fetch(`http://localhost:3000/api/calculator/${traineeid.traineeid}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch calculator data');
                 }
@@ -38,7 +69,7 @@ export default function DietPage() {
                 console.error('Error fetching calculator data:', error);
             }
         };
-        
+
         fetchMeals();
     }, [refresh]);
 
@@ -47,7 +78,7 @@ export default function DietPage() {
     };
 
     const deleteMeal = async (mealid) => {
-        
+
         const deleteData = {
             mealid: mealid,
         };
@@ -55,7 +86,8 @@ export default function DietPage() {
         const requestOptions = {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${checkToken}`,
             },
             body: JSON.stringify(deleteData)
         };
@@ -71,7 +103,7 @@ export default function DietPage() {
             setRefresh(prevRefresh => !prevRefresh);
         } catch (error) {
             console.error('Error deleting meals:', error);
-        }        
+        }
     }
 
     return (
@@ -84,16 +116,16 @@ export default function DietPage() {
                     </Button>
                 </Box>
                 <Box bg="gray.200" p={4} ml="auto" mr={12} borderRadius="md">
-                <Flex alignItems="center">
-                    <Heading size="md" ml={5}>This Month</Heading>
-                    <Spacer />
-                    <Button colorScheme="teal" variant="outline" mr={4} onClick={() => handleTypeSelect('bulk')}>
-                        Bulk
-                    </Button>
+                    <Flex alignItems="center">
+                        <Heading size="md" ml={5}>This Month</Heading>
+                        <Spacer />
+                        <Button colorScheme="teal" variant="outline" mr={4} onClick={() => handleTypeSelect('bulk')}>
+                            Bulk
+                        </Button>
                         <Button colorScheme="teal" variant="outline" onClick={() => handleTypeSelect('cut')}>
-                        Cut
-                    </Button>
-                </Flex>
+                            Cut
+                        </Button>
+                    </Flex>
                     <TableContainer>
                         <Table variant='simple'>
                             <Thead>
@@ -109,8 +141,8 @@ export default function DietPage() {
                                     <Tr key={index}>
                                         <Td>{item.nutrients}</Td>
                                         <Td isNumeric>{item.current}</Td>
-                                        <Td isNumeric>{ type == 'bulk' ? item.target.bulk : item.target.cut}</Td>
-                                        <Td>{ type == 'bulk' ? item.diff.bulk : item.diff.cut }</Td>
+                                        <Td isNumeric>{type == 'bulk' ? item.target.bulk : item.target.cut}</Td>
+                                        <Td>{type == 'bulk' ? item.diff.bulk : item.diff.cut}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
@@ -143,11 +175,11 @@ export default function DietPage() {
                                 <Td isNumeric>{item.fat}</Td>
                                 <Td isNumeric>{item.calories}</Td>
                                 <Td>
-                                    <Center display={item.foodname=="No Data" ? "none" : "block"}>
+                                    <Center display={item.foodname == "No Data" ? "none" : "block"}>
                                         <Button colorScheme="teal" variant="outline" as={'a'} href={`/update-meal?mealid=${item.mealid}&foodname=${item.foodname}&quantity=${item.quantity}`} mr="3%">
                                             <EditIcon boxSize={5} />
                                         </Button>
-                                        <Button colorScheme="teal" variant="outline" onClick={() => deleteMeal(item.mealid) }>
+                                        <Button colorScheme="teal" variant="outline" onClick={() => deleteMeal(item.mealid)}>
                                             <DeleteIcon boxSize={5} />
                                         </Button>
                                     </Center>

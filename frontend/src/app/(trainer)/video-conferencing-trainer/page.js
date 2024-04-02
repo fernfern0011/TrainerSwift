@@ -25,8 +25,8 @@ export default function Page() {
 
   useEffect(() => {
     const token = Cookies.get('token')
-    const traineeinfo = Cookies.get('traineeinfo')
-    var traineeid
+    const trainerinfo = Cookies.get('trainerinfo')
+    var trainerid
     var bookedby
 
     if (!token) {
@@ -34,14 +34,14 @@ export default function Page() {
       return
     }
 
-    if (!(traineeinfo === undefined)) {
-      traineeid = JSON.parse(traineeinfo)
+    if (!(trainerinfo === undefined)) {
+      trainerid = JSON.parse(trainerinfo)
     }
 
     setCheckToken(token)
     const fetchBookedBy = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/trainee-booking/${traineeid.traineeid}`, {
+        const response = await fetch(`http://localhost:3000/api/trainer-booking/${trainerid.trainerid}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default function Page() {
     (async () => {
       try {
         const resp = await fetch(
-          `http://localhost:3000/api/get-participant-token?room=${bookedby}&username=${traineeid.traineeid}`
+          `http://localhost:3000/api/get-participant-token?room=${bookedby}&username=${trainerid.trainerid}`
           , {
             method: "GET",
             headers: {

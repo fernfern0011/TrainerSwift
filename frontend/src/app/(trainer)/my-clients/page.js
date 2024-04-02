@@ -1,16 +1,19 @@
 "use client"
+
 import { useState, useEffect } from 'react';
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Flex, Spinner, Text, SimpleGrid, Heading } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation'
 import ClientCard from '../../../components/clientCard';
 import SearchBar from '../../../components/searchBar';
-import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
 
 export default function MyClientPage() {
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
     const [bookings, setBookings] = useState([]);
     const [traineeDetails, setTraineeDetails] = useState([]);
-    const [checkToken, setCheckToken] = useState('');
-    const router = useRouter();
+    const [error, setError] = useState('')
+    const [checkToken, setCheckToken] = useState('')
 
     useEffect(() => {
         const token = Cookies.get('token')
@@ -27,6 +30,7 @@ export default function MyClientPage() {
         }
 
         setCheckToken(token)
+        setLoading(true)
         const fetchBookings = async () => {
             try {
                 const responseBookings = await fetch(`http://localhost:3000/api/trainer-booking/${trainerid.trainerid}`, {
@@ -35,53 +39,78 @@ export default function MyClientPage() {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,
                     }
-                });
-                if (!responseBookings.ok) {
-                    throw new Error('Failed to fetch bookings');
-                }
+                })
+
+                // if booking successfully fetched
                 const dataBookings = await responseBookings.json();
-                setBookings(dataBookings.data.bookedby);
+                console.log(dataBookings);
 
-                const responseTraineeDetails = await fetch(`http://localhost:3000/api/trainer-details/${trainerid.trainerid}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
+                if (dataBookings.code == 200) {
+
+                    const responseTraineeDetails = await fetch(`http://localhost:3000/api/trainer-details/${trainerid.trainerid}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        }
+                    });
+
+                    const dataTraineeDetails = await responseTraineeDetails.json();
+                    console.log(dataTraineeDetails);
+
+                    if (dataTraineeDetails.code == 200) {
+                        setBookings(dataBookings.data.bookedby);
+                        setTraineeDetails(dataTraineeDetails.data.bookedby_details);
+                        setLoading(false)
                     }
-                });
-                if (!responseTraineeDetails.ok) {
-                    throw new Error('Failed to fetch trainee details');
+                } else {
+                    setError('Failed to retrieve booking data.')
+                    setLoading(false)
                 }
-                const dataTraineeDetails = await responseTraineeDetails.json();
-                setTraineeDetails(dataTraineeDetails.data.bookedby_details);
-                console.log(dataTraineeDetails.data.bookedby_details)
-
-
             } catch (error) {
                 console.error('Error fetching bookings:', error);
             }
         };
 
-        fetchBookings();
+        fetchBookings().catch((e) => {
+            // handle the error as needed
+            console.error('An error occurred while fetching the data: ', e)
+        })
     }, []);
 
-    return (
-        <Box padding="2%">
-            <Flex justifyContent='center' paddingBottom='5px'>
-                <SearchBar />
-            </Flex>
-            {bookings && bookings.length > 0 ? (
-                bookings.map((booking, index) => (
-                    <ClientCard
-                        key={index}
-                        booking={booking}
-                        traineeDetails={traineeDetails[index]} // Pass corresponding traineeDetails
-                    />
-                ))
-            ) : (
-                <p>No bookings found.</p>
-            )}
+    console.log(bookings, traineeDetails);
 
+    return (
+        <Box p={20}>
+            {checkToken == "" ?
+                <Flex m={'auto'} justifyContent={'center'}>
+                    <Spinner />
+                </Flex> : (
+                    <>
+                        <Heading mb={10}>Booking List</Heading>
+                        <Flex justifyContent='center' paddingBottom='5px' gap='3'>
+                            <SearchBar mr={10} />
+                        </Flex>
+                        {loading ?
+                            <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retrieving booking data...</Text> : (
+                                error ?
+                                    <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text> :
+                                    <SimpleGrid mt={4}>
+                                        {bookings && bookings.length > 0 ? (
+                                            bookings.map((booking, index) => (
+                                                <ClientCard
+                                                    key={index}
+                                                    booking={booking}
+                                                    traineeDetails={traineeDetails[index]} // Pass corresponding traineeDetails
+                                                />
+                                            ))
+                                        ) : <Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>{error}</Text>}
+                                    </SimpleGrid>
+                            )
+                        }
+                    </>
+                )
+            }
         </Box>
     );
 }

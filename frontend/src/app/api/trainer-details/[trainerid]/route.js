@@ -6,10 +6,8 @@ const DATA_SOURCE_URL = 'http://localhost:8000/bookingapi/trainer'
 
 export const dynamic = 'force-dynamic'
 
-
 export async function GET(req, context) {
     const { trainerid } = await context.params
-    console.log(trainerid)
     
     try {
         const headersInstance = headers()
@@ -24,9 +22,9 @@ export async function GET(req, context) {
             return NextResponse.json({ "code": 400, "message": "Expired" })
         } else {
             const res = await fetch(`${DATA_SOURCE_URL}/${trainerid}/bookedbydetails`)
-            const getUser = await res.json()
+            const getBookingDetails = await res.json()
 
-            return NextResponse.json(getUser)
+            return NextResponse.json(getBookingDetails)
         }
     } catch (error) {
         console.error('Token verification failed', error)

@@ -90,7 +90,7 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
         }).toString();
 
         // Navigate to checkout page using window.location.href
-        window.location.href = `/checkout?${queryString}`;
+        window.open(`/checkout?${queryString}`, `_blank`);
     }
 
     const triggerPayment = async () => {
@@ -153,52 +153,50 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
                         </Flex>
                     </Flex>
 
-                        <Stack>
-                            {/* Package timeslots */}
-                            {timeslots && timeslots.length !== 0 ? (
-                                <Accordion allowMultiple>
-                                    <AccordionItem>
-                                        <AccordionButton>
-                                            <Text mb={'5px'}>Timeslots Available:</Text>
-                                            <AccordionIcon />
-                                        </AccordionButton>
-                                        <AccordionPanel pb={4}>
-                                            {(timeslots).sort(function (a, timeslot) { return a.availabilityid - timeslot.availabilityid }).map((timeslot) =>
-                                            (
-                                                <Button
-                                                    variant={timeslot.availabilityid == formData.availabilityID ? 'solid' : 'outline'}
-                                                    colorScheme={timeslot.availabilityid == formData.availabilityID ? 'blue' : 'blue'}
-                                                    mr={2} mb={2} id={timeslot.availabilityid}
-                                                    key={timeslot.availabilityid}
-                                                    onClick={(e) => handleSelectTimeslot(e)}>
-                                                    {timeslot.time}
-                                                </Button>
-                                            )
-                                            )}
-                                            {error &&
-                                                <Text color={"red"} width={'fit-content'} m={'auto'}>{error}</Text>
-                                            }
+                    <Stack>
+                        {/* Package timeslots */}
+                        {timeslots && timeslots.length !== 0 ? (
+                            <Accordion allowMultiple>
+                                <AccordionItem>
+                                    <AccordionButton>
+                                        <Text mb={'5px'}>Timeslots Available:</Text>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <AccordionPanel pb={4}>
+                                        {(timeslots).sort(function (a, timeslot) { return a.availabilityid - timeslot.availabilityid }).map((timeslot) =>
+                                        (
                                             <Button
-                                                colorScheme='red'
-                                                variant={'solid'}
-                                                w={'full'}
-                                                mt={'10px'}
-                                                rightIcon={<ArrowForwardIcon />}
-                                                isLoading={booking ? true : false}
-                                                isDisabled={formData.availabilityID ? false : true}
-                                                onClick={() => handleSubmitTimeslot()}
-                                            >
-                                                Book a slot
+                                                variant={timeslot.availabilityid == formData.availabilityID ? 'solid' : 'outline'}
+                                                colorScheme={timeslot.availabilityid == formData.availabilityID ? 'blue' : 'blue'}
+                                                mr={2} mb={2} id={timeslot.availabilityid}
+                                                key={timeslot.availabilityid}
+                                                onClick={(e) => handleSelectTimeslot(e)}>
+                                                {timeslot.time}
                                             </Button>
-                                        </AccordionPanel>
-                                    </AccordionItem>
-                                </Accordion>
-                            ) :
-                                (<Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>No timeslots</Text>)}
-                        </Stack>
-                    </Box>
+                                        )
+                                        )}
+                                        {error &&
+                                            <Text color={"red"} width={'fit-content'} m={'auto'}>{error}</Text>
+                                        }
+                                        <Button
+                                            colorScheme='red'
+                                            variant={'solid'}
+                                            w={'full'}
+                                            mt={'10px'}
+                                            rightIcon={<ArrowForwardIcon />}
+                                            isDisabled={formData.availabilityID ? false : true}
+                                            onClick={() => handleSubmitTimeslot()}
+                                        >
+                                            Book a slot
+                                        </Button>
+                                    </AccordionPanel>
+                                </AccordionItem>
+                            </Accordion>
+                        ) :
+                            (<Text color={"red"} width={'fit-content'} m={'auto'} pt={'50px'}>No timeslots</Text>)}
+                    </Stack>
                 </Box>
-            }
+            </Box>
         </Flex>
     )
 }

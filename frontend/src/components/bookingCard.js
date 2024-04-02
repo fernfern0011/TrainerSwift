@@ -138,7 +138,7 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
 
                         <Stack>
                             {/* Package timeslots */}
-                            {timeslots.length != 0 ? (
+                            {timeslots && timeslots.length !== 0 ? (
                                 <Accordion allowMultiple>
                                     <AccordionItem>
                                         <AccordionButton>

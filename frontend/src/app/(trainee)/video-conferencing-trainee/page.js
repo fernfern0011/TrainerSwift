@@ -49,6 +49,7 @@ export default function Page() {
           }
         });
         console.log(response)
+        // console.log("Session: ", traineeid.traineeid)
         if (!response.ok) {
           throw new Error('Failed to fetch trainer information');
         }

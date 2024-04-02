@@ -40,8 +40,7 @@ export default function RootLayout({ children }) {
           {isAuthenticated == false && <Navbar />}
           {isAuthenticated === true && (
             <>
-              {trainerinfo.role === 'trainer' ? <TrainerNavbar {...trainerinfo} /> : <TraineeNavbar {...traineeinfo} />}
-
+                {trainerinfo && trainerinfo.role === 'trainer' ? <TrainerNavbar {...trainerinfo} /> : <TraineeNavbar {...traineeinfo} />}
             </>
           )}
           {children}

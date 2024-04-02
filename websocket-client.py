@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import json
+from datetime import datetime
+import pytz
 
 app=Flask(__name__)
 CORS(app)
@@ -39,12 +41,12 @@ def websocketchat():
 
         if (data["connection"] == True):
             print(data)
-            await connect([data["traineeID"]+","+ data["trainerID"]+","+"connection created"])
+            await connect([data["traineeID"]+"`"+ data["trainerID"]+"`"+"connection created"+"`"+ str(datetime.now(pytz.timezone('Asia/Singapore')))])
         else:
             if data["sender"] == "trainee":
-                await connect([data["traineeID"]+","+ data["trainerID"]+","+data["message"]])
+                await connect([data["traineeID"]+"`"+ data["trainerID"]+"`"+data["message"]+"`"+str(datetime.now(pytz.timezone('Asia/Singapore')))])
             else:
-                await connect([data["trainerID"]+","+ data["traineeID"]+","+data["message"]])
+                await connect([data["trainerID"]+"`"+ data["traineeID"]+"`"+data["message"]+"`"+str(datetime.now(pytz.timezone('Asia/Singapore')))])
 
     asyncio.run(main())
     return jsonify({"response": "success"})

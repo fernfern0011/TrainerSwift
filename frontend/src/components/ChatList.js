@@ -39,12 +39,12 @@ const ChatList = () => {
   const groupedChats = {};
   chats.forEach((chat) => {
     const { sender_info, receiver_info, message } = chat;
-    const chatId = sender_info < receiver_info ? `${sender_info}_${receiver_info}` : `${receiver_info}_${sender_info}`;
+    const chatId = sender_info < receiver_info ?  `${receiver_info}_${sender_info}`:`${sender_info}_${receiver_info}` ;
 
     if (!groupedChats[chatId]) {
       groupedChats[chatId] = {
         id: chatId,
-        name: sender_info < receiver_info ? sender_info : receiver_info,
+        name: sender_info < receiver_info ? receiver_info : sender_info,
         src: '', // Add source for Avatar image
         messages: [],
         date: '', // You might want to include date information as well

@@ -20,9 +20,9 @@ collection = db["chats"]
 
 
 #insert client message
-async def save_chat(sender_info,receiver_info, message):
+async def save_chat(sender_info,receiver_info, message, timestamp):
     try:
-        result = collection.insert_one({"sender_info":sender_info,"receiver_info":receiver_info,"message":message})
+        result = collection.insert_one({"sender_info":sender_info,"receiver_info":receiver_info,"message":message, "timestamp":timestamp})
         print("Message saved successfully")
     except Exception as e:
         print(f"Error saving message to MongoDB: {e}")
@@ -40,12 +40,13 @@ async def send_message(message):
 async def handle_client(websocket, path):
     async for message in websocket:
         #message = eval(message)
-        message = message.split(",")
+        message = message.split("`")
         print(message)
         sender_info = message[0]
         receiver_info = message[1]
         text_message = message[2]
-        await save_chat(sender_info,receiver_info, text_message)
+        timestamp = message[3]
+        await save_chat(sender_info,receiver_info, text_message,timestamp)
         response = await send_message(text_message)
         await websocket.send(response)
 

@@ -198,7 +198,6 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
                         </Stack>
                     </Box>
                 </Box>
-            }
         </Flex>
     )
 }

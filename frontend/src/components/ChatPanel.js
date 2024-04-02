@@ -1,16 +1,30 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Box, Flex, Text, Input, Button } from '@chakra-ui/react';
 import { ChatContext } from '../store/chatStore';
+import Cookies from 'js-cookie'
 import { SourceTextModule } from 'vm';
 //import { RootLayout } from "../app/layout";
 
+const trainerinfo = Cookies.get('trainerinfo')
+const traineeinfo = Cookies.get('traineeinfo')
+//console.log(traineeinfo)
+var loginType
 
+if (traineeinfo === undefined){
+  //console.log("trainer account login")
+  loginType = "trainer"
+}else if (trainerinfo=== undefined){
+  //console.log("trainee account login")
+  loginType = "trainee"
+}
 
 const ChatMessage = ({ message }) => {
   //console.log(currentUser);
-  const alignSelf = message.sender_info === "trainee7" ? 'flex-end' : 'flex-start';
-  const messageColor = message.sender_info === "trainee7" ? 'blue.500' : 'red.500';
-  const textColor = message.sender_info === "trainee7" ? 'white' : 'black';
+  //console.log(message.sender_info.substring(0,7) == loginType)
+  
+  const alignSelf = message.sender_info.substring(0,7) == loginType ? 'flex-end' : 'flex-start';
+  const messageColor = message.sender_info.substring(0,7) == loginType ? 'blue.500' : 'red.500';
+  const textColor = message.sender_info.substring(0,7) == loginType ? 'white' : 'black';
 
   return (
     <Box
@@ -34,15 +48,15 @@ const ChatPanel = ({}) => {
   const messagesEndRef = useRef(null);
 
   //console.log(trainerinfo, traineeinfo);
-  console.log(chats)
+  //console.log(chats)
   const sortedMessages = chats.slice().sort((a,b) => {
     const timestampA = new Date(a.timestamp);
     const timestampB = new Date(b.timestamp);
     return timestampA - timestampB;
   })
-  console.log(chats)
+  //console.log(chats)
   //console.log(selectedChat)
-  console.log(sortedMessages)
+  //console.log(sortedMessages)
 
   const scrollToBottom = () => {
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -82,13 +96,12 @@ const ChatPanel = ({}) => {
           <Box flex="1" overflowY="auto" mb="4" display="flex" flexDirection="column-reverse">
             <div ref={messagesEndRef} />
             {sortedMessages.reverse().map((message, index) => {
-              const isTrainer = (message.sender_info === "trainee7");
+              //const isTrainer = (message.sender== loginType);
               //console.log(message.sender_info === 'trainer113')
               return (
                 <ChatMessage
                   key={index}
                   message={message}
-                  isTrainer={isTrainer}
                 />
               );
             })}

@@ -25,7 +25,7 @@ export async function POST(req) {
             traineeID: traineeID,
             connection: connection,
             message: message,
-            sender: "trainee"
+            sender: sender
         })
     })
 

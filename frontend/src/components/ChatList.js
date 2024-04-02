@@ -3,6 +3,20 @@
 import React, { useContext } from 'react';
 import { VStack, Box, Text, Avatar } from '@chakra-ui/react';
 import { ChatContext } from '../store/chatStore';
+import Cookies from 'js-cookie';
+
+const trainerinfo = Cookies.get('trainerinfo')
+  const traineeinfo = Cookies.get('traineeinfo')
+  //console.log(traineeinfo)
+  var loginType
+
+  if (traineeinfo === undefined){
+    //console.log("trainer account login")
+    loginType = "trainer"
+  }else if (trainerinfo=== undefined){
+    //console.log("trainee account login")
+    loginType = "trainee"
+  }
 
 const ChatItem = ({ chat, onClick }) => {
   const lastMessage = chat.messages?.[chat.messages.length - 1];
@@ -42,9 +56,15 @@ const ChatList = () => {
     const chatId = sender_info < receiver_info ?  `${receiver_info}_${sender_info}`:`${sender_info}_${receiver_info}` ;
 
     if (!groupedChats[chatId]) {
+      var name
+      if (loginType === "trainer"){
+        name = "trainee7" 
+      } else{
+        name = "trainer7"
+      }
       groupedChats[chatId] = {
         id: chatId,
-        name: sender_info < receiver_info ? receiver_info : sender_info,
+        name: name,
         src: '', // Add source for Avatar image
         messages: [],
         date: '', // You might want to include date information as well

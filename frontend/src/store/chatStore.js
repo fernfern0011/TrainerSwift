@@ -35,7 +35,7 @@ export const ChatProvider = ({ children }) => {
         // Fetch chat data from your API
         const response = await axios.get('http://localhost:3000/api/chat');
         const chatData = response.data.chats;
-        console.log(chatData);
+        //console.log(chatData);
 
         // Set fetched chat data to state
         setChats(chatData);
@@ -47,11 +47,12 @@ export const ChatProvider = ({ children }) => {
   };
 
   const sendMessage = async (newMessage) => {
-    console.log(newMessage.text)
+    //console.log(newMessage.text)
     // console.log(selectedChat)
     try { 
       // Prepare message payload
-      if (loginType === "trainer"){
+      console.log(loginType == "trainer")
+      if (loginType == "trainer"){
         payload = {
           traineeID: selectedChat.name,
           trainerID: 'trainer7', // Assuming trainerID is constant
@@ -59,7 +60,7 @@ export const ChatProvider = ({ children }) => {
           message: newMessage.text,
           sender: 'trainer', // Assuming sender is always the trainee
         };
-      } else {
+      } else if (loginType == "trainee") {
         payload = {
           traineeID: 'trainee7',
           trainerID: selectedChat.name, // Assuming trainerID is constant
@@ -69,19 +70,15 @@ export const ChatProvider = ({ children }) => {
         };
       }
       
-      console.log('Sending message:', payload); // Log the payload
+      //console.log('Sending message:', payload); // Log the payload
   
       // Send message to your API
       const response = await axios.post('http://localhost:3000/api/chat', payload);
 
-      console.log(response)
-      console.log(chats)
+      //console.log(response)
+      //console.log(chats)
       
       // If message sent successfully, update chat in state
-      const updatedChat = {
-      };
-  
-      setSelectedChat(updatedChat);
       fetchData()
     } catch (error) {
       console.error('Error sending message:', error);

@@ -58,14 +58,13 @@ const ChatPanel = ({}) => {
   //console.log(selectedChat)
   //console.log(sortedMessages)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  };
-
 
   useEffect(() => {
-    scrollToBottom();
-  }, [chats]);
+    fetchData()
+    const pollingInterval = setInterval(fetchData(),5000)
+    return () => clearInterval(pollingInterval)
+    //fetchData()
+  }, );
   
 
   const handleSendMessage = () => {

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'
 import {
   Center,
@@ -15,7 +15,6 @@ import {
   Link,
   Checkbox
 } from '@chakra-ui/react';
-import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 export default function AddMeal() {
@@ -41,7 +40,7 @@ export default function AddMeal() {
 
     setCheckToken(token)
     setTrainee(traineeid)
-  })
+  },[])
 
   const handleAddMeal = async () => {
 

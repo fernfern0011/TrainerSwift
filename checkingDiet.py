@@ -56,6 +56,8 @@ def processDiet(diet):
         weight = traineeResult['data']['traineeinfo']['weight']
         age = traineeResult['data']['traineeinfo']['age']
 
+        print(f"Trainee {traineeid} is {height}cm, {weight}kg, {age}y.o.")
+
     else:
         print(traineeResult)
         return {
@@ -87,11 +89,13 @@ def processDiet(diet):
     
     print('\n-----Invoking trainee microservice-----')
     monthlyAverageMeal = invoke_http(f"{dietURL}/diet/{traineeid}/average", method='GET')
-    averageValue = monthlyAverageMeal["data"]
+
+    if monthlyAverageMeal["code"]==200:
+        data = monthlyAverageMeal["data"]
+        print(f"Data {data} obtained")
     
     print('\n\n-----Invoking calculator microservice-----')
-
-    details = {"height": height, "weight": weight, "age":age, "info": averageValue}
+    details = {"height": height, "weight": weight, "age":age, "info": data}
     calcResult = invoke_http(f"{calcURL}/calculator/{traineeid}", method='POST', json=details)
     print("calcResult:", calcResult, '\n')
 

@@ -36,9 +36,6 @@ export default function Hero() {
               _hover={{ bg: 'RGBA(0, 0, 0, 0.80)' }}>
               Get started
             </Button>
-            <Button rounded={'full'} px={6}>
-              Learn more
-            </Button>
           </Stack>
         </Stack>
       </Container>

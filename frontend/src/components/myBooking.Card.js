@@ -25,7 +25,7 @@ export default function BookingCard({booking, traineeDetails}) {
                                     Location: {traineeDetails.address}
                                 </Text>
                                 <Flex alignItems='flex-end' paddingTop='5%'>
-                                    <Button variant='solid' colorScheme='red' mr="2%">
+                                    <Button variant='solid' colorScheme='red' mr="2%" as='a' href={'/chat'}>
                                         Chat
                                         <ChatIcon ml='5px' />
                                     </Button>
@@ -35,8 +35,8 @@ export default function BookingCard({booking, traineeDetails}) {
                                             <CalendarIcon ml='5px' />
                                         </Button>
                                     )}
-                                    {traineeDetails.mode == "offline" && (
-                                        <Button variant='solid' colorScheme='red' as='a' href={'/videoConferencing'} >
+                                    {traineeDetails.mode == "online" && (
+                                        <Button variant='solid' colorScheme='red' as='a' href={'/video-conferencing-trainee'} >
                                             Video Chat
                                             <PhoneIcon ml='5px' />
                                         </Button>

@@ -90,7 +90,7 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
         }).toString();
 
         // Navigate to checkout page using window.location.href
-        window.open(`/checkout?${queryString}`, '_blank');
+        window.open(`/checkout?${queryString}`, `_blank`);
     }
 
     const triggerPayment = async () => {

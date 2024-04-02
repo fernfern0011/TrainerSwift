@@ -120,7 +120,7 @@ def create_new_trainer_query():
             # Insert the new trainer into the database
             cur.execute(
                 f"INSERT INTO account (trainerid, username, email, password, name, stripeid) VALUES (nextval('account_id_seq'), %s, %s, %s, %s, %s) RETURNING trainerid;",
-                (username, email, password, name, ))
+                (username, email, password, name, stripeid ))
 
             # Get the ID of the newly inserted trainer
             new_trainerid = cur.fetchone()[0]

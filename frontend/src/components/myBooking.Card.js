@@ -35,8 +35,8 @@ export default function BookingCard({booking, traineeDetails}) {
                                             <CalendarIcon ml='5px' />
                                         </Button>
                                     )}
-                                    {traineeDetails.mode == "offline" && (
-                                        <Button variant='solid' colorScheme='red' as='a' href={'/videoConferencing'} >
+                                    {traineeDetails.mode == "online" && (
+                                        <Button variant='solid' colorScheme='red' as='a' href={'/video-conferencing-trainee'} >
                                             Video Chat
                                             <PhoneIcon ml='5px' />
                                         </Button>

@@ -1,12 +1,33 @@
 from flask import Flask, jsonify, request
 from config import *
 from dbConnection import *
+from flasgger import Swagger
 app = Flask(__name__)  # special variable that will call __main__
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'Trainee microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create, retrieve, update, and delete of trainee'
+}
+swagger = Swagger(app)
 
 # Trainee Account #
 # [GET] getAllTrainee
 @app.route('/trainee', methods=['GET'])
 def read_all_trainee_query():
+    """
+    Get all trainee
+    ---
+    responses:
+        200:
+            description: Return all trainee
+        400:
+            description: There is no trainee
+
+    """
+
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM account ORDER BY traineeid ASC')
@@ -33,6 +54,17 @@ def read_all_trainee_query():
 # [GET] getOneTrainee
 @app.route("/trainee/<traineeid>", methods=['GET'])
 def read_trainee_by_id_query(traineeid):
+    """
+    Get one trainee by traineeid
+    ---
+    responses:
+        200:
+            description: Return one trainee
+        400:
+            description: There is no trainee
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -60,6 +92,17 @@ def read_trainee_by_id_query(traineeid):
 # [POST] verifyAccount
 @app.route('/trainee/login', methods=['POST'])
 def verify_account():
+    """
+    Verify trainee account
+    ---
+    responses:
+        201:
+            description: Successfully login
+        400:
+            description: Trainee account doens't exist
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         email = data['email']
@@ -93,6 +136,17 @@ def verify_account():
 # [POST] createNewTrainee
 @app.route('/trainee/create', methods=['POST'])
 def create_new_trainee_query():
+    """
+    Create trainee account
+    ---
+    responses:
+        201:
+            description: Trainee created successfully
+        400:
+            description: Failed to create a new trainee
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         username = data['username']
@@ -149,6 +203,17 @@ def create_new_trainee_query():
 # [PUT] updateTrainee
 @app.route('/trainee/<int:traineeid>', methods=['PUT'])
 def update_trainee_query(traineeid):
+    """
+    Update trainee account by traineeid
+    ---
+    responses:
+        200:
+            description: Trainee updated successfully
+        400:
+            description: Failed to update a trainee
+
+    """
+        
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -176,6 +241,17 @@ def update_trainee_query(traineeid):
 # [DELETE] deleteTrainee
 @app.route('/trainee/<int:traineeid>', methods=['DELETE'])
 def delete_trainee_by_id_query(traineeid):
+    """
+    Delete trainee account by traineeid
+    ---
+    responses:
+        200:
+            description: Trainee deleted successfully
+        400:
+            description: Failed to delete a trainee
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -203,6 +279,17 @@ def delete_trainee_by_id_query(traineeid):
 # [GET] getAllTraineeInfo
 @app.route('/traineeinfo', methods=['GET'])
 def read_all_traineeinfo_query():
+    """
+    Get all trainee info
+    ---
+    responses:
+        200:
+            description: Return all trainee info
+        400:
+            description: There is no trainee information
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM info ORDER BY traineeid ASC')
@@ -227,10 +314,19 @@ def read_all_traineeinfo_query():
     })
 
 # [GET] getOneTraineeInfo
-
-
 @app.route('/traineeinfo/<int:traineeid>', methods=['GET'])
 def read_traineeinfo_by_id_query(traineeid):
+    """
+    Get one trainee info by traineeid
+    ---
+    responses:
+        200:
+            description: Return one trainee info
+        400:
+            description: There is no trainee information
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -258,6 +354,17 @@ def read_traineeinfo_by_id_query(traineeid):
 # [PUT] updateTraineeInfo
 @app.route('/traineeinfo/<int:traineeid>', methods=['PUT'])
 def update_traineeinfo_by_id_query(traineeid):
+    """
+    Update trainee info by traineeid
+    ---
+    responses:
+        200:
+            description: Trainee Information updated successfully
+        400:
+            description: Failed to update trainee information
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -285,7 +392,7 @@ def update_traineeinfo_by_id_query(traineeid):
 
             return jsonify({
                 "code": 200,
-                "message": "trainee Information updated successfully."
+                "message": "Trainee Information updated successfully."
             })
         except:
             return jsonify({

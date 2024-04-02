@@ -44,7 +44,7 @@ export default function UpdateMeal() {
 
         setCheckToken(token)
         setTrainee(traineeid)
-    })
+    }, [])
     
     const handleUpdateMeal = async () => {
 

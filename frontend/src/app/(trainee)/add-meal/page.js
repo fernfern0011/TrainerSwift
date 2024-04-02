@@ -40,7 +40,7 @@ export default function AddMeal() {
 
     setCheckToken(token)
     setTrainee(traineeid)
-  })
+  },[])
 
   const handleAddMeal = async () => {
 

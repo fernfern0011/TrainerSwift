@@ -8,6 +8,26 @@ import { ChevronLeftIcon } from '@chakra-ui/icons';
 
 export default function ViewTrainerPackage() {
 
+    const [trainerInfo, setTrainerInfo] = useState(null);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/trainer/2');
+            if (!response.ok) {
+            throw new Error('Failed to fetch trainer information');
+            }
+            const data = await response.json();
+            setTrainerInfo(data.data.trainerinfo);
+        } catch (error) {
+            setError(error.message);
+        }
+        };
+
+        fetchData();
+    }, []);
+
     return (
         <Box>
             <Button
@@ -24,28 +44,23 @@ export default function ViewTrainerPackage() {
             </Button>
             <Box style={{ display: 'inline-block' }} mt={"25px"} ml={'25%'}>
                 <Box style={{ display: 'inline-block' }}>
-                    <Heading>
-                        John Doe, 24
-                    </Heading>
+                <Heading>
+                    {trainerInfo ? `${trainerInfo.name}, ${new Date().getFullYear() - new Date(trainerInfo.dob).getFullYear()}` : ''}
+                </Heading>
+
                     <Box>
                         <Text style={{ display: 'inline-block' }}>
-                            Trainer ID:
-                        </Text>
-                        <Text ml={"5px"} style={{ display: 'inline-block' }}>
-                            123456
+                        Height: {trainerInfo ? trainerInfo.height : ''}cm
                         </Text>
                     </Box>
                     <Box>
                         <Text style={{ display: 'inline-block' }}>
-                            Expert in:
-                        </Text>
-                        <Text ml={"5px"} style={{ display: 'inline-block' }}>
-                            Yoga, Pilates, Swimming
+                        Weight: {trainerInfo ? trainerInfo.weight : ''}kg
                         </Text>
                     </Box>
                     <Box mt={"70px"}>
                         <Heading>
-                            Package
+                            Packages    
                         </Heading>
                     </Box>
                 </Box>
@@ -53,7 +68,7 @@ export default function ViewTrainerPackage() {
                     <Image
                         borderRadius='full'
                         boxSize='200px'
-                        src='https://bit.ly/dan-abramov'
+                        src='https://placehold.co/200x200'
                         alt='Dan Abramov'
                     />
                 </Box>

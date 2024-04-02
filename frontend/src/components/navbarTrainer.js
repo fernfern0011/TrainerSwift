@@ -28,10 +28,10 @@ const TrainerNav = [{
   link: '/post'
 }, {
   nav: 'My Clients',
-  link: '#'
+  link: '/my-clients'
 }, {
-  nav: 'My Broadcasts',
-  link: '#'
+  nav: 'My Chats',
+  link: '/chat'
 }]
 
 const NavLink = ({ children }) => {

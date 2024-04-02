@@ -42,25 +42,6 @@ export default function DietPage() {
         fetchMeals();
     }, [refresh]);
 
-    // Function to generate an array of dates for the past 7 days
-    const generatePastWeekDates = () => {
-        const dates = [];
-        const today = new Date();
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            dates.push(date.toISOString().split('T')[0]); // Format date as YYYY-MM-DD
-        }
-        return dates;
-    };
-
-    const dates = generatePastWeekDates();
-    
-
-    const handleDateSelect = (date) => {
-        setSelectedDate(date);
-    };
-
     const handleTypeSelect = (type) => {
         setType(type);
     };

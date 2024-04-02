@@ -17,7 +17,7 @@ export async function GET(req, context) {
             return NextResponse.json({ "code": 400, "message": "Expired" })
         } else {
             const { traineeid } = await context.params
-            console.log(traineeid)
+            console.log(traineeid);
 
             const res = await fetch(`${DATA_SOURCE_URL}/${traineeid}/get-all-cartitems`)
             const getUser = await res.json()

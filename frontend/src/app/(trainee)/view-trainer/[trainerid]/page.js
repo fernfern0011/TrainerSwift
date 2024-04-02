@@ -161,7 +161,7 @@ export default function ViewTrainerPackage({ params }) {
 
                                         <SimpleGrid columns={2} spacing={5} mt={4}>
                                             {packagelist.map((data) => (
-                                                <BookingCard key={data.packageid} {...data} trainerid={parseInt(params.trainerid)} />
+                                                <BookingCard key={data.packageid} {...data} trainerid={parseInt(params.trainerid)} trainername={trainerInfo.name} />
                                             ))}
                                         </SimpleGrid>
                                     </Stack>

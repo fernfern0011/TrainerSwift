@@ -30,6 +30,7 @@ export async function POST(req) {
                 role: 'trainer',
                 trainerid: result.data.trainer.trainerid,
                 name: result.data.trainer.name,
+                stripeid: result.data.trainer.stripeid
             }
 
             // create session

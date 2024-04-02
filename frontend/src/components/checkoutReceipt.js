@@ -8,7 +8,6 @@ export default function CheckoutReceipt() {
             <CardHeader>
                 <Heading size='lg' >Summary</Heading>
             </CardHeader>
-
             <CardBody mt={'-25px'}>
                 <Stack divider={<StackDivider />} spacing='4'>
                     <Box>

@@ -22,12 +22,11 @@ import { useRouter } from 'next/navigation'
 import Cookies from 'js-cookie'
 import { ArrowForwardIcon } from '@chakra-ui/icons'
 
-export default function BookingCard({ packageid, ispremium, name, day, mode, detail, address, price, timeslots, trainerid }) {
+export default function BookingCard({ packageid, ispremium, name, day, mode, detail, address, price, timeslots, trainerid, trainername }) {
     const router = useRouter()
-    const [loading, setLoading] = useState(false)
-    const [booking, setBooking] = useState(false)
     const [checkToken, setCheckToken] = useState('')
     const [error, setError] = useState('')
+    const [time, setTime] = useState('')
     const [formData, setFormData] = useState({
         traineeID: 0,
         trainerID: 0,
@@ -62,79 +61,97 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
 
 
     const handleSelectTimeslot = async (e) => {
+        console.log(e.target.value);
         setFormData({
             ...formData,
             availabilityID: parseInt(e.target.id)
         })
+
+        setTime(e.target.value)
     }
 
     const handleSubmitTimeslot = async (e) => {
-        setBooking(true)
-        console.log(formData);
 
         if (formData.availabilityID == 0) {
             setError('Timeslot must be selected')
         }
+        // Trigger payment request
+        triggerPayment();
 
-        const triggerPayment = await fetch('http://localhost:3000/api/payment', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${checkToken}`,
-            },
-            body: JSON.stringify(formData)
-        })
+        // Construct URL with query parameters
+        const queryString = new URLSearchParams({
+            trainerid: trainerid,
+            trainername: trainername,
+            package: name,
+            day: day,
+            time: time,
+            address: address,
+            price: price
+        }).toString();
 
-        // trigger payment
-        const result = await triggerPayment.json()
-        console.log(result);
+        // Navigate to checkout page using window.location.href
+        window.location.href = `/checkout?${queryString}`;
+    }
 
-        // setLoading(true)
+    const triggerPayment = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/payment', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${checkToken}`,
+                },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+            console.log(result);
+        } catch (error) {
+            console.error('Error triggering payment:', error);
+        }
     }
 
     return (
         <Flex w={"full"} justifyContent={'space-around'}>
-            {loading ? <Spinner m={'auto'} /> :
-                <Box
-                    bg={useColorModeValue('white', 'gray.800')}
-                    w={'100%'}
-                    borderWidth="1px"
-                    rounded="lg"
-                    shadow="lg"
-                    position="relative">
-                    <Box>
-                        <Flex direction={'column'} p={"6"} bgColor={'gray.50'} minH={'210px'}>
-                            <Flex mt="1">
-                                <Box
-                                    mr={'10px'}
-                                    fontSize="24px"
-                                    fontWeight="semibold"
-                                    lineHeight="tight"
-                                    isTruncated>
-                                    {name}
-                                </Box>
-                                {ispremium ? (<Tag
-                                    size={'md'}
-                                    maxWidth={'fit-content'}
-                                    colorScheme='yellow'
-                                >
-                                    <TagLabel>Premium</TagLabel>
-                                </Tag>) : ''}
-                            </Flex>
-
-                            {/* Package Details */}
-                            <Flex justifyContent="space-between">
-                                <UnorderedList>
-                                    <ListItem><b>Day:</b> {day ? day : 'To Be Updated'}</ListItem>
-                                    <ListItem><b>Mode:</b> {mode}</ListItem>
-                                    {mode == 'offline' ? (<ListItem><b>Location:</b> {address ? address : 'To Be Updated'}</ListItem>) : ""}
-                                    <ListItem><b>Detail:</b> {detail}</ListItem>
-                                </UnorderedList>
-                                <Box fontSize="22px" ml={25}>
-                                    ${price}
-                                </Box>
-                            </Flex>
+            <Box
+                bg={useColorModeValue('white', 'gray.800')}
+                w={'100%'}
+                borderWidth="1px"
+                rounded="lg"
+                shadow="lg"
+                position="relative">
+                <Box>
+                    <Flex direction={'column'} p={"6"} bgColor={'gray.50'} minH={'210px'}>
+                        <Flex mt="1">
+                            <Box
+                                mr={'10px'}
+                                fontSize="24px"
+                                fontWeight="semibold"
+                                lineHeight="tight"
+                                isTruncated>
+                                {name}
+                            </Box>
+                            {ispremium ? (<Tag
+                                size={'md'}
+                                maxWidth={'fit-content'}
+                                colorScheme='yellow'
+                            >
+                                <TagLabel>Premium</TagLabel>
+                            </Tag>) : ''}
                         </Flex>
+
+                        {/* Package Details */}
+                        <Flex justifyContent="space-between">
+                            <UnorderedList>
+                                <ListItem><b>Day:</b> {day ? day : 'To Be Updated'}</ListItem>
+                                <ListItem><b>Mode:</b> {mode}</ListItem>
+                                {mode == 'offline' ? (<ListItem><b>Location:</b> {address ? address : 'To Be Updated'}</ListItem>) : ""}
+                                <ListItem><b>Detail:</b> {detail}</ListItem>
+                            </UnorderedList>
+                            <Box fontSize="22px" ml={25}>
+                                ${price}
+                            </Box>
+                        </Flex>
+                    </Flex>
 
                         <Stack>
                             {/* Package timeslots */}

@@ -100,6 +100,7 @@ def create_new_trainer_query():
         email = data['email']
         password = data['password']
         name = data['name']
+        stripeid = data['stripeid']
 
         con = get_db_connection(config)
         cur = con.cursor()
@@ -118,7 +119,7 @@ def create_new_trainer_query():
         try:
             # Insert the new trainer into the database
             cur.execute(
-                f"INSERT INTO account (trainerid, username, email, password, name) VALUES (nextval('account_id_seq'), %s, %s, %s, %s) RETURNING trainerid;",
+                f"INSERT INTO account (trainerid, username, email, password, name, stripeid) VALUES (nextval('account_id_seq'), %s, %s, %s, %s, %s) RETURNING trainerid;",
                 (username, email, password, name, ))
 
             # Get the ID of the newly inserted trainer
@@ -159,11 +160,12 @@ def update_trainer_query(trainerid):
         email = data['email']
         password = data['password']
         name = data['name']
+        stripeid = data['stripeid']
 
         try:
             # Update a trainer and trainerinfo
-            cur.execute(f"""UPDATE account SET username = %s, email = %s, password = %s, name = %s WHERE trainerid = %s;""",
-                        (username, email, password, name, trainerid, ))
+            cur.execute(f"""UPDATE account SET username = %s, email = %s, password = %s, name = %s, stripeid = %s WHERE trainerid = %s;""",
+                        (username, email, password, name, stripeid, trainerid, ))
 
             cur.execute(f"""UPDATE info SET name = %s WHERE trainerid = %s;""",
                         (name, trainerid, ))

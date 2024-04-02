@@ -90,7 +90,7 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
         }).toString();
 
         // Navigate to checkout page using window.location.href
-        window.location.href = `/checkout?${queryString}`;
+        window.open(`/checkout?${queryString}`, '_blank');
     }
 
     const triggerPayment = async () => {
@@ -184,7 +184,6 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
                                                 w={'full'}
                                                 mt={'10px'}
                                                 rightIcon={<ArrowForwardIcon />}
-                                                isLoading={booking ? true : false}
                                                 isDisabled={formData.availabilityID ? false : true}
                                                 onClick={() => handleSubmitTimeslot()}
                                             >
@@ -198,7 +197,6 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
                         </Stack>
                     </Box>
                 </Box>
-            }
         </Flex>
     )
 }

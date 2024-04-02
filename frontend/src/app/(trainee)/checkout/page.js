@@ -10,6 +10,8 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
+
+
 // const trainer_id = 'acct_1OnPQZFSwTDhdL4G';
 
 export default function Checkout() {

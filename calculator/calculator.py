@@ -112,12 +112,12 @@ def calculate(traineeid):
 
     try:
         if trainee_exists:
-            print('hi')
-            cur.execute(f"UPDATE meal SET current_calories=%s, current_carbs=%s, current_protein=%s, current_fat=%s, target_calories_bulk=%s, target_carbs_bulk=%s, target_protein_bulk=%s, target_fat_bulk=%s, target_calories_cut=%s, target_carbs_cut=%s, target_protein_cut=%s, target_fat_cut=%s WHERE traineeid = %s",(average_calories, average_carbs, average_protein, average_fat, calories_needed_bulk, protein_needed_bulk, carbs_needed_bulk, fat_needed_bulk, calories_needed_cut, protein_needed_cut, carbs_needed_cut, fat_needed_cut, traineeid, ))
+            print("Trainee exist in the calculator. Updating...")
+            cur.execute(f"UPDATE calculator SET current_calories=%s, current_carbs=%s, current_protein=%s, current_fat=%s, target_calories_bulk=%s, target_carbs_bulk=%s, target_protein_bulk=%s, target_fat_bulk=%s, target_calories_cut=%s, target_carbs_cut=%s, target_protein_cut=%s, target_fat_cut=%s WHERE traineeid = %s",(average_calories, average_carbs, average_protein, average_fat, calories_needed_bulk, carbs_needed_bulk, protein_needed_bulk, fat_needed_bulk, calories_needed_cut, carbs_needed_cut, protein_needed_cut, fat_needed_cut, traineeid, ))
             print('success update')
         else:
-            print('bye')
-            cur.execute(f"INSERT INTO calculator (traineeid, current_calories, current_carbs, current_protein, current_fat, target_calories_bulk, target_carbs_bulk, target_protein_bulk, target_fat_bulk, target_calories_cut, target_carbs_cut, target_protein_cut, target_fat_cut) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (traineeid, average_calories, average_carbs, average_protein, average_fat, calories_needed_bulk, protein_needed_bulk, carbs_needed_bulk, fat_needed_bulk, calories_needed_cut, protein_needed_cut, carbs_needed_cut, fat_needed_cut, ))
+            print("Trainee does not exist in the calculator. Adding...")
+            cur.execute(f"INSERT INTO calculator (traineeid, current_calories, current_carbs, current_protein, current_fat, target_calories_bulk, target_carbs_bulk, target_protein_bulk, target_fat_bulk, target_calories_cut, target_carbs_cut, target_protein_cut, target_fat_cut) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (traineeid, average_calories, average_carbs, average_protein, average_fat, calories_needed_bulk, carbs_needed_bulk, protein_needed_bulk, fat_needed_bulk, calories_needed_cut, carbs_needed_cut, protein_needed_cut, fat_needed_cut, ))
             print('success add')
         
         con.commit()
@@ -127,7 +127,7 @@ def calculate(traineeid):
     except:
         return jsonify({
                 "code": 400,
-                "message": "Failed to create new trainee."
+                "message": "Failed to calculate."
             })
     
     return jsonify({

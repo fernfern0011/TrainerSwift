@@ -32,7 +32,7 @@ export default function ViewTrainerPackage() {
         setCheckToken(token)
         const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/trainer/2', {
+            const response = await fetch(`http://localhost:3000/api/trainer/${traineeid.traineeid}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

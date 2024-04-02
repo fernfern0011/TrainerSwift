@@ -255,6 +255,33 @@ def read_packagelist_by_postid_query(postid):
         "message": "There is no package."
     })
 
+# [GET] getAllPackageByTrainerid
+@app.route('/trainer/<int:trainerid>/package', methods=['GET'])
+def read_packagelist_by_trainerid_query(trainerid):
+    con = get_db_connection(config)
+    cur = con.cursor()
+    cur.execute(
+        f"SELECT p.*, a.day, json_agg(jsonb_build_object('availabilityid', a.availabilityid, 'time', a.time, 'status', a.status)) AS timeslots FROM package p INNER JOIN availability a ON a.packageid = p.packageid INNER JOIN post po ON po.postid = p.postid WHERE po.trainerid = %s AND a.status = 'Open' GROUP BY p.packageid, a.day;", (trainerid, ))
+
+    packagelist = cur.fetchall()
+    cur.close()
+    con.close()
+
+    packagelist_json = [{'packageid': package[0], 'name': package[1], 'detail': package[2],
+                         'price': package[3], 'mode': package[4], 'address': package[5], 'postid': package[6], 'ispremium': package[7], 'created_timestamp': package[8], 'day': package[9], 'timeslots': package[10]} for package in packagelist]
+
+    if len(packagelist):
+        return jsonify({
+            "code": 200,
+            "data": {
+                "package": [package for package in packagelist_json]
+            }
+        })
+    return jsonify({
+        "code": 400,
+        "message": "There is no package."
+    })
+
 # [POST] createNewPackage
 @app.route('/package/create', methods=['POST'])
 def create_new_package_query():

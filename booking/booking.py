@@ -561,10 +561,25 @@ def delete_availability_query(availabilityid):
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
+        
         try:
             # Delete an availability
             cur.execute(
-                f'DELETE FROM availability WHERE availabilityid = %s;', (availabilityid, ))
+                f'DELETE FROM availability WHERE availabilityid = %s RETURNING packageid;', (availabilityid, ))
+            
+            con.commit()
+            # Get the packageid
+            packageid = cur.fetchone()[0]
+            
+            # Check if the availability for the packageid still exists
+            cur.execute(
+                f"SELECT EXISTS(SELECT 1 FROM availability WHERE packageid = %s);", (packageid, ))
+            packageid_exists = cur.fetchone()[0]
+            
+            if not packageid_exists:
+            # Delete an availability
+                cur.execute(
+                    f'DELETE FROM package WHERE packageid = %s;', (packageid, ))               
 
             con.commit()
             cur.close()

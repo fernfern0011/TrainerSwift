@@ -2,7 +2,7 @@
 import { Card, Flex, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box } from '@chakra-ui/react';
 import { ChatIcon, CalendarIcon, PhoneIcon } from '@chakra-ui/icons';
 
-export default function ClientCard({booking, traineeDetails}) {
+export default function ClientCard({ booking, traineeDetails }) {
 
 
     if (!traineeDetails) {
@@ -45,7 +45,7 @@ export default function ClientCard({booking, traineeDetails}) {
                             </CardBody>
                         </Stack>
 
-                        
+
 
                         <Flex>
                             <Flex alignItems='flex-end'>
@@ -53,17 +53,11 @@ export default function ClientCard({booking, traineeDetails}) {
                                     <CardBody textAlign="right">
                                         <Text fontSize='lg'>{traineeDetails.availability_day}</Text>
                                         <Heading size='lg'>
-                                        {traineeDetails.availability_time}
+                                            {traineeDetails.availability_time}
                                         </Heading>
                                     </CardBody>
                                 </Stack>
                             </Flex>
-                            <Image
-                                objectFit='cover'
-                                maxW={{ base: '100%', sm: '200px' }}
-                                src='https://images.unsplash.com/photo-1667489022797-ab608913feeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5fHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=800&q=60'
-                                alt='Caffe Latte'
-                            />
                         </Flex>
                     </Flex>
                 </Card>

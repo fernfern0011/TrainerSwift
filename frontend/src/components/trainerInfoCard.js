@@ -28,8 +28,7 @@ export default function TrainerInfoCard(data) {
 
           <CardFooter>
             <Link href={{
-              // pathname: `/trainer/${data.trainerid}`
-              pathname: '/view-trainer-package'
+              pathname: `/view-trainer/${data.trainerid}`
             }}>
               <Button variant='solid' colorScheme='red'>
                 Check Packages

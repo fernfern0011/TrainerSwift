@@ -20,13 +20,16 @@ import {
   Text
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Cookies from 'js-cookie'
 
-const Links = ['Search Trainer', 'My Bookings', 'Payment History'];
-
-const NavLink = ({ children }) => {
+const Links = [
+  { text: 'Search Trainer', route: '/search-trainer' },
+  { text: 'My Bookings', route: '/my-bookings' }
+];
+const NavLink = ({ text, route }) => {
   return (
+    <Link href={route} passHref>
     <Box
       as="a"
       px={2}
@@ -36,9 +39,10 @@ const NavLink = ({ children }) => {
         textDecoration: 'none',
         bg: useColorModeValue('red.900', 'red.900'),
       }}
-      href={'#'}>
-      {children}
+    >
+      {text}
     </Box>
+  </Link>
   );
 };
 
@@ -66,10 +70,14 @@ export default function TraineeNavbar(traineeinfo) {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={'center'}>
-            <Box color={'white'}>Trainer Swift</Box>
+            <Link href={'/'}>
+              <Box color={'white'}>
+                Trainer Swift
+              </Box>
+            </Link>
             <HStack color={'white'} as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
-              {Links.map((link) => (
-                <NavLink key={link}>{link}</NavLink>
+              {Links.map(({text, route}) => (
+                <NavLink key={text} text={text} route={route} />
               ))}
             </HStack>
           </HStack>

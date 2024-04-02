@@ -2,54 +2,74 @@
 import { Heading, Spacer, Box, Flex, Button, Menu, MenuButton, MenuList, MenuItem, TableContainer, Table, Thead, Tr, Th, Td, Tbody, Tfoot, Stack } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { React, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function DietPage() {
     const [meals, setMeals] = useState([]);
     const [calcData, setCalcData] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
     const [type, setType] = useState('bulk');
+    const [checkToken, setCheckToken] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
+        const token = Cookies.get('token')
+        const trainerinfo = Cookies.get('trainerinfo')
+        var trainerid
+
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        if (!(trainerinfo === undefined)) {
+            trainerid = JSON.parse(trainerinfo)
+        }
+
+        setCheckToken(token)
         const fetchMeals = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/diet/7');
+                const response = await fetch('http://localhost:3000/api/diet/7', {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch meals');
                 }
                 const data = await response.json();
-                console.log(data.data.meal)
-                setMeals(data.data.meal);
+                if (data.data == undefined) {
+                    setMeals(data.message);
+                } else {
+                    setMeals(data.data.meal);
+                }
+
             } catch (error) {
                 console.error('Error fetching meals:', error);
             }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/calculator/7', {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch calculator data');
+                }
+                const data = await response.json();
+                setCalcData(data.data);
+            } catch (error) {
+                console.error('Error fetching calculator data:', error);
+            }
         };
 
-        if (JSON.parse(sessionStorage.getItem('calcData')) != null) {
-            const storedCalcData = JSON.parse(sessionStorage.getItem('calcData')).data.calcResult.data;
-            setCalcData(storedCalcData);
-        }
-        
         fetchMeals();
     }, []);
-
-    // Function to generate an array of dates for the past 7 days
-    const generatePastWeekDates = () => {
-        const dates = [];
-        const today = new Date();
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            dates.push(date.toISOString().split('T')[0]); // Format date as YYYY-MM-DD
-        }
-        return dates;
-    };
-
-    const dates = generatePastWeekDates();
-    
-
-    const handleDateSelect = (date) => {
-        setSelectedDate(date);
-    };
 
     const handleTypeSelect = (type) => {
         setType(type);
@@ -59,31 +79,19 @@ export default function DietPage() {
         <Box>
             <Flex alignItems="center" mt={5}>
                 <Box bg="gray.200" pl={20} ml={5} height="325px" width="700px">
-                    <Heading mt={20} mb={10} size='3xl'>My Diet</Heading>
-                    <Stack direction="row" spacing={4}>
-                        <Menu>
-                            <MenuButton as={Button} rightIcon={<ChevronDownIcon />} colorScheme="teal" variant="solid">
-                                {selectedDate ? selectedDate : 'Date'}
-                            </MenuButton>
-                            <MenuList>
-                                {dates.map((date, index) => (
-                                    <MenuItem key={index} onClick={() => handleDateSelect(date)}>{date}</MenuItem>
-                                ))}
-                            </MenuList>
-                        </Menu>
-                    </Stack>
+                    <Heading mt={20} mb={10} size='3xl'>Trainee 7 Diet</Heading>
                 </Box>
                 <Box bg="gray.200" p={4} ml="auto" mr={12} borderRadius="md">
-                <Flex alignItems="center">
-                    <Heading size="md" ml={5}>This Month</Heading>
-                    <Spacer />
-                    <Button colorScheme="teal" variant="outline" mr={4} onClick={() => handleTypeSelect('bulk')}>
-                        Bulk
-                    </Button>
+                    <Flex alignItems="center">
+                        <Heading size="md" ml={5}>This Month</Heading>
+                        <Spacer />
+                        <Button colorScheme="teal" variant="outline" mr={4} onClick={() => handleTypeSelect('bulk')}>
+                            Bulk
+                        </Button>
                         <Button colorScheme="teal" variant="outline" onClick={() => handleTypeSelect('cut')}>
-                        Cut
-                    </Button>
-                </Flex>
+                            Cut
+                        </Button>
+                    </Flex>
                     <TableContainer>
                         <Table variant='simple'>
                             <Thead>
@@ -99,8 +107,8 @@ export default function DietPage() {
                                     <Tr key={index}>
                                         <Td>{item.nutrients}</Td>
                                         <Td isNumeric>{item.current}</Td>
-                                        <Td isNumeric>{ type == 'bulk' ? item.target.bulk : item.target.cut}</Td>
-                                        <Td>{ type == 'bulk' ? item.diff.bulk : item.diff.cut }</Td>
+                                        <Td isNumeric>{type == 'bulk' ? item.target.bulk : item.target.cut}</Td>
+                                        <Td>{type == 'bulk' ? item.diff.bulk : item.diff.cut}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>

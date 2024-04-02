@@ -20,9 +20,10 @@ import {
     SliderFilledTrack,
     SliderThumb,
     useToast,
-    Button, Heading, IconButton, Input, Stack, Text, HStack, Checkbox, Textarea
+    Button, Heading, IconButton, Input, Stack, Text, HStack, Checkbox, Textarea, useDisclosure, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter
 } from '@chakra-ui/react'
 import React, { useState, useEffect } from "react"
+import Cookies from 'js-cookie'
 
 function ConvertTimeIntoInt(starttime, endtime) {
     const intStartTime = parseInt(starttime.replace(":", ""))
@@ -63,8 +64,11 @@ export default function PackageEditPage({ params }) {
     const [availabilityList, setAvailabilityList] = useState([])
     const [newDay, setNewDay] = useState('')
     const [error, setError] = useState('')
+    const [token, setToken] = useState('')
     const [isUploading, setIsUploading] = useState(false)
     const toast = useToast()
+    const { isOpen, onOpen, onClose } = useDisclosure()
+    const cancelRef = React.useRef()
 
     const [formData, setFormData] = useState({
         name: '',
@@ -81,12 +85,22 @@ export default function PackageEditPage({ params }) {
     })
 
     useEffect(() => {
-        setLoading(true)
+        const token = Cookies.get('token')
 
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        setToken(token)
+        setLoading(true)
         const fetchData = async () => {
             const getPackageRes = await fetch(`http://localhost:3000/api/package/${params.packageid}`, {
                 method: "GET",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
             })
 
             // if package successfully fetched
@@ -272,6 +286,10 @@ export default function PackageEditPage({ params }) {
             updatedTimeList.splice(removeIndex, 1)
             setTimeList(updatedTimeList)
         }
+
+        if (availabilityList.length == 0) {
+            onOpen()
+        }
     }
 
     // whenever the timelist changes, filtertimelist gets updated
@@ -291,7 +309,7 @@ export default function PackageEditPage({ params }) {
         setIsUploading(true)
         setError("")
 
-        if (formData.name != '' && formData.day != '' && formData.price != 0 && filterTimeList.length != 0) {
+        if (formData.name != '' && formData.day != '' && formData.price != 0) {
             const bodyData = {
                 packageid: params.packageid,
                 name: formData.name,
@@ -305,7 +323,10 @@ export default function PackageEditPage({ params }) {
 
             const updatePackage = await fetch(`http://localhost:3000/api/package/${params.packageid}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
                 body: JSON.stringify(bodyData)
             })
 
@@ -320,13 +341,16 @@ export default function PackageEditPage({ params }) {
                         isSuccess = true
                     }
 
-                    if (newTimeList.length != 0 || filterTimeList != 0) {
+                    if (newTimeList.length != 0 || filterTimeList != 0 || toRemoveTimeList != 0) {
                         const updateAvailability = await fetch('http://localhost:3000/api/availability', {
                             method: "POST",
-                            headers: { "Content-Type": "application/json" },
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
+                            },
                             body: JSON.stringify({
                                 day: formData.day,
-                                newTime: (newTimeList ? newTimeList : filterTimeList),
+                                newTime: (newTimeList ? newTimeList : filterTimeList == []),
                                 toRemoveTime: toRemoveTimeList,
                                 packageid: params.packageid
                             })
@@ -362,7 +386,10 @@ export default function PackageEditPage({ params }) {
                     if (newDay != '') {
                         const updateDay = await fetch(`http://localhost:3000/api/availability`, {
                             method: "PUT",
-                            headers: { "Content-Type": "application/json" },
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
+                            },
                             body: JSON.stringify(
                                 {
                                     day: newDay,
@@ -391,7 +418,7 @@ export default function PackageEditPage({ params }) {
                         })
 
                         // push back to the post with package page
-                        router.push(`/post/${getPostid.get("postid")}?title=${getTitle.get("title")}`)
+                        router.push(`/post/${getPostid.get("postid")}/package?title=${getTitle.get("title")}`)
                     }
 
                     break;
@@ -417,7 +444,7 @@ export default function PackageEditPage({ params }) {
                                 aria-label='Done'
                                 fontSize='36px'
                                 icon={<ChevronLeftIcon />}
-                                onClick={() => router.push(`/post/${getPostid.get('postid')}?title=${getTitle.get('title')}`)}
+                                onClick={() => router.push(`/post/${getPostid.get('postid')}/package?title=${getTitle.get('title')}`)}
                             />
                             <Heading ml={'30px'}>Edit {getName.get('name')}</Heading>
                         </Stack>
@@ -462,6 +489,31 @@ export default function PackageEditPage({ params }) {
                                     <FormLabel fontSize={'24px'}>Address<Text as='sup' color={'red'}>*</Text> </FormLabel>
                                     <Input type='text' name='address' value={newAddress} placeholder="Type your address..." mb={'20px'} onChange={(e) => setNewAddress(e.target.value)} />
                                 </FormControl>
+
+                                {/* Alert when last timeslot is being removed */}
+                                <AlertDialog
+                                    isOpen={isOpen}
+                                    leastDestructiveRef={cancelRef}
+                                    onClose={onClose}
+                                >
+                                    <AlertDialogOverlay>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                                                Remove available timeslot
+                                            </AlertDialogHeader>
+
+                                            <AlertDialogBody>
+                                                Removing the last available timeslot will delete the package
+                                            </AlertDialogBody>
+
+                                            <AlertDialogFooter>
+                                                <Button colorScheme='red' onClick={onClose} ml={3}>
+                                                    OK
+                                                </Button>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialogOverlay>
+                                </AlertDialog>
 
                                 <FormControl>
                                     <FormLabel fontSize={'24px'}>Timeslot<Text as='sup' color={'red'}>*</Text></FormLabel>

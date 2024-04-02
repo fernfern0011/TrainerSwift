@@ -5,23 +5,44 @@ import { ChevronLeftIcon } from "@chakra-ui/icons"
 import {
     FormControl,
     FormLabel,
-    Button, Heading, IconButton, Input, Stack, Textarea, Image as ChakraImage, Box, Text
+    Button, Heading, IconButton, Input, Stack, Textarea, Image as ChakraImage, Box, Text, useToast
 } from '@chakra-ui/react'
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
+import Cookies from 'js-cookie'
 
 export default function CreateNewPost() {
     const router = useRouter()
     const [file, setFile] = useState({})
     const [error, setError] = useState('')
+    const [token, setToken] = useState('')
     const [isUploading, setIsUploading] = useState(false)
+    const toast = useToast()
 
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         category: '',
-        trainerid: '10'
+        trainerid: 0
     })
+
+    useEffect(() => {
+        const token = Cookies.get('token')
+        const trainerinfo = Cookies.get('trainerinfo')
+        var trainerid
+
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        if (!(trainerinfo === undefined)) {
+            trainerid = JSON.parse(trainerinfo)
+            setFormData({ ...formData, trainerid: trainerid.trainerid })
+        }
+
+        setToken(token)
+    }, [])
 
     const handleChange = (e) => {
         e.preventDefault();
@@ -68,7 +89,10 @@ export default function CreateNewPost() {
                     // To call createNewPost api
                     const createNewPost = await fetch('http://localhost:3000/api/post', {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
                         body: JSON.stringify({
                             title: formData.title,
                             description: formData.description,
@@ -84,8 +108,18 @@ export default function CreateNewPost() {
                         setIsUploading(false)
                         setFile({})
                         setFormData({ title: "", description: "", category: "" })
-                    }
 
+                        // when created successfully
+                        toast({
+                            title: 'Post created successfully.',
+                            status: 'success',
+                            position: 'top-right',
+                            duration: 5000,
+                            isClosable: true,
+                        })
+
+                        router.push('/post')
+                    }
                 } else {
                     setIsUploading(false)
                 }
@@ -109,7 +143,7 @@ export default function CreateNewPost() {
     })
 
     return (
-        <Stack direction='column' m={'30px 50px'}>
+        <Stack direction='column' m={'30px 50px'} minH={'75.8vh'}>
             <Stack direction='row' align={'center'}>
                 <IconButton
                     isRound={true}

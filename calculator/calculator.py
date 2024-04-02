@@ -93,10 +93,11 @@ def calculate(traineeid):
     weight = data["weight"]
     height = data["height"]
     age = data["age"]
-    average_calories = float(data["info"]["average_calories"])
-    average_carbs = float(data["info"]["average_carbs"])
-    average_protein = float(data["info"]["average_protein"])
-    average_fat = float(data["info"]["average_fat"])
+    
+    average_calories = 0.0 if not data["info"]["average_calories"] else float(data["info"]["average_calories"])
+    average_carbs = 0.0 if not data["info"]["average_carbs"] else float(data["info"]["average_carbs"])
+    average_protein = 0.0 if not data["info"]["average_protein"] else float(data["info"]["average_protein"])
+    average_fat = 0.0 if not data["info"]["average_fat"] else float(data["info"]["average_fat"])
 
     con = get_db_connection(config)
     cur = con.cursor()

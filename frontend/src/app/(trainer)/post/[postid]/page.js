@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { ChevronLeftIcon } from "@chakra-ui/icons"
 import {
     FormControl,
@@ -16,7 +16,9 @@ export default function PostEditPage({ params }) {
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState({})
     const [error, setError] = useState('')
+    const [token, setToken] = useState('')
     const [isUploading, setIsUploading] = useState(false)
+    const [existedImage, setExistedImage] = useState(false)
     const toast = useToast()
 
     const [formData, setFormData] = useState({
@@ -38,9 +40,9 @@ export default function PostEditPage({ params }) {
 
         if (!(trainerinfo === undefined)) {
             trainerid = JSON.parse(trainerinfo)
-
         }
 
+        setToken(token)
         setLoading(true)
         const fetchData = async () => {
             const getPostRes = await fetch(`http://localhost:3000/api/post/${params.postid}?trainerid=${trainerid.trainerid}`, {
@@ -64,7 +66,7 @@ export default function PostEditPage({ params }) {
                 })
 
                 setFile({ preview: postInfo.image })
-
+                setExistedImage(true)
                 setLoading(false)
             } else if (result.code == 400) {
                 setError('There is no post.')
@@ -99,6 +101,7 @@ export default function PostEditPage({ params }) {
         const preview = URL.createObjectURL(fileObject)
 
         setFileState({ fileObject, preview })
+        setExistedImage(false)
     }
 
     // Trigger s3 api and createNewPost api
@@ -107,43 +110,52 @@ export default function PostEditPage({ params }) {
         setError("")
 
         if (formData.title != "" && formData.description != "" && formData.category != "") {
-
             try {
-                // Upload Image to S3
-                const uploadImage = new FormData();
-                uploadImage.append("file", file.fileObject)
-                const response = await fetch('/api/s3-upload', {
-                    method: 'POST',
-                    body: uploadImage
-                })
+                var data
 
-                const data = await response.json();
+                if (!existedImage) {
+                    // Upload Image to S3
+                    const uploadImage = new FormData();
+                    uploadImage.append("file", file.fileObject)
+                    const response = await fetch('/api/s3-upload', {
+                        method: 'POST',
+                        body: uploadImage
+                    })
+
+                    data = await response.json();
+                }
 
                 // If image successfully uploaded
-                if (data.success == true) {
+                if (existedImage || file.preview) {
+                    var image
                     const s3ObjectURL = 'https://trainerswift-web-storage.s3.ap-southeast-1.amazonaws.com/post/'
 
+                    if (existedImage) {
+                        image = file.preview
+                    } else {
+                        image = s3ObjectURL + data.fileName
+                    }
                     // To call updatePost api
                     const updatePost = await fetch('http://localhost:3000/api/post', {
                         method: "PUT",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
                         body: JSON.stringify({
                             title: formData.title,
                             description: formData.description,
                             category: formData.category,
                             trainerid: formData.trainerid,
-                            image: s3ObjectURL + data.fileName,
+                            image: image,
                             postid: params.postid
                         })
                     })
 
                     // if post successfully created
                     const result = await updatePost.json();
-                    if (result.code == 200) {
-                        setIsUploading(false)
-                        setFile({})
-                        setFormData({ title: "", description: "", category: "" })
 
+                    if (result.code == 200) {
                         // when updated successfully
                         toast({
                             title: 'Post updated successfully.',
@@ -154,6 +166,9 @@ export default function PostEditPage({ params }) {
                         })
 
                         router.push('/post')
+                        setIsUploading(false)
+                        setFile({})
+                        setFormData({ title: "", description: "", category: "" })
                     }
                 } else {
                     setIsUploading(false)
@@ -181,7 +196,7 @@ export default function PostEditPage({ params }) {
         <Stack direction='column' m={'30px 50px'}>
             {loading ?
                 <Text width={'fit-content'} m={'auto'} pt={'50px'}>Retriving post data...</Text> : (
-                    <Stack minH={'83.5vh'}>
+                    <Stack minH={'75.8vh'}>
                         <Stack direction='row' align={'center'}>
                             <IconButton
                                 isRound={true}
@@ -246,7 +261,6 @@ export default function PostEditPage({ params }) {
                                         suggested size 200x200`
                                                 }
                                             </Text>
-
                                         </Box>
                                     )}
                                 </Box>

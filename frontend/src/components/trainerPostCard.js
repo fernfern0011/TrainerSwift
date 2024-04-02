@@ -1,22 +1,38 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box, HStack, Tag, Spinner, useToast } from '@chakra-ui/react';
+import { Card, Image, Stack, CardBody, Heading, Text, CardFooter, Button, Box, HStack, Tag, Spinner, useToast, Flex } from '@chakra-ui/react';
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
+import Cookies from 'js-cookie'
 
 export default function TrainerPostCard(data) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [token, setToken] = useState('')
   const toast = useToast()
+
+  useEffect(() => {
+    const token = Cookies.get('token')
+
+    if (!token) {
+      router.replace('/') // If no token is found, redirect to login page
+      return
+    }
+
+    setToken(token)
+  }, [])
 
   const handleDelete = async (postid) => {
     setLoading(true)
 
     const response = await fetch('http://localhost:3000/api/post', {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
       body: JSON.stringify(
         {
           postid: postid
@@ -38,6 +54,8 @@ export default function TrainerPostCard(data) {
         isClosable: true,
       })
 
+      window.location.href = '/post'
+
     } else {
       setLoading(false)
 
@@ -54,7 +72,10 @@ export default function TrainerPostCard(data) {
 
   return (
     <Box m={'auto'} width={'full'} minH={'260px'}>
-      {loading ? <Spinner /> :
+      {loading ?
+        <Flex m={'auto'} justifyContent={'center'} minH={'inherit'} alignItems={'center'}>
+          <Spinner />
+        </Flex> :
         <Card
           direction={{ base: 'column', sm: 'row' }}
           overflow='hidden'

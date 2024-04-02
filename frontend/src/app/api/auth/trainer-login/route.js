@@ -7,7 +7,6 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req) {
     const { email, password } = await req.json()
-    console.log(email, password);
 
     if (!email || !password) return NextResponse.json({ "code": 400, "message": "Missing required data" })
 

@@ -7,6 +7,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation'
 import SearchBar from '../../../../../components/searchBar';
 import PackageCard from '../../../../../components/packageCard'
+import Cookies from 'js-cookie'
 
 export default function PackageByPostID({ params }) {
     const getTitle = useSearchParams()
@@ -16,12 +17,27 @@ export default function PackageByPostID({ params }) {
     const [error, setError] = useState('')
 
     useEffect(() => {
-        setLoading(true)
+        const token = Cookies.get('token')
+        const trainerinfo = Cookies.get('trainerinfo')
+        var trainerid
 
+        if (!token) {
+            router.replace('/') // If no token is found, redirect to login page
+            return
+        }
+
+        if (!(trainerinfo === undefined)) {
+            trainerid = JSON.parse(trainerinfo)
+        }
+
+        setLoading(true)
         const fetchData = async () => {
             const response = await fetch(`http://localhost:3000/api/post/${params.postid}/package`, {
                 method: "GET",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
             })
 
             // if package successfully fetched

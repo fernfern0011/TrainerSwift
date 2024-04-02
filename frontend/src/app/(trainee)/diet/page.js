@@ -95,21 +95,9 @@ export default function DietPage() {
             <Flex alignItems="center" mt={5}>
                 <Box bg="gray.200" pl={20} ml={5} height="325px" width="700px">
                     <Heading mt={20} mb={10} size='3xl'>My Diet</Heading>
-                    <Stack direction="row" spacing={4}>
-                        <Menu>
-                            <MenuButton as={Button} rightIcon={<ChevronDownIcon />} colorScheme="teal" variant="solid">
-                                {selectedDate ? selectedDate : 'Date'}
-                            </MenuButton>
-                            <MenuList>
-                                {dates.map((date, index) => (
-                                    <MenuItem key={index} onClick={() => handleDateSelect(date)}>{date}</MenuItem>
-                                ))}
-                            </MenuList>
-                        </Menu>
-                        <Button rightIcon={<AddIcon />} colorScheme="teal" variant="outline" as={'a'} href={'/add-meal'}>
-                            Add Meal
-                        </Button>
-                    </Stack>
+                    <Button rightIcon={<AddIcon />} colorScheme="teal" variant="outline" as={'a'} href={'/add-meal'}>
+                        Add Meal
+                    </Button>
                 </Box>
                 <Box bg="gray.200" p={4} ml="auto" mr={12} borderRadius="md">
                 <Flex alignItems="center">

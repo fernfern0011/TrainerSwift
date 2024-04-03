@@ -3,3 +3,4 @@ Flask-Cors==4.0.0
 psycopg2-binary==2.9.9
 config==0.5.1
 configparser==6.0.1
+flasgger==0.9.7.1

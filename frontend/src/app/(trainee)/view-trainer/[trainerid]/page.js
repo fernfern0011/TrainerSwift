@@ -58,14 +58,14 @@ export default function ViewTrainerPackage({ params }) {
 
                     // if package successfully fetched
                     const packageResult = await response.json()
-
+            
                     if (packageResult.code == 200) {
                         setPackagelist(packageResult.data.package)
                     } else if (result.code == 400) {
                         setError('There is no package.')
                         setLoading(false)
                     } else {
-                        setError('Failed to retrieve package data.')
+                        setError('There is no package.')
                         setLoading(false)
                     }
                 } else {

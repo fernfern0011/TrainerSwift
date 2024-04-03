@@ -16,7 +16,8 @@ import {
     ListItem,
     Text,
     Tag,
-    TagLabel, Stack
+    TagLabel, Stack,
+    useToast
 } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import Cookies from 'js-cookie'
@@ -25,8 +26,10 @@ import { ArrowForwardIcon } from '@chakra-ui/icons'
 export default function BookingCard({ packageid, ispremium, name, day, mode, detail, address, price, timeslots, trainerid, trainername }) {
     const router = useRouter()
     const [checkToken, setCheckToken] = useState('')
+    const [isBooking, setIsBooking] = useState('')
     const [error, setError] = useState('')
     const [time, setTime] = useState('')
+    const toast = useToast()
     const [formData, setFormData] = useState({
         traineeID: 0,
         trainerID: 0,
@@ -71,6 +74,7 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
     }
 
     const handleSubmitTimeslot = async (e) => {
+        setIsBooking(true)
 
         if (formData.availabilityID == 0) {
             setError('Timeslot must be selected')
@@ -78,19 +82,52 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
         // Trigger payment request
         triggerPayment();
 
-        // Construct URL with query parameters
-        const queryString = new URLSearchParams({
-            trainerid: trainerid,
-            trainername: trainername,
-            package: name,
-            day: day,
-            time: time,
-            address: address,
-            price: price
-        }).toString();
+        const res = await fetch('http://localhost:3000/api/bookedby', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${checkToken}`,
+            },
+            body: JSON.stringify({
+                trainerid: formData.trainerID,
+                traineeid: formData.traineeID,
+                availabilityid: formData.availabilityID,
+                ispremium: formData.ispremium
+            })
+        })
 
-        // Navigate to checkout page using window.location.href
-        window.open(`/checkout?${queryString}`, `_blank`);
+        const result = await res.json();
+
+        if (result.code == 201) {
+            // when booking created successfully
+            toast({
+                title: 'Booking created successfully.',
+                status: 'success',
+                position: 'top-right',
+                duration: 5000,
+                isClosable: true,
+            })
+
+            setIsBooking(false)
+
+            // Construct URL with query parameters
+            const queryString = new URLSearchParams({
+                trainerid: trainerid,
+                trainername: trainername,
+                package: name,
+                day: day,
+                time: time,
+                address: address,
+                price: price,
+                availabilityid: formData.availabilityID
+            }).toString();
+
+            // Navigate to checkout page using window.location.href
+            window.open(`/checkout?${queryString}`, `_blank`);
+
+            // Reload the page
+            window.location.href = `/view-trainer/${trainerid}`
+        }
     }
 
     const triggerPayment = async () => {
@@ -184,6 +221,7 @@ export default function BookingCard({ packageid, ispremium, name, day, mode, det
                                             w={'full'}
                                             mt={'10px'}
                                             rightIcon={<ArrowForwardIcon />}
+                                            isLoading={isBooking ? true : false}
                                             isDisabled={formData.availabilityID ? false : true}
                                             onClick={() => handleSubmitTimeslot()}
                                         >

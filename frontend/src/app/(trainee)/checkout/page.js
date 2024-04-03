@@ -29,7 +29,8 @@ export default function Checkout() {
     address: searchParams.get('address'),
     price: searchParams.get('price'),
     traineeid: 0,
-    traineename: ""
+    traineename: "",
+    availabilityid: searchParams.get('availabilityid')
   })
 
   console.log(formData);
@@ -68,11 +69,11 @@ export default function Checkout() {
     }
   }, []);
 
-
+  console.log(formData);
   const createCheckoutSession = async () => {
     try {
 
-      const response = await fetch(`http://localhost:3000/api/cart/${formData.traineeid}`, {
+      const response = await fetch(`http://localhost:3000/api/cart/${formData.traineeid}?trainerid=${formData.trainerid}&availabilityid=${formData.availabilityid}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

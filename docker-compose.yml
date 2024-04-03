@@ -1,0 +1,35 @@
+version: "3.8"
+networks:
+  trainerSwift-net:
+    driver: bridge
+    name: trainerSwift-net
+
+services:
+  rabbitmq1:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq1
+    environment:
+      - RABBITMQ_DEFAULT_USER=default
+      - RABBITMQ_DEFAULT_PASS=default
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    
+
+  stripe-service:
+    build: .
+    image: stripe-service:1.0
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq1:
+        condition: service_healthy
+ 
+  

@@ -1,13 +1,34 @@
 from flask import Flask, jsonify, request
 from config import *
 from dbConnection import *
+from flasgger import Swagger
 app = Flask(__name__)  # special variable that will call __main__
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'Trainer microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create, retrieve, update, and delete of trainer'
+}
+swagger = Swagger(app)
 
 
 # Trainer Account #
 # [GET] getAllTrainer
 @app.route('/trainer', methods=['GET'])
 def read_all_trainer_query():
+    """
+    Get all trainers
+    ---
+    responses:
+        200:
+            description: Return all trainers
+        400:
+            description: There is no trainer
+
+    """
+
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM account ORDER BY trainerid ASC')
@@ -34,6 +55,17 @@ def read_all_trainer_query():
 # [GET] getOneTrainer
 @app.route('/trainer/<int:trainerid>', methods=['GET'])
 def read_trainer_by_id_query(trainerid):
+    """
+    Get one trainer by trainerid
+    ---
+    responses:
+        200:
+            description: Return one trainer
+        400:
+            description: There is no trainer
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -61,6 +93,17 @@ def read_trainer_by_id_query(trainerid):
 # [POST] verifyAccount
 @app.route('/trainer/login', methods=['POST'])
 def verify_account():
+    """
+    Verify trainer by trainerid
+    ---
+    responses:
+        201:
+            description: Return one trainer
+        400:
+            description: Account does not exist
+
+    """
+        
     if request.method == 'POST':
         data = request.get_json()
         email = data['email']
@@ -75,7 +118,7 @@ def verify_account():
         trainerInfo = cur.fetchone()
         cur.close()
         con.close()
-        
+
         if trainerInfo:
             trainer_json = {"trainerid": trainerInfo[0], "username": trainerInfo[1], "email": trainerInfo[2],
                             "stripeid": trainerInfo[4], "name": trainerInfo[5]}
@@ -94,6 +137,17 @@ def verify_account():
 # [POST] createNewTrainer
 @app.route('/trainer/create', methods=['POST'])
 def create_new_trainer_query():
+    """
+    Create a new trainer
+    ---
+    responses:
+        201:
+            description: Trainer created successfully
+        400:
+            description: Failed to create new trainer
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         username = data['username']
@@ -120,7 +174,7 @@ def create_new_trainer_query():
             # Insert the new trainer into the database
             cur.execute(
                 f"INSERT INTO account (trainerid, username, email, password, name, stripeid) VALUES (nextval('account_id_seq'), %s, %s, %s, %s, %s) RETURNING trainerid;",
-                (username, email, password, name, stripeid ))
+                (username, email, password, name, stripeid))
 
             # Get the ID of the newly inserted trainer
             new_trainerid = cur.fetchone()[0]
@@ -152,6 +206,17 @@ def create_new_trainer_query():
 # [PUT] updateTrainer
 @app.route('/trainer/<int:trainerid>', methods=['PUT'])
 def update_trainer_query(trainerid):
+    """
+    Update a trainer
+    ---
+    responses:
+        200:
+            description: Trainer updated successfully
+        400:
+            description: Failed to update a trainer
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -187,6 +252,17 @@ def update_trainer_query(trainerid):
 # [DELETE] deleteTrainer
 @app.route('/trainer/<int:trainerid>', methods=['DELETE'])
 def delete_trainer_by_id_query(trainerid):
+    """
+    Delete a trainer by trainerid
+    ---
+    responses:
+        200:
+            description: Trainer deleted successfully
+        400:
+            description: Failed to delete a trainer
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -214,6 +290,17 @@ def delete_trainer_by_id_query(trainerid):
 # [GET] getAllCategory
 @app.route('/category', methods=['GET'])
 def read_all_category_query():
+    """
+    Get all category
+    ---
+    responses:
+        200:
+            description: Return all category
+        400:
+            description: There is no category
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
 
@@ -241,6 +328,17 @@ def read_all_category_query():
 # [GET] getOneCategory
 @app.route('/category/<int:catid>', methods=['GET'])
 def read_category_by_id_query(catid):
+    """
+    Get one category by categoryid
+    ---
+    responses:
+        200:
+            description: Return one category
+        400:
+            description: There is no category
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
 
@@ -269,6 +367,17 @@ def read_category_by_id_query(catid):
 # [POST] createNewCategory
 @app.route('/category/create', methods=['POST'])
 def create_new_category_query():
+    """
+    Create a new category
+    ---
+    responses:
+        201:
+            description: Category created successfully
+        400:
+            description: Failed to create new category
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         catcode = data['catcode']
@@ -316,6 +425,17 @@ def create_new_category_query():
 # [DELETE] deleteCategory
 @app.route('/category/<int:catid>', methods=['DELETE'])
 def delete_category_by_id_query(catid):
+    """
+    Delete a category
+    ---
+    responses:
+        200:
+            description: Category deleted successfully
+        400:
+            description: Failed to delete a category
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -343,6 +463,17 @@ def delete_category_by_id_query(catid):
 # [GET] getAllCertification
 @app.route('/certification', methods=['GET'])
 def read_all_certification_query():
+    """
+    Get all certification
+    ---
+    responses:
+        200:
+            description: Return all certification
+        400:
+            description: There is no certification
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
 
@@ -364,12 +495,23 @@ def read_all_certification_query():
         })
     return jsonify({
         "code": 400,
-        "message": "There is no certificate."
+        "message": "There is no certification."
     })
 
 # [GET] getOneCertification
 @app.route('/certification/<int:certid>', methods=['GET'])
 def read_certification_by_id_query(certid):
+    """
+    Get one category by categoryid
+    ---
+    responses:
+        200:
+            description: Return one category
+        400:
+            description: There is no certification
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
 
@@ -392,12 +534,23 @@ def read_certification_by_id_query(certid):
 
     return jsonify({
         "code": 400,
-        "message": "There is no certificate."
+        "message": "There is no certification."
     })
 
 # [POST] createNewCertification
 @app.route('/certification/create', methods=['POST'])
 def create_new_certification_query():
+    """
+    Create a new certification
+    ---
+    responses:
+        201:
+            description: Certification created successfully
+        400:
+            description: Failed to create a new certification
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         certcode = data['certcode']
@@ -416,7 +569,7 @@ def create_new_certification_query():
         if cert_exists:
             return jsonify({
                 "code": 400,
-                "message": "Failed to create. Certificate already exists"
+                "message": "Failed to create. Certification already exists"
             })
 
         try:
@@ -435,18 +588,29 @@ def create_new_certification_query():
             return jsonify({
                 "code": 201,
                 "new_certificationid": new_certificationid,
-                "message": "Certificate created successfully."
+                "message": "Certification created successfully."
             })
 
         except:
             return jsonify({
                 "code": 400,
-                "message": "Failed to create new certificate."
+                "message": "Failed to create new certification."
             })
 
 # [DELETE] deleteCertification
 @app.route('/certification/<int:certid>', methods=['DELETE'])
 def delete_certification_by_id_query(certid):
+    """
+    Delete certification by certificationid
+    ---
+    responses:
+        200:
+            description: Certification deleted successfully
+        400:
+            description: Failed to delete a certification
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -475,6 +639,17 @@ def delete_certification_by_id_query(certid):
 # [GET] getAllTrainerInfo
 @app.route('/trainerinfo', methods=['GET'])
 def read_all_trainerinfo_query():
+    """
+    Get all trainer info
+    ---
+    responses:
+        200:
+            description: Return all trainer info
+        400:
+            description: There is no trainer information
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM info ORDER BY trainerid ASC')
@@ -502,6 +677,17 @@ def read_all_trainerinfo_query():
 # [GET] getOneTrainerInfo
 @app.route('/trainerinfo/<int:trainerid>', methods=['GET'])
 def read_trainerinfo_by_id_query(trainerid):
+    """
+    Get one trainer info by trainerid
+    ---
+    responses:
+        200:
+            description: Return one trainer info
+        400:
+            description: There is no trainer information
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -530,6 +716,17 @@ def read_trainerinfo_by_id_query(trainerid):
 # [PUT] updateTrainerInfo
 @app.route('/trainerinfo/<int:trainerid>', methods=['PUT'])
 def update_trainerinfo_by_id_query(trainerid):
+    """
+    Update a trainer info by trainerid
+    ---
+    responses:
+        200:
+            description: Trainer Information updated successfully
+        400:
+            description: Failed to update trainer information
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)

@@ -1,13 +1,33 @@
 from flask import Flask, jsonify, request
 from config import load_config
 from dbConnection import *
-
+from flasgger import Swagger
 app = Flask(__name__)  # special variable that will call __main__
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'Booking microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create, retrieve, update, and delete of post, package, availability and bookedby'
+}
+swagger = Swagger(app)
 
 # Post #
 # [GET] getAllPost
 @app.route('/post', methods=['GET'])
 def read_all_post_query():
+    """
+    Get all post
+    ---
+    responses:
+        200:
+            description: Return all post
+        400:
+            description: There is no post
+
+    """
+
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM post ORDER BY postid ASC')
@@ -34,6 +54,17 @@ def read_all_post_query():
 # [GET] getOnePost
 @app.route('/post/<int:postid>', methods=['GET'])
 def read_post_by_id_query(postid):
+    """
+    Get one post
+    ---
+    responses:
+        200:
+            description: Return one post
+        400:
+            description: There is no post
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -57,13 +88,25 @@ def read_post_by_id_query(postid):
         "code": 400,
         "message": "There is no post."
     })
-    
+
 # [GET] getAllPostByTrainerid
 @app.route('/trainer/<int:trainerid>/post', methods=['GET'])
 def read_post_by_trainerid_query(trainerid):
+    """
+    Get all post by trainerid
+    ---
+    responses:
+        200:
+            description: Return all post belongs to trainer
+        400:
+            description: There is no post
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f'SELECT * FROM post WHERE trainerid = %s ORDER BY postid ASC;', (trainerid, ))
+    cur.execute(
+        f'SELECT * FROM post WHERE trainerid = %s ORDER BY postid ASC;', (trainerid, ))
 
     postlist = cur.fetchall()
     cur.close()
@@ -87,6 +130,17 @@ def read_post_by_trainerid_query(trainerid):
 # [POST] createNewPost
 @app.route('/post/create', methods=['POST'])
 def create_new_post_query():
+    """
+    Create a new post
+    ---
+    responses:
+        201:
+            description: Post created successfully
+        400:
+            description: Failed to create a new post
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         title = data.get('title')
@@ -124,6 +178,17 @@ def create_new_post_query():
 # [PUT] updatePost
 @app.route('/post/<int:postid>', methods=['PUT'])
 def update_post_query(postid):
+    """
+    Update a post
+    ---
+    responses:
+        200:
+            description: Post updated successfully
+        400:
+            description: Failed to update a post
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -151,6 +216,17 @@ def update_post_query(postid):
 # [DELETE] deletePost
 @app.route('/post/<int:postid>', methods=['DELETE'])
 def delete_post_query(postid):
+    """
+    Delete a post by post id
+    ---
+    responses:
+        200:
+            description: Post deleted successfully
+        400:
+            description: Failed to delete a post
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -178,6 +254,17 @@ def delete_post_query(postid):
 # [GET] getAllPackage
 @app.route('/package', methods=['GET'])
 def read_all_packages_query():
+    """
+    Get all package
+    ---
+    responses:
+        200:
+            description: Return all package
+        400:
+            description: There is no package
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM package ORDER BY packageid ASC')
@@ -204,6 +291,17 @@ def read_all_packages_query():
 # [GET] getOnePackage
 @app.route('/package/<int:packageid>', methods=['GET'])
 def read_package_by_id_query(packageid):
+    """
+    Get one package by packageid
+    ---
+    responses:
+        200:
+            description: Return one package data
+        400:
+            description: There is no package
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -231,6 +329,17 @@ def read_package_by_id_query(packageid):
 # [GET] getAllPackageByPostid
 @app.route('/post/<int:postid>/package', methods=['GET'])
 def read_packagelist_by_postid_query(postid):
+    """
+    Get all packages by postid
+    ---
+    responses:
+        200:
+            description: Return all packages under postid
+        400:
+            description: There is no package
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -258,6 +367,17 @@ def read_packagelist_by_postid_query(postid):
 # [GET] getAllPackageByTrainerid
 @app.route('/trainer/<int:trainerid>/package', methods=['GET'])
 def read_packagelist_by_trainerid_query(trainerid):
+    """
+    Get all packages by trainerid
+    ---
+    responses:
+        200:
+            description: Return all packages belong to the trainer
+        400:
+            description: There is no package
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -285,6 +405,17 @@ def read_packagelist_by_trainerid_query(trainerid):
 # [POST] createNewPackage
 @app.route('/package/create', methods=['POST'])
 def create_new_package_query():
+    """
+    Create a new package
+    ---
+    responses:
+        201:
+            description: Package created successfully
+        400:
+            description: Failed to create a new package
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         name = data.get('name')
@@ -336,6 +467,17 @@ def create_new_package_query():
 # [PUT] updatePackage
 @app.route('/package/<int:packageid>', methods=['PUT'])
 def update_package_by_id_query(packageid):
+    """
+    Update a package
+    ---
+    responses:
+        200:
+            description: Package updated successfully
+        400:
+            description: Failed to update a package
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -363,6 +505,17 @@ def update_package_by_id_query(packageid):
 # [DELETE] deletePackage
 @app.route('/package/<int:packageid>', methods=['DELETE'])
 def delete_package_by_id_query(packageid):
+    """
+    Delete a package by package id
+    ---
+    responses:
+        200:
+            description: Package deleted successfully
+        400:
+            description: Failed to delete a package
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
@@ -391,6 +544,17 @@ def delete_package_by_id_query(packageid):
 # [GET] getAllAvailabilities
 @app.route('/availability', methods=['GET'])
 def read_all_availability_query():
+    """
+    Get all availabilities
+    ---
+    responses:
+        200:
+            description: Return all availabilities
+        400:
+            description: There is no availability
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -418,6 +582,17 @@ def read_all_availability_query():
 # [GET] getOneAvailability
 @app.route('/availability/<int:availabilityid>', methods=['GET'])
 def read__availability_by_id_query(availabilityid):
+    """
+    Get one availability by availabililtyid
+    ---
+    responses:
+        200:
+            description: Return one availability
+        400:
+            description: There is no availability
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -442,9 +617,20 @@ def read__availability_by_id_query(availabilityid):
         "message": "There is no availability."
     })
 
-# [GET] getOneAvailabilityByPackageid
+# [GET] getAllAvailabilityByPackageid
 @app.route('/package/<int:packageid>/availability', methods=['GET'])
 def read__availability_by_packageid_query(packageid):
+    """
+    Get all availabilities by packageid
+    ---
+    responses:
+        200:
+            description: Return all availability under the package
+        400:
+            description: There is no availability
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -469,9 +655,20 @@ def read__availability_by_packageid_query(packageid):
         "message": "There is no availability."
     })
 
-# [GET] createNewAvailability
+# [POST] createNewAvailability
 @app.route('/availability/create', methods=['POST'])
 def create_availability_query():
+    """
+    Create a new availability
+    ---
+    responses:
+        201:
+            description: Availability created successfully
+        400:
+            description: Failed to create an availability
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         day = data.get('day')
@@ -520,6 +717,17 @@ def create_availability_query():
 # [PUT] updateAvailabilityStatus
 @app.route('/availability/update_status', methods=['PUT'])
 def update_availability_status_query():
+    """
+    Update an availability status
+    ---
+    responses:
+        200:
+            description: Availability updated successfully
+        400:
+            description: Failed to update an availability
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -547,6 +755,17 @@ def update_availability_status_query():
 # [PUT] updateAvailabilityDay
 @app.route('/availability/update_day', methods=['PUT'])
 def update_availability_day_query():
+    """
+    Update an availability day
+    ---
+    responses:
+        200:
+            description: Availability updated successfully
+        400:
+            description: Failed to update an availability
+
+    """
+    
     if request.method == 'PUT':
         data = request.get_json()
         con = get_db_connection(config)
@@ -585,28 +804,39 @@ def update_availability_day_query():
 # [DELETE] deleteAvailability
 @app.route('/availability/<int:availabilityid>', methods=['DELETE'])
 def delete_availability_query(availabilityid):
+    """
+    Delete an availability by availability id
+    ---
+    responses:
+        200:
+            description: Availability deleted successfully
+        400:
+            description: Failed to delete an availability
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()
-        
+
         try:
             # Delete an availability
             cur.execute(
                 f'DELETE FROM availability WHERE availabilityid = %s RETURNING packageid;', (availabilityid, ))
-            
+
             con.commit()
             # Get the packageid
             packageid = cur.fetchone()[0]
-            
+
             # Check if the availability for the packageid still exists
             cur.execute(
                 f"SELECT EXISTS(SELECT 1 FROM availability WHERE packageid = %s);", (packageid, ))
             packageid_exists = cur.fetchone()[0]
-            
+
             if not packageid_exists:
-            # Delete an availability
+                # Delete an availability
                 cur.execute(
-                    f'DELETE FROM package WHERE packageid = %s;', (packageid, ))               
+                    f'DELETE FROM package WHERE packageid = %s;', (packageid, ))
 
             con.commit()
             cur.close()
@@ -627,6 +857,17 @@ def delete_availability_query(availabilityid):
 # [GET] getAllBookedby
 @app.route('/bookedby', methods=['GET'])
 def read_all_bookedby_query():
+    """
+    Get all booking
+    ---
+    responses:
+        200:
+            description: Return all booking
+        400:
+            description: There is no booking
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM bookedby ORDER BY bookedbyid ASC')
@@ -653,6 +894,17 @@ def read_all_bookedby_query():
 # [GET] getOneBookedby
 @app.route('/bookedby/<int:bookedbyid>', methods=['GET'])
 def read_bookedby_by_id_query(bookedbyid):
+    """
+    Get one booking by booking id
+    ---
+    responses:
+        200:
+            description: Return one booking data 
+        400:
+            description: There is no booking
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -680,6 +932,17 @@ def read_bookedby_by_id_query(bookedbyid):
 # [GET] getOneBookedbyDetails
 @app.route('/bookedby/<int:bookedbyid>/details', methods=['GET'])
 def read_bookedby_details_by_id_query(bookedbyid):
+    """
+    Get one booking details by booking id
+    ---
+    responses:
+        200:
+            description: Return one booking details 
+        400:
+            description: There is no booking details
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -707,6 +970,17 @@ def read_bookedby_details_by_id_query(bookedbyid):
 # [GET] getAllBookedbyByTrainerid
 @app.route('/trainer/<int:trainerid>/bookedby', methods=['GET'])
 def read_bookedby_by_trainerid_query(trainerid):
+    """
+    Get all bookings by trainerid
+    ---
+    responses:
+        200:
+            description: Return all bookings belong to the trainer 
+        400:
+            description: There is no booking
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM bookedby WHERE trainerid = %s;', (trainerid, ))
@@ -733,6 +1007,17 @@ def read_bookedby_by_trainerid_query(trainerid):
 # [GET] getAllBookedbyByTraineeid
 @app.route('/trainee/<int:traineeid>/bookedby', methods=['GET'])
 def read_bookedby_by_traineeid_query(traineeid):
+    """
+    Get all bookings by traineeid
+    ---
+    responses:
+        200:
+            description: Return all bookings belong to the trainee
+        400:
+            description: There is no booking
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(f'SELECT * FROM bookedby WHERE traineeid = %s;', (traineeid, ))
@@ -759,6 +1044,17 @@ def read_bookedby_by_traineeid_query(traineeid):
 # [GET] getAllBookedbyDetailsByTraineeid
 @app.route('/trainee/<int:traineeid>/bookedbydetails', methods=['GET'])
 def read_bookedbydetails_by_traineeid_query(traineeid):
+    """
+    Get all booking details by traineeid
+    ---
+    responses:
+        200:
+            description: Return all booking details belong to the trainee
+        400:
+            description: There is no booking
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -786,6 +1082,17 @@ def read_bookedbydetails_by_traineeid_query(traineeid):
 # [GET] getAllBookedbyDetailsByTrainerid
 @app.route('/trainer/<int:trainerid>/bookedbydetails', methods=['GET'])
 def read_bookedbydetails_by_trainerid_query(trainerid):
+    """
+    Get all booking details by trainerid
+    ---
+    responses:
+        200:
+            description: Return all booking details belong to the trainer
+        400:
+            description: There is no booking
+
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -813,10 +1120,21 @@ def read_bookedbydetails_by_trainerid_query(trainerid):
 # [GET] getAllCartItems
 @app.route('/trainee/<int:traineeid>/get-all-cartitems', methods=['GET'])
 def get_all_cartitems(traineeid):
+    """
+    Get all cart items by traineeid
+    ---
+    responses:
+        200:
+            description: Return cart items by traineeid
+        400:
+            description: There is no item in cart
+
+    """
+    
     data = request.get_json()
     trainerid = data.get('trainerid')
     availabilityid = data.get('availabilityid')
-    
+
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
@@ -842,6 +1160,17 @@ def get_all_cartitems(traineeid):
 # [POST] createNewBookedby
 @app.route('/bookedby/create', methods=['POST'])
 def create_bookedby_query():
+    """
+    Create a new booking
+    ---
+    responses:
+        201:
+            description: Booking created successfully
+        400:
+            description: Failed to create a new booking
+
+    """
+    
     if request.method == 'POST':
         data = request.get_json()
         trainerid = data.get('trainerid')
@@ -890,6 +1219,17 @@ def create_bookedby_query():
 # [DELETE] deleteBookedby
 @app.route('/bookedby/<int:bookedbyid>', methods=['DELETE'])
 def delete_bookedby_by_id_query(bookedbyid):
+    """
+    Delete a booking by booking id
+    ---
+    responses:
+        200:
+            description: Booking deleted successfully
+        400:
+            description: Failed to delete a booking
+
+    """
+    
     if request.method == 'DELETE':
         con = get_db_connection(config)
         cur = con.cursor()

@@ -68,7 +68,7 @@ export default function Page() {
     (async () => {
       try {
         const resp = await fetch(
-          `http://localhost:3000/api/get-participant-token?room=${bookedby}&username=${traineeid.traineeid}`
+          `http://localhost:3000/api/get-participant-token?room=${room}&username=${traineeid.traineeid}`
           , {
             method: "GET",
             headers: {

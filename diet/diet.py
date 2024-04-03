@@ -3,26 +3,50 @@ from flask_cors import CORS
 from config import *
 from dbConnection import *
 from invokes import invoke_http
+from flasgger import Swagger
 
 app = Flask(__name__)
 CORS(app)
 
-calories_URL="https://api.edamam.com/api/nutrition-data"
-app_id="70f0b79f"
-app_key="2ad7ba4942b277d6e7b316a5d45c39cc"
-nutrition_type="logging"
+# Initialize flasgger
+app.config['SWAGGER'] = {
+    'title': 'Diet microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create, retrieve, update, and delete of diet'
+}
+swagger = Swagger(app)
+
+calories_URL = "https://api.edamam.com/api/nutrition-data"
+app_id = "70f0b79f"
+app_key = "2ad7ba4942b277d6e7b316a5d45c39cc"
+nutrition_type = "logging"
+
 
 @app.route('/diet/<int:traineeid>/all')
 def get_all_meal(traineeid):
+    """
+    Get all meals
+    ---
+    responses:
+        200:
+            description: Return all meals
+        400:
+            description: There is no meal
+
+    """
+
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} ORDER BY date_time DESC")
+    cur.execute(
+        f"SELECT * FROM meal WHERE traineeid={traineeid} ORDER BY date_time DESC")
 
     meallist = cur.fetchall()
     cur.close()
     con.close()
 
-    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": round(meal[4],2), "carbs": round(meal[5],2), "protein": round(meal[6],2), "fat": round(meal[7],2), "date_time": meal[8]} for meal in meallist]
+    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": round(
+        meal[4], 2), "carbs": round(meal[5], 2), "protein": round(meal[6], 2), "fat": round(meal[7], 2), "date_time": meal[8]} for meal in meallist]
 
     if len(meallist):
         return jsonify({
@@ -31,25 +55,39 @@ def get_all_meal(traineeid):
                 "meal": [meal for meal in meallist_json]
             }
         })
-    
+
     return jsonify({
         "code": 400,
         "message": [{"traineeid": "No Data", "mealid": "No Data", "foodname": "No Data", "quantity": "No Data", "calories": "No Data", "carbs": "No Data", "protein": "No Data", "fat": "No Data", "date_time": "No Data"}]
     })
 
+
 @app.route('/diet/<int:traineeid>/monthly')
 def get_all_meal_by_month(traineeid):
+    """
+    Get all meals monthly by traineeid
+    ---
+    responses:
+        200:
+            description: Return all meals monthly
+        400:
+            description: There is no meal
+
+    """
+    
     month = request.args.get('month')
 
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM meal WHERE traineeid={traineeid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY date_time DESC")
+    cur.execute(
+        f"SELECT * FROM meal WHERE traineeid={traineeid} AND TO_CHAR(date_time, 'Month') LIKE '%{month}%' ORDER BY date_time DESC")
 
     meallist = cur.fetchall()
     cur.close()
     con.close()
 
-    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3], "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7]} for meal in meallist]
+    meallist_json = [{"traineeid": meal[0], "mealid": meal[1], "foodname": meal[2], "quantity": meal[3],
+                      "calories": meal[4], "carbs": meal[5], "protein": meal[6], "fat": meal[7]} for meal in meallist]
 
     if len(meallist):
         return jsonify({
@@ -58,18 +96,30 @@ def get_all_meal_by_month(traineeid):
                 "meal": [meal for meal in meallist_json]
             }
         })
-    
+
     return jsonify({
         "code": 400,
         "message": "There is no meal."
     })
 
+
 @app.route('/diet/<int:traineeid>/average')
 def get_monthly_average(traineeid):
+    """
+    Get monthly avergae by traineeid
+    ---
+    responses:
+        200:
+            description: Return monthly average
+        400:
+            description: There is no meal
 
+    """
+    
     con = get_db_connection(config)
     cur = con.cursor()
-    cur.execute(f"SELECT AVG(calories), AVG(carbs), AVG(protein), AVG(fat) FROM meal WHERE traineeid={traineeid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND EXTRACT(YEAR FROM date_time)=EXTRACT(YEAR FROM CURRENT_TIMESTAMP) ")
+    cur.execute(
+        f"SELECT AVG(calories), AVG(carbs), AVG(protein), AVG(fat) FROM meal WHERE traineeid={traineeid} AND EXTRACT(MONTH FROM date_time)=EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND EXTRACT(YEAR FROM date_time)=EXTRACT(YEAR FROM CURRENT_TIMESTAMP) ")
 
     average_value = cur.fetchone()
     cur.close()
@@ -85,22 +135,34 @@ def get_monthly_average(traineeid):
                 "average_fat": average_value[3]
             }
         })
-    
+
     return jsonify({
         "code": 400,
         "message": "There is no meal."
     })
 
+
 @app.route('/diet/add', methods=['POST'])
 def add_meal():
+    """
+    Add new diet
+    ---
+    responses:
+        201:
+            description: Meal successfully added
+        400:
+            description: Failed to add meal
+
+    """
+    
     data = request.get_json()
     traineeid = data["traineeid"]
     foodname = data["meal"]["foodname"]
     quantity = data["meal"]["quantity"]
 
     global calories_URL
-    calories_URL+=f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
-    
+    calories_URL += f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
+
     response = invoke_http(calories_URL)
     calories = response['calories'] * quantity
     carbs = response['totalNutrients']['CHOCDF']['quantity'] * quantity
@@ -111,17 +173,19 @@ def add_meal():
     cur = con.cursor()
 
     try:
-        cur.execute(f'INSERT INTO meal (traineeid, foodname, quantity, calories, carbs, protein, fat) VALUES (%s, %s, %s, %s, %s, %s, %s)', (traineeid, foodname, quantity, calories, carbs, protein, fat))
+        cur.execute(f'INSERT INTO meal (traineeid, foodname, quantity, calories, carbs, protein, fat) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                    (traineeid, foodname, quantity, calories, carbs, protein, fat))
         cur.execute(f'SELECT * FROM meal ORDER BY mealid DESC')
-        new_meal=cur.fetchone()
-        meal_json={"traineeid": new_meal[0], "mealid": new_meal[1], "foodname": new_meal[2], "quantity": new_meal[3], "calories": new_meal[4], "carbs": new_meal[5], "protein": new_meal[6], "fat": new_meal[7]}
+        new_meal = cur.fetchone()
+        meal_json = {"traineeid": new_meal[0], "mealid": new_meal[1], "foodname": new_meal[2], "quantity": new_meal[3],
+                     "calories": new_meal[4], "carbs": new_meal[5], "protein": new_meal[6], "fat": new_meal[7]}
 
         con.commit()
         cur.close()
         con.close()
 
         return jsonify({
-            "code":201,
+            "code": 201,
             "data": meal_json,
             "message": f"Meal {meal_json['foodname']} successfully added."
         })
@@ -131,9 +195,21 @@ def add_meal():
             "code": 400,
             "message": "Fail to add meal."
         })
-    
+
+
 @app.route('/diet/delete', methods=['DELETE'])
 def delete_meal():
+    """
+    Delete a diet
+    ---
+    responses:
+        201:
+            description: Diet deleted successfully
+        400:
+            description: Fail to delete meal
+
+    """
+    
     data = request.get_json()
     mealid = data["mealid"]
 
@@ -151,7 +227,7 @@ def delete_meal():
         con.close()
 
         return jsonify({
-            "code":201,
+            "code": 201,
             "deleted_meal": deleted_meal,
             "message": f"Meal {deleted_meal} successfully deleted."
         })
@@ -161,9 +237,21 @@ def delete_meal():
             "code": 400,
             "message": "Fail to delete meal."
         })
-    
+
+
 @app.route('/diet/update', methods=['PUT'])
 def update_meal():
+    """
+    Update a diet
+    ---
+    responses:
+        201:
+            description: Diet updated successfully
+        400:
+            description: Fail to update meal
+
+    """
+    
     data = request.get_json()
     mealid = data["mealid"]
     foodname = data["meal"]["foodname"]
@@ -184,8 +272,8 @@ def update_meal():
 
         if target_foodname != foodname:
             global calories_URL
-            calories_URL+=f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
-            
+            calories_URL += f"?app_id={app_id}&app_key={app_key}&nutrition-type={nutrition_type}&ingr={foodname}"
+
             response = invoke_http(calories_URL)
             calories = response['calories'] * quantity
             carbs = response['totalNutrients']['CHOCDF']['quantity'] * quantity
@@ -200,17 +288,18 @@ def update_meal():
 
         print(foodname, quantity, calories, carbs, protein, fat)
 
-        cur.execute(f"UPDATE meal SET foodname=%s, quantity=%s, calories=%s, carbs=%s, protein=%s, fat=%s WHERE mealid = %s",(foodname, quantity, calories, carbs, protein, fat, mealid, ))
-        
+        cur.execute(f"UPDATE meal SET foodname=%s, quantity=%s, calories=%s, carbs=%s, protein=%s, fat=%s WHERE mealid = %s",
+                    (foodname, quantity, calories, carbs, protein, fat, mealid, ))
+
         cur.execute(f"SELECT * FROM meal WHERE mealid={mealid}")
-        updated_meal=cur.fetchone()[2]
+        updated_meal = cur.fetchone()[2]
 
         con.commit()
         cur.close()
         con.close()
 
         return jsonify({
-            "code":201,
+            "code": 201,
             "new_meal": updated_meal,
             "message": f"Meal {updated_meal} successfully updated."
         })
@@ -220,7 +309,8 @@ def update_meal():
             "code": 400,
             "message": "Fail to update meal."
         })
-    
+
+
 if __name__ == "__main__":
     config = load_config()
     app.run(host="0.0.0.0", port=5000, debug=True)

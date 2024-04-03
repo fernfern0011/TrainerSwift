@@ -12,7 +12,7 @@ const stripePromise = loadStripe(
 
 
 
-// const trainer_id = 'acct_1OnPQZFSwTDhdL4G';
+const trainer_id = 'acct_1OnPQZFSwTDhdL4G';
 
 export default function Checkout() {
   const [productData, setProductData] = useState([]);
@@ -35,7 +35,7 @@ export default function Checkout() {
     availabilityid: searchParams.get('availabilityid')
   })
 
-  console.log(formData);
+  // console.log(formData);
 
   useEffect(() => {
     const token = Cookies.get('token')
@@ -71,7 +71,7 @@ export default function Checkout() {
     }
   }, []);
 
-  console.log(formData);
+  // console.log(formData);
   const createCheckoutSession = async () => {
     try {
 
@@ -88,13 +88,14 @@ export default function Checkout() {
       }
 
       const stripes = await stripePromise;
-      console.log(stripes);
+      // console.log(stripes);
       const responseData = await response.json();
-      const cartItem = responseData.data;
+      const cartItem = responseData.package;
       console.log(cartItem)
 
-      const productName = cartItem.packagename;
-      const productPrice = parseFloat(cartItem.price);
+      const productName = formData.package;
+      const productPrice = parseFloat(formData.price);
+      console.log(productName)
 
       const product = await stripe.products.create({
         name: productName,
@@ -121,7 +122,7 @@ export default function Checkout() {
         payment_intent_data: {
           application_fee_amount: applicationFeeAmount,
           transfer_data: {
-            destination: stripeid,
+            destination: trainer_id,
           },
         },
         mode: 'payment',

@@ -813,10 +813,14 @@ def read_bookedbydetails_by_trainerid_query(trainerid):
 # [GET] getAllCartItems
 @app.route('/trainee/<int:traineeid>/get-all-cartitems', methods=['GET'])
 def get_all_cartitems(traineeid):
+    data = request.get_json()
+    trainerid = data.get('trainerid')
+    availabilityid = data.get('availabilityid')
+    
     con = get_db_connection(config)
     cur = con.cursor()
     cur.execute(
-        f'SELECT b.trainerid, b.traineeid, pa.name, pa.price FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.traineeid = %s;', (traineeid, ))
+        f'SELECT b.trainerid, b.traineeid, pa.name, pa.price FROM bookedby b INNER JOIN availability a ON a.availabilityid = b.availabilityid INNER JOIN package pa ON pa.packageid = a.packageid WHERE b.traineeid = %s AND b.trainerid = %s AND b.availabilityid = %s;', (traineeid, trainerid, availabilityid, ))
 
     cartDetails = cur.fetchone()
     cur.close()
@@ -824,7 +828,7 @@ def get_all_cartitems(traineeid):
 
     if cartDetails:
         cartDetails_json = {
-            'trainerid': cartDetails[0], 'traineeid': cartDetails[1], 'packagename': cartDetails[2], 'price': (cartDetails[3]*100)}
+            'trainerid': cartDetails[0], 'traineeid': cartDetails[1], 'packagename': cartDetails[2], 'price': cartDetails[3] / 100}
 
         return jsonify({
             "code": 200,

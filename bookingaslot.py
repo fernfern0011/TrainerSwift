@@ -15,11 +15,12 @@ from invokes import invoke_http
 app = Flask(__name__)
 CORS(app)
 
-traineeURL = environ.get('traineeURL', 'http://127.0.0.1:4999')
-trainerURL = environ.get('trainerURL', 'http://127.0.0.1:5000')
-bookingURL = environ.get('bookingURL', 'http://127.0.0.1:5001')
-notificationURL = environ.get('notificationURL')
-websocketURL = environ.get('websocketURL')
+# Get environment variables with default values if not provided
+traineeURL = os.environ.get('traineeURL', 'http://localhost:8000/traineeapi')
+trainerURL = os.environ.get('trainerURL', 'http://localhost:8000/trainerapi')
+bookingURL = os.environ.get('bookingURL', 'http://localhost:8000/bookingapi')
+notificationURL = os.environ.get('notificationURL', 'http://notificationapi' )
+websocketURL = os.environ.get('websocketURL', 'http://localhost:8000/websocketapi')
 
 
 @app.route("/payment", methods=['POST'])
@@ -94,6 +95,7 @@ def processPayment(payment):
     if trainerResult['code'] == 200:
         trainerID = trainerResult['data']['trainer']['trainerid']
         trainerName = trainerResult['data']['trainer']['username']
+        trainerEmail = trainerResult['data']['trainer']['email']
         trainerExist = True
         # If the above line executes successfully, it means trainerResult["code"] exists
         print(f"Trainer {trainerID} exists")
@@ -112,7 +114,9 @@ def processPayment(payment):
     package = payment.get('packageID', None)
     post = invoke_http(f"{bookingURL}/package/{package}", method='GET')
     postid = post['data']['package']['postid']
+    isPremium = post['data']['package']['ispremium']
     trainer = invoke_http(f"{bookingURL}/post/{postid}", method='GET')
+
     trainerID2 = trainer['data']['post']['trainerid']
 
     if trainerID2 == trainerID:
@@ -130,6 +134,7 @@ def processPayment(payment):
     slotid = []
     if bookingResult['code'] == 200:
         for data in bookingResult['data']['availability']:
+            print(data)
             if data['status'] == 'Open':
                 slots.append(data)
                 slotid.append(data['availabilityid'])
@@ -143,7 +148,7 @@ def processPayment(payment):
             "code": 500,
             "message": "Package does not exist."
         }
-    
+    print(slots)
     if len(slots) != 0:
         print(f"There are slots for package {package}")
     else:
@@ -154,6 +159,8 @@ def processPayment(payment):
 
     if traineeExist and trainerExist and slotExist:
         availabilityID = payment.get('availabilityID', None)
+        print(availabilityID)
+        print(slotid)
         if availabilityID in slotid:
             json_data = {
                 "availabilityid": availabilityID,
@@ -170,7 +177,6 @@ def processPayment(payment):
     reservationResult = invoke_http(f"{bookingURL}/package/{package}/availability", method='GET')
     
     print('\n-----Invoking stripe microservice-----')
-
     e_queue_name = 'payment_notifications'        # queue to be subscribed by Error microservice
     def receivePayment(channel):
         try:
@@ -181,7 +187,8 @@ def processPayment(payment):
 
             def stop_consuming_after_timeout():
                 nonlocal paymentSuccessful
-                for x in range(24):
+                for x in range(60):
+                    print('hi')
                     if paymentSuccessful:
                         break
                     time.sleep(5)  # Wait for 10 seconds
@@ -249,34 +256,50 @@ def processPayment(payment):
         print("Slot has been opened again")
         return {
             "code": 500,
-            "message": "Payment was not completed within 2 minutes."
+            "message": "Payment was not completed within 5 minutes."
         }
     paymentResult = invoke_http(f"{bookingURL}/package/{package}/availability", method='GET')
 
+    print("idiot")
     print('\n\n-----Invoking notification microservice-----')
     availabilityDetails = invoke_http(f"{bookingURL}/availability/{availabilityID}", method='GET')
+    print(availabilityDetails)
     day = availabilityDetails['data']['availability']['day']
     timeslot = availabilityDetails['data']['availability']['time']
-    transactionNumber = paymentDetails['data']['object']['id']
-    amount = paymentDetails['data']['object']['amount']
+    print('hi')
+    transactionNumber = paymentDetails['paymentIntent']['id']
+    amount = paymentDetails['paymentIntent']['amount_received'] / 100
 
     json_data = {
-        "transactionNumber": transactionNumber,
-        "amount": amount,
-        "date": day,
-        'time': timeslot, 
-        "clientName": traineeUsername,
-        'trainerName': trainerName,
-        "email": traineeEmail
-    }
-    successfulNotfication = invoke_http(f"{notificationURL}/notification", method='post', json=json_data)
-    print(successfulNotfication)
 
+        "data": {
+            "traineeEmail": traineeEmail,
+            "trainerEmail": trainerEmail,
+            "clientName": traineeUsername,
+            "trainerName": trainerName,
+            "date": day,
+            "time": timeslot,
+            "transactionNumber": transactionNumber,
+            "amount": amount
+        }  
+    }
+
+    print(json_data)
+    print("idiot")
+    print(notificationURL)
+    invoke_http(f"{notificationURL}/send-email", method='post', json=json_data)
+   
     print('\n\n-----Invoking chat microservice-----')
+    traineeID_str = str(traineeID)
+    trainerID_str = str(trainerID)
     json_data = {
-        "traineeID": traineeID,
-        'trainerID': trainerID
+        "traineeID": traineeID_str,
+        'trainerID': trainerID_str,
+        "connection": True,
+        "message":"yesss i'm here class is still taking place sorry",
+        "sender" : "trainee"
     }
+    print(json_data)
     successfulChat = invoke_http(f"{websocketURL}/websocketchat", method='post', json=json_data)
     print(successfulChat)
 
@@ -284,7 +307,8 @@ def processPayment(payment):
     json_data = {
         "traineeid": traineeID,
         "availabilityid": availabilityID,
-        'trainerid': trainerID
+        'trainerid': trainerID,
+        'ispremium': isPremium
     }
     successfulBookedby = invoke_http(f"{bookingURL}/bookedby/create", method='POST', json=json_data)
     print(successfulBookedby)
@@ -297,6 +321,7 @@ def processPayment(payment):
             "Trainer Exist": trainerExist,
             "Package Status": paymentResult,
             "Payment Result": paymentSuccessful,
+            "ispremium": isPremium
         }
     }
 
@@ -305,4 +330,4 @@ def processPayment(payment):
 if __name__ == "__main__":
     print("This is flask " + os.path.basename(__file__) +
           " for placing a payment...")
-    app.run(host="0.0.0.0", port=5100, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
